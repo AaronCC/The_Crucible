@@ -1,0 +1,215 @@
+#include "Game.h"
+#include "Ability.h"
+#include "GenInfo.h"
+#include "Helper.h"
+
+#ifndef ITEM_H
+#define ITEM_H
+
+#define AF Helper::Affix
+#define AFV Helper::AffVal
+
+class Item
+{
+public:
+
+
+#define numst 9
+	enum SlotType {
+		HED = 0,
+		BDY = 1,
+		MAH = 2,
+		OFH = 3,
+		RNG = 4,
+		AMU = 5,
+		CLK = 6,
+		BLT = 7,
+		SCR = 8
+	};
+
+	struct BaseItem {
+		SlotType t;
+		std::string id;
+		std::map<AF, AFV> aff;
+		void addAff(AF a, AFV av) { aff[a] = av; }
+		BaseItem(SlotType t, std::string id) :t(t), id(id) {}
+		BaseItem() :
+			t(SlotType::AMU),
+			id("") {}
+	};
+
+	enum Rarity {
+		NORM = 0,
+		MAGIC = 1,
+		RARE = 3,
+		ULTRA = 5
+	};
+	Rarity rarity;
+
+	SlotType slotType;
+	Helper helper;
+#define NUM_ITEM_BUFFS 4
+
+	std::vector<std::string> buffStrings{ "Attack","Defense","Agility","Knowledge" };
+	std::vector<std::string> typeStrings{ "Head","Body","Main-hand","Off-hand","Ring","Amulet","Cloak","Belt","Scroll" };
+	std::map<AF, AFV> buffs;
+
+	bool twoHanded = false;
+
+	std::vector<AbEffect::Damage> damage;
+
+	std::string getTypeString()
+	{
+		return typeStrings[slotType];
+	}
+	virtual std::string getName()
+	{
+		return this->name;
+	}
+	void addDamage(AbEffect::DamageType type, int min, int max)
+	{
+		damage.push_back(AbEffect::Damage{ type,min,max });
+	}
+	void setDamage(std::vector<AbEffect::Damage> damage)
+	{
+		this->damage.clear();
+		this->damage = damage;
+	}
+	std::vector<AbEffect> getEffectFromMAH() {
+		std::vector<AbEffect> effs;
+		for(auto dmg : damage)
+			effs.push_back(AbEffect(AbEffect::Effect({}, dmg, 1)));
+		return effs;
+	}
+	std::vector<std::string> getDamageString()
+	{
+		std::map<AbEffect::DamageType, std::string> damageStrings;
+		std::vector < std::string> strings;
+		damageStrings[AbEffect::DamageType::FIRE] = "Fire";
+		damageStrings[AbEffect::DamageType::COLD] = "Ice";
+		damageStrings[AbEffect::DamageType::LGHT] = "Lightning";
+		damageStrings[AbEffect::DamageType::PHYS] = "Physical";
+		damageStrings[AbEffect::DamageType::POIS] = "Poison";
+		for (auto dmg : damage)
+			strings.push_back(std::to_string(dmg.min) + "-" + std::to_string(dmg.max) + " " + damageStrings[dmg.type]);
+		return strings;
+	}
+
+	virtual std::vector<std::pair<sf::Color, std::string>> getBaseString()
+	{
+		std::vector<std::pair<sf::Color, std::string>> baseStr;
+		for (auto af : base.aff)
+		{
+			std::string afvstr = af.second.getStr();
+			if (afvstr != "")
+				baseStr.push_back({ af.second.color, afvstr + " " + helper.buffnames[(int)af.first] });
+		}
+		return baseStr;
+	}
+	virtual std::vector<std::pair<sf::Color, std::string>> getBuffString()
+	{
+		std::vector<std::pair<sf::Color, std::string>> buffStr;
+		for (auto af : buffs)
+		{
+			std::string afvstr = af.second.getStr();
+			if (afvstr != "")
+				buffStr.push_back({ af.second.color, afvstr + " " + helper.buffnames[(int)af.first] });
+		}
+		return buffStr;
+	}
+	virtual std::string getItemTexName() { return ""; }
+
+	void updateBaseVals();
+
+	Item(std::string name, std::map<AF, AFV> buffs, BaseItem base, SlotType type, Rarity rarity)
+	{
+		this->name = name;
+		this->slotType = type;
+		this->buffs = buffs;
+		this->base = base;
+		this->rarity = rarity;
+		updateBaseVals();
+	}
+	~Item();
+
+	Helper::Stats getStatBuffs();
+
+	std::string name;
+	BaseItem base;
+
+	std::vector<std::string> propertyText;
+
+	virtual Ability* getAbility() {
+		return nullptr;
+	}
+
+	Ability * ability;
+};
+class Scroll : public Item {
+public:
+	Scroll(std::string name, SlotType type, Ability* ability, Rarity rarity)
+		: Item(name, {}, BaseItem(), type, rarity) {
+		this->ability = ability;
+	}
+	std::string getDesc() {
+		return ability->description;
+	}
+	
+	std::vector<std::pair<sf::Color, std::string>> getBuffString()
+	{
+		std::map<AbEffect::DamageType, std::string> damageStrings;
+		damageStrings[AbEffect::DamageType::FIRE] = "Fire";
+		damageStrings[AbEffect::DamageType::COLD] = "Ice";
+		damageStrings[AbEffect::DamageType::LGHT] = "Lightning";
+		damageStrings[AbEffect::DamageType::PHYS] = "Physical";
+		damageStrings[AbEffect::DamageType::POIS] = "Poison";
+		std::map<AbEffect::DamageType, sf::Color> damageColors;
+		damageColors[AbEffect::DamageType::FIRE] = sf::Color({ 255, 74, 61 });
+		damageColors[AbEffect::DamageType::COLD] = sf::Color({ 109, 165, 255 });
+		damageColors[AbEffect::DamageType::LGHT] = sf::Color({ 248, 255, 61 });
+		damageColors[AbEffect::DamageType::PHYS] = sf::Color({ 226, 165, 86 });
+		damageColors[AbEffect::DamageType::POIS] = sf::Color({ 131, 211, 69 });
+
+		std::vector<std::pair<sf::Color, std::string>> buffStr;
+		if(ability->info.range == 1)
+			buffStr.push_back({ sf::Color::White, "Melee" + ability->areadesc[(int)ability->info.area] });
+		else
+			buffStr.push_back({ sf::Color::White, "Ranged" + ability->areadesc[(int)ability->info.area] });
+		std::vector<AbEffect::Effect> effs = ability->getEffects();
+		buffStr.push_back({ sf::Color::White, "Range: " + std::to_string(ability->info.range) });
+		buffStr.push_back({ sf::Color::White, "Cooldown: " + std::to_string(ability->cooldown).substr(0,4) });
+		buffStr.push_back({ sf::Color::White, "Cast Time: " + std::to_string((float)ability->tickCost).substr(0, 4) });
+		for (auto eff : effs)
+		{
+			std::string min = std::to_string(eff.damage.min * eff.dur);
+			std::string max = std::to_string(eff.damage.max * eff.dur);
+			std::string type = damageStrings[eff.damage.type];
+			if (eff.dur == 1)
+			{
+				if (min != max)
+					buffStr.push_back({ damageColors[eff.damage.type], min + "-" + max + " " + type });
+				else
+					buffStr.push_back({ damageColors[eff.damage.type], min + " " + type });
+			}
+			else
+			{
+				if (min != max)
+					buffStr.push_back({ damageColors[eff.damage.type], min + "-" + max + " " + type + " over " + std::to_string(eff.dur) + " ticks" });
+				else
+					buffStr.push_back({ damageColors[eff.damage.type], min + " " + type + " over " + std::to_string(eff.dur) + " ticks" });
+			}
+		}
+		return buffStr;
+	}
+
+	virtual Ability* getAbility() { return this->ability; }
+
+	virtual std::string getItemTexName() {
+		return ability->texName;
+	}
+
+	virtual std::string getName() {
+		return this->ability->name;
+	}
+};
+#endif /* ITEM_H */

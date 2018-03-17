@@ -1,0 +1,25 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 15
+VisualStudioVersion = 15.0.26730.16
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Crucible_Game", "Crucible_Game\Crucible_Game.vcxproj", "{A99A97FC-FA0A-44C4-9563-79A61B2C5FA9}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|x64 = Debug|x64
+		Release|x64 = Release|x64
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{A99A97FC-FA0A-44C4-9563-79A61B2C5FA9}.Debug|x64.ActiveCfg = Debug|x64
+		{A99A97FC-FA0A-44C4-9563-79A61B2C5FA9}.Debug|x64.Build.0 = Debug|x64
+		{A99A97FC-FA0A-44C4-9563-79A61B2C5FA9}.Release|x64.ActiveCfg = Release|x64
+		{A99A97FC-FA0A-44C4-9563-79A61B2C5FA9}.Release|x64.Build.0 = Release|x64
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {AD714EB3-1B52-4EDD-A89F-CD6F585893F8}
+	EndGlobalSection
+EndGlobal
