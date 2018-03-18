@@ -157,5 +157,8 @@
     <Text Include="media\Music.txt">
       <Filter>Resource Files</Filter>
     </Text>
+    <Text Include="media\Affixes.txt">
+      <Filter>Resource Files</Filter>
+    </Text>
   </ItemGroup>
 </Project>

@@ -58,5 +58,12 @@ Helper::Stats Item::getStatBuffs()
 			stats.buffs[buff.first] = buff.second;
 		}
 	}
+	for (auto buff : base.aff)
+	{
+		if (!buff.second.local)
+		{
+			stats.buffs[buff.first] = stats.buffs[buff.first] + buff.second;
+		}
+	}
 	return stats;
 }

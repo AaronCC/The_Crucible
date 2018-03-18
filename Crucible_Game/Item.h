@@ -14,7 +14,7 @@ class Item
 public:
 
 
-#define numst 9
+#define numst 8
 	enum SlotType {
 		HED = 0,
 		BDY = 1,
@@ -29,10 +29,11 @@ public:
 
 	struct BaseItem {
 		SlotType t;
+		bool twoh;
 		std::string id;
 		std::map<AF, AFV> aff;
 		void addAff(AF a, AFV av) { aff[a] = av; }
-		BaseItem(SlotType t, std::string id) :t(t), id(id) {}
+		BaseItem(SlotType t, std::string id, bool twoh) :t(t), id(id), twoh(twoh) {}
 		BaseItem() :
 			t(SlotType::AMU),
 			id("") {}
@@ -128,6 +129,7 @@ public:
 		this->buffs = buffs;
 		this->base = base;
 		this->rarity = rarity;
+		this->twoHanded = base.twoh;
 		updateBaseVals();
 	}
 	~Item();

@@ -43,12 +43,12 @@
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
-    <IncludePath>C:\Program Files %28x86%29\SFML-2.4.0\include;$(IncludePath);C:\Users\Aaron\Documents\Crucible_Game\SFML-2.4.2\include</IncludePath>
-    <LibraryPath>C:\Program Files %28x86%29\SFML-2.4.0\lib;$(LibraryPath);C:\Users\Aaron\Documents\Crucible_Game\SFML-2.4.2\lib</LibraryPath>
+    <IncludePath>C:\Program Files %28x86%29\SFML-2.4.0\include;$(IncludePath);C:\Users\Aaron\Documents\Crucible_Game\SFML-2.4.2\include;C:\Users\Aaron\source\The_Crucible\SFML-2.4.2\include</IncludePath>
+    <LibraryPath>C:\Program Files %28x86%29\SFML-2.4.0\lib;$(LibraryPath);C:\Users\Aaron\Documents\Crucible_Game\SFML-2.4.2\lib;C:\Users\Aaron\source\The_Crucible\SFML-2.4.2\lib</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
-    <IncludePath>C:\Users\Aaron\Documents\Crucible_Game\SFML-2.4.2\include;$(IncludePath);C:\Users\Aaron\Documents\Crucible_Game\SFML-2.4.2\include</IncludePath>
-    <LibraryPath>C:\Users\Aaron\Documents\Crucible_Game\SFML-2.4.2\lib;$(LibraryPath);C:\Users\Aaron\Documents\Crucible_Game\SFML-2.4.2\lib</LibraryPath>
+    <IncludePath>C:\Users\Aaron\Documents\Crucible_Game\SFML-2.4.2\include;$(IncludePath);C:\Users\Aaron\Documents\Crucible_Game\SFML-2.4.2\include;C:\Users\Aaron\source\The_Crucible\SFML-2.4.2\include</IncludePath>
+    <LibraryPath>C:\Users\Aaron\Documents\Crucible_Game\SFML-2.4.2\lib;$(LibraryPath);C:\Users\Aaron\Documents\Crucible_Game\SFML-2.4.2\lib;C:\Users\Aaron\source\The_Crucible\SFML-2.4.2\lib</LibraryPath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <ClCompile>
@@ -125,6 +125,7 @@
     <ClInclude Include="Tile.h" />
   </ItemGroup>
   <ItemGroup>
+    <Text Include="media\Affixes.txt" />
     <Text Include="media\Music.txt" />
     <Text Include="media\Sounds.txt" />
     <Text Include="media\Textures.txt" />

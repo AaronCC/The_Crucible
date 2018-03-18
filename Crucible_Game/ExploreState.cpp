@@ -66,7 +66,7 @@ void ExploreState::update(const float dt)
 			std::queue<std::string> msgs;
 			if (player.queuedAction == Player::Action::ABILITY)
 			{
-				std::vector<AbEffect::Effect> abEffs = player.queuedAbility->getEffects();
+				std::vector<AbEffect::Effect> abEffs = player.queuedAbility->getBuffedEffects(&player.bStats);
 				for (auto point : player.getQueuedPoints())
 				{
 					Enemy* enemy = map->getEnemyAt(point.x, point.y);

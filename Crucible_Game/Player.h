@@ -93,7 +93,7 @@ public:
 	void update(float dt);
 	void updateTilePos();
 	void updateAbilities(float dt);
-	void updateAutoAttack();
+	void updateAbilities();
 	void move(sf::Vector2f offset) {
 		position += offset;
 		position.x = std::round(position.x);
@@ -223,7 +223,7 @@ public:
 		this->engaged = false;
 
 		updateAbilityBar();
-		updateAutoAttack();
+		updateAbilities();
 		autoAttack = Ability(this->game, game->texmgr.getRef("slash"), "slash_icon",
 			{ 0,3,0.1f }, { 32,32 }, 0, 1, "Default Attack",
 			"Melee slash in an arc");

@@ -89,11 +89,6 @@ sf::Vector2f Helper::clamp(sf::Vector2f vec, float max)
 		return vec;
 }
 
-Helper::Helper()
-{
-}
-
-
 Helper::~Helper()
 {
 }

@@ -6,30 +6,36 @@ class Helper
 {
 public:
 
-	static const int numbuffs = 15;
+	static const int numbuffs = 20;
 	std::string buffnames[numbuffs] = {
 		"fire damage",
 		"cold damage",
 		"lightning damage",
 		"poison damage",
 		"physical damage",
+		"% fire resistance",
+		"% lightning resistance",
+		"% cold resistance",
+		"% poison resistance",
 		"% global fire damage",
 		"% global cold damage",
 		"% global lightning damage",
 		"% global poison damage",
 		"% local physical damage",
 		"% global physical damage",
+		"armor rating",
 		"agility",
 		"defense",
 		"knowledge",
 		"attack"
-	};
-	sf::Color damageColors[5] = {
+	}; 
+	sf::Color damageColors[6] = {
 		{ 226, 165, 86 },
 		{ 255, 74, 61 },
 		{ 109, 165, 255 },
 		{ 248, 255, 61 },
-		{ 131, 211, 69 }
+		{ 131, 211, 69 },
+		sf::Color::White
 	};
 	//  PHYS = 0,
 	//	FIRE = 1,
@@ -41,15 +47,19 @@ public:
 	damageColors[AbEffect::DamageType::LGHT] = sf::Color({ 248, 255, 61 });
 	damageColors[AbEffect::DamageType::PHYS] = sf::Color({ 226, 165, 86 });
 	damageColors[AbEffect::DamageType::POIS] = sf::Color({ 131, 211, 69 });*/
-	std::pair<int, int> sRange = std::pair<int, int>{ 0,4 };
-	std::pair<int, int> pRange = std::pair<int, int>{ 5,14 };
+	std::pair<int, int> sRange = std::pair<int, int>{ 0,8 };
+	std::pair<int, int> pRange = std::pair<int, int>{ 9,19 };
 	enum Affix {
 		//SUFFIX
 		FIRE_FLT_DMG,
 		COLD_FLT_DMG,
 		LGHT_FLT_DMG,
 		POIS_FLT_DMG,
-		PHYS_FLT_DMG,
+		PHYS_FLT_DMG, 
+		FIRE_RES,
+		LGHT_RES,
+		COLD_RES,
+		POIS_RES,
 		//PREFIX
 		FIRE_PRC_DMG,
 		COLD_PRC_DMG,
@@ -57,6 +67,7 @@ public:
 		POIS_PRC_DMG,
 		PHYS_PRC_L_DMG,
 		PHYS_PRC_G_DMG,
+		ARM_RAT,
 		AGI,
 		DEF,
 		KNO,
@@ -69,8 +80,8 @@ public:
 		std::string id;
 		bool pre;
 		bool local;
+		
 		sf::Color color;
-
 		std::string getStr() {
 			if (v1 != -1)
 			{
@@ -191,7 +202,10 @@ public:
 	float magnitude(sf::Vector2f);
 	sf::Vector2f normalized(sf::Vector2f vec, float mag);
 	sf::Vector2f clamp(sf::Vector2f vec, float max);
-	Helper();
+	Helper()
+	{
+		
+	}
 	~Helper();
 };
 #endif

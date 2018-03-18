@@ -92,26 +92,16 @@ Scroll* ItemGenerator::makeScroll(int aLvl, float mf)
 	scroll = new Scroll(ab->name, Item::SlotType::SCR, ab, rarity);
 	return scroll;
 }
-/*	switch (efType)
+bool ItemGenerator::canRollAf(Item::SlotType type, AF af)
+{
+	for (auto st : afTypeExMap[af])
 	{
-	case EfType::INST:
-		break;
-	case EfType::BUFF:
-		break;
-	case EfType::DEBUFF:
-		break;
-	case EfType::DOT:
-		break;
-	}*/
-	/*
-		AbEffect eff = AbEffect(AbEffect::Effect({ 0,0,0,0 },
-			AbEffect::Damage(
-				AbEffect::DamageType::COLD, 1, 10),
-			1));
-		AbEffect eff2 = AbEffect(AbEffect::Effect({ 0,0,0,0 },
-			AbEffect::Damage(
-				AbEffect::DamageType::PHYS, 1, 1),
-			5));*/
+		if (type == st)
+			return false;
+	}
+	return true;
+}
+
 Item * ItemGenerator::makeItem(int aLvl, float mf)
 {
 	Helper helper;
@@ -121,7 +111,7 @@ Item * ItemGenerator::makeItem(int aLvl, float mf)
 	std::uniform_int_distribution<> dist(0, numst - 1);
 
 	int st = dist(gen);
-	ST type = ST::MAH;//(ST)st;
+	ST type = (ST)st;
 	std::vector<BaseItem> basePool;
 	for (auto base : bases[type])
 	{
@@ -139,7 +129,6 @@ Item * ItemGenerator::makeItem(int aLvl, float mf)
 	Item::Rarity rarity = getRarity(mf);
 
 	int numAffixes = (int)rarity;
-	std::map<AF, std::vector<std::pair<AFV, int>>> affixes = prefixes;
 	std::pair<int, int> afRange = helper.pRange;
 	int numP = 0, numS = 0, rndNumAffixes = 0;
 	do
@@ -151,24 +140,55 @@ Item * ItemGenerator::makeItem(int aLvl, float mf)
 	} while (numP < (1 + numAffixes - 1) && numS < (1 + numAffixes - 1));
 	std::map<AF, AFV> itmAfvs;
 	rndNumAffixes = numP;
+
+	std::map<AF, std::vector<std::pair<AFV, int>>> sufpools;
+	std::map<AF, std::vector<std::pair<AFV, int>>> prepools;
+	std::vector<AF> sufchoices;
+	std::vector<AF> prechoices;
+
+	for (int i = 0; i <= helper.sRange.second; i++)
+	{
+		for (auto eff : suffixes[(AF)i])
+		{
+			if (eff.second <= aLvl && canRollAf(bi.t, (AF)i))
+				sufpools[(AF)i].push_back({ eff.first,eff.second });
+		}
+		if (sufpools[(AF)i].size() > 0)
+			sufchoices.push_back((AF)i);
+	}
+	for (int i = helper.pRange.first; i <= helper.pRange.second; i++)
+	{
+		for (auto eff : prefixes[(AF)i])
+		{
+			if (eff.second <= aLvl && canRollAf(bi.t, (AF)i))
+				prepools[(AF)i].push_back({ eff.first,eff.second });
+		}
+		if (prepools[(AF)i].size() > 0)
+			prechoices.push_back((AF)i);
+	}
+
+	std::vector<AF> choices = prechoices;
+	std::map<AF, std::vector<std::pair<AFV, int>>> affixes = prepools;
 	for (int c = 0; c < 2; c++)
 	{
 		for (int i = 0; i < rndNumAffixes; i++)
 		{
 			dist.reset();
-			dist = std::uniform_int_distribution<>(0, afRange.second - afRange.first);
-			AF af = (AF)(dist(gen) + afRange.first);
-			while (affixes[af].size() <= 0)
-			{
-				af = (AF)(dist(gen) + afRange.first);
-			}
+			dist = std::uniform_int_distribution<>(0, choices.size()-1);
+			int choice = dist(gen);
+			AF af = (AF)choices[choice];
 			dist.reset();
 			dist = std::uniform_int_distribution<>(0, affixes[af].size() - 1);
 			int rndAfv = dist(gen);
 			itmAfvs[af] = affixes[af][rndAfv].first;
 			affixes[af].erase(affixes[af].begin() + rndAfv);
+			if (affixes[af].size() == 0)
+				choices.erase(choices.begin() + choice);
+			if (choices.size() <= 0)
+				break;
 		}
-		affixes = suffixes;
+		affixes = sufpools;
+		choices = sufchoices;
 		afRange = helper.sRange;
 		rndNumAffixes = numS;
 	}

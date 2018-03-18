@@ -64,7 +64,7 @@ void Player::handleInput()
 	{
 		updateAbilityBar();
 		updatePlayerStats();
-		updateAutoAttack();
+		updateAbilities();
 		this->playerInfo.setAbilities(this->inventory.getScrollAbilities(), &autoAttack,bStats);
 		if (this->hud.showState == Hud::ShowState::SHOW_INV)
 		{
@@ -82,7 +82,7 @@ void Player::handleInput()
 	{
 		updateAbilityBar();
 		updatePlayerStats();
-		updateAutoAttack();
+		updateAbilities();
 		this->playerInfo.setAbilities(this->inventory.getScrollAbilities(), &autoAttack,bStats);
 		if (hud.showState == Hud::ShowState::SHOW_MSG)
 			hud.showState = Hud::ShowState::SHOW_NONE;
@@ -98,7 +98,7 @@ void Player::handleInput()
 	{
 		updateAbilityBar();
 		updatePlayerStats();
-		updateAutoAttack();
+		updateAbilities();
 		this->playerInfo.setAbilities(this->inventory.getScrollAbilities(), &autoAttack,bStats);
 		if (this->hud.showState == Hud::ShowState::SHOW_INFO)
 		{
@@ -351,7 +351,7 @@ void Player::updateAbilities(float dt)
 			rmCache[rm + 1]--;
 	}
 }
-void Player::updateAutoAttack()
+void Player::updateAbilities()
 {
 	Item* itm = inventory.eqItems[2].first.getItem();
 	autoAttack.effs.clear();

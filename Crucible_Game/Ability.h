@@ -15,12 +15,14 @@
 
 class AbEffect {
 public:
+#define numdamagetype 6
 	enum DamageType {
 		PHYS = 0,
 		FIRE = 1,
 		COLD = 2,
 		LGHT = 3,
-		POIS = 4
+		POIS = 4,
+		NONE = 5
 	};
 	struct Damage {
 		DamageType type;
@@ -37,6 +39,13 @@ public:
 			std::mt19937 gen(rd());
 			std::uniform_int_distribution<> dist(0, max - min);
 			return dist(gen) + min;
+		}
+		void modDamage(float prc)
+		{
+			float nMin = min * (1.f + (prc/100.f));
+			float nMax = max * (1.f + (prc/100.f));
+			min = std::ceil(nMin);
+			max = std::ceil(nMax);
 		}
 	};
 	struct Effect {
@@ -129,7 +138,27 @@ public:
 		std::vector<AbEffect::Effect> effEffs;
 		for (auto eff : this->effs)
 		{
-			effEffs.push_back(eff.getEffects());
+			AbEffect::Effect effect = eff.getEffects();
+			effEffs.push_back(effect);
+		}
+		return effEffs;
+	}
+
+	std::map<AbEffect::DamageType, Helper::Affix> damageAffixes;
+	std::vector<AbEffect::Effect> getBuffedEffects(Helper::Stats* stats) {
+
+		std::vector<AbEffect::Effect> effEffs;
+		for (auto eff : this->effs)
+		{
+			AbEffect::Effect effect = eff.getEffects();
+			for (int i = 0; i < numdamagetype; i++)
+			{
+				if (effect.damage.type == (AbEffect::DamageType)i)
+				{
+					effect.damage.modDamage(stats->buffs[damageAffixes[effect.damage.type]].v1);
+				}
+			}
+			effEffs.push_back(effect);
 		}
 		return effEffs;
 	}
@@ -148,11 +177,18 @@ public:
 		else
 			str.push_back("Ranged" + areadesc[(int)info.area]);
 		str.push_back("Range: " + std::to_string(info.range));
-		str.push_back("Cooldown: " + std::to_string(cooldown).substr(0,4));
+		str.push_back("Cooldown: " + std::to_string(cooldown).substr(0, 4));
 		str.push_back("Cast Time: " + std::to_string((float)tickCost*stats->speed).substr(0, 4));
 		for (auto e : effs)
 		{
 			AbEffect::Damage damage = e.getEffects().damage;
+			for (int i = 0; i < numdamagetype; i++)
+			{
+				if (damage.type == (AbEffect::DamageType)i)
+				{
+					damage.modDamage(stats->buffs[damageAffixes[damage.type]].v1);
+				}
+			}
 			AbEffect::Effect ef = e.getEffects();
 			if (damage.min + damage.max != 0)
 			{
@@ -181,6 +217,7 @@ public:
 		this->info = a.info;
 		this->texName = a.texName;
 		this->effs = a.effs;
+		this->damageAffixes = a.damageAffixes;
 	}
 	std::string texName;
 	Ability(Game* game,
@@ -208,6 +245,12 @@ public:
 		this->animHandler.addAnim(animation);
 		this->duration = animation.duration * animation.getLength();
 		this->description = description;
+
+		damageAffixes[AbEffect::DamageType::COLD] = Helper::Affix::COLD_PRC_DMG;
+		damageAffixes[AbEffect::DamageType::FIRE] = Helper::Affix::FIRE_PRC_DMG;
+		damageAffixes[AbEffect::DamageType::POIS] = Helper::Affix::POIS_PRC_DMG;
+		damageAffixes[AbEffect::DamageType::LGHT] = Helper::Affix::LGHT_PRC_DMG;
+		damageAffixes[AbEffect::DamageType::PHYS] = Helper::Affix::PHYS_PRC_G_DMG;
 	}
 
 	~Ability();
