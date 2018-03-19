@@ -59,7 +59,12 @@ void Map::draw(sf::RenderWindow & window, float dt)
 		if (!enemy->dead)
 			enemy->draw();
 	}
-
+	for (auto l : loot)
+	{
+		l->draw(this->game->window);
+	}
+	for (auto t : actionText)
+		window.draw(t);
 	for (int y = drawStart.y; y < drawEnd.y; ++y)
 	{
 		for (int x = drawStart.x; x < drawEnd.x; ++x)
@@ -72,8 +77,12 @@ void Map::draw(sf::RenderWindow & window, float dt)
 		canSelect.draw(window, dt);
 	else
 		cantSelect.draw(window, dt);
-	return;
 
+	for (auto text : hoverText)
+	{
+		window.draw(text);
+	}
+	return;
 }
 
 sf::Vector2i Map::globalToTilePos(sf::Vector2f global)
@@ -97,21 +106,75 @@ void Map::update(float dt)
 	for (int i = 0; i < enemies.size(); i++)
 	{
 		Enemy& enemy = *enemies[i];
-		
+
 		if (enemy.update())
 		{
 			getTile(enemy.tilePos.x, enemy.tilePos.y)->occupied = false;
 			oldPosBuffer.push_back(enemy.tilePos);
+			Loot* newloot = new Loot(enemy.mf, enemy.lvl, enemy.tilePos, this->game, this->itemGenerator);
+			tLoot[enemy.tilePos.y * this->width + enemy.tilePos.x] = newloot;
+			loot.push_back(newloot);
 		}
 	}
 	for (auto pos : oldPosBuffer)
 	{
 		tEnemies[pos.y*this->width + pos.x] = nullptr;
 	}
+	Loot* loot;
+	if (oldMouseIndex != mouseIndex)
+		updateHoverText();
+	oldMouseIndex = mouseIndex;
 	canSelect.setPosition(selectPos);
 	cantSelect.setPosition(selectPos);
 }
-
+void Map::updateHoverText()
+{
+	Loot* loot;
+	if (getTile(mouseIndex.x, mouseIndex.y)->occupied)
+	{
+		Enemy* enemy = tEnemies[mouseIndex.y*this->width + mouseIndex.x];
+		if (enemy != nullptr)
+		{
+			std::string name = enemy->name;
+			std::string hp = std::to_string(enemy->hp);
+			std::string maxHp = std::to_string(enemy->maxHp);
+			hoverText.clear();
+			hoverText.push_back(sf::Text(name, game->fonts["main_font"], tSize));
+			hoverText.push_back(sf::Text(hp + "/" + maxHp, game->fonts["main_font"], tSize));
+			hoverText[0].setPosition((mouseIndex.x * tileSize.x) - (TILE_SIZE / 2), (mouseIndex.y * tileSize.y) - (tSize * 3.5));
+			hoverText[0].setFillColor({ 255, 0, 0 });
+			hoverText[1].setPosition((mouseIndex.x * tileSize.x) - (TILE_SIZE / 2), (mouseIndex.y * tileSize.y) - (tSize * 2.5f));
+			hoverText[1].setFillColor({ 255, 0, 0 });
+			hoverText[0].setOutlineThickness(1);
+			hoverText[1].setOutlineThickness(1);
+		}
+	}
+	else if ((loot = tLoot[mouseIndex.y*this->width + mouseIndex.x]) != nullptr)
+	{
+		std::string name = loot->item->name;
+		hoverText.clear();
+		hoverText.push_back(sf::Text(name, game->fonts["main_font"], tSize));
+		hoverText[0].setPosition((mouseIndex.x * tileSize.x) - (TILE_SIZE / 2), (mouseIndex.y * tileSize.y) - (tSize * 2.5));
+		switch (loot->item->rarity)
+		{
+		case Item::Rarity::NORM:
+			hoverText[0].setFillColor(NORM_COLOR);
+			break;
+		case Item::Rarity::MAGIC:
+			hoverText[0].setFillColor(MAGIC_COLOR);
+			break;
+		case Item::Rarity::RARE:
+			hoverText[0].setFillColor(RARE_COLOR);
+			break;
+		case Item::Rarity::ULTRA:
+			hoverText[0].setFillColor(ULTRA_COLOR);
+			break;
+		}
+		hoverText[0].setOutlineThickness(1);
+	}
+	else
+		hoverText.clear();
+}
 bool Map::activateObjsAtTile(std::vector<sf::Vector2i> pos)
 {
 	bool hit = false;
@@ -128,7 +191,7 @@ bool Map::activateObjsAtTile(std::vector<sf::Vector2i> pos)
 				enemy.active = true;
 				hc++;
 			}
-		if(!enemy.active)
+		if (!enemy.active)
 			enemy.wayPoints.clear();
 	}
 
@@ -165,6 +228,78 @@ void Map::handleInput(sf::Event event)
 		break;
 	default:
 		break;
+	}
+}
+void Map::eraseLoot(sf::Vector2i pos)
+{
+	Loot* newLoot = tLoot[pos.y*this->width + pos.x];
+	if (newLoot != nullptr)
+	{
+		for (int i = 0; i < loot.size(); i++)
+		{
+			if (loot[i]->pos == pos)
+			{
+				loot.erase(loot.begin() + i);
+				break;
+			}
+		}
+		tLoot[pos.y * this->width + pos.x] = nullptr;
+	}
+}
+void Map::resolveAction(Player* player)
+{
+	Item * itm;
+	Loot * newLoot;
+	switch (action)
+	{
+	case Action::PICKUP:
+		newLoot = tLoot[player->tilePos.y *this->width + player->tilePos.x];
+		if (newLoot != nullptr)
+		{
+			itm = newLoot->item;
+			if (itm != nullptr)
+				if (player->pickup(itm))
+				{
+					eraseLoot(player->tilePos);
+					updateActionText(player->tilePos);
+				}
+		}
+		break;
+	default:
+		break;
+	}
+}
+void Map::updateActionText(sf::Vector2i playerPos)
+{
+	actionText.clear();
+	this->action = Action::NONE;
+	Loot* newLoot = tLoot[playerPos.y *this->width + playerPos.x];
+	if (newLoot != nullptr)
+	{
+		actionText.push_back(sf::Text("e: pickup", game->fonts["main_font"], tSize));
+		actionText[0].setFillColor(sf::Color::White);
+		actionText[0].setOutlineThickness(1);
+		actionText[0].setPosition((playerPos.x * tileSize.x) - (TILE_SIZE / 2), (playerPos.y * tileSize.y) - (tSize * 3.5));
+		std::string name = newLoot->item->name;
+		actionText.push_back(sf::Text(name, game->fonts["main_font"], tSize));
+		actionText[1].setPosition((playerPos.x * tileSize.x) - (TILE_SIZE / 2), (playerPos.y * tileSize.y) - (tSize * 2.5));
+		switch (newLoot->item->rarity)
+		{
+		case Item::Rarity::NORM:
+			actionText[1].setFillColor(NORM_COLOR);
+			break;
+		case Item::Rarity::MAGIC:
+			actionText[1].setFillColor(MAGIC_COLOR);
+			break;
+		case Item::Rarity::RARE:
+			actionText[1].setFillColor(RARE_COLOR);
+			break;
+		case Item::Rarity::ULTRA:
+			actionText[1].setFillColor(ULTRA_COLOR);
+			break;
+		}
+		actionText[1].setOutlineThickness(1);
+		this->action = Action::PICKUP;
 	}
 }
 
@@ -226,7 +361,9 @@ void Map::resolveEntityAI(float tickCount)
 				getTile(occ_tiles.second.x, occ_tiles.second.y)->occupied = true;
 			}
 		else if (enemy->dead)
+		{
 			oldPosBuffer.push_back(enemy->tilePos);
+		}
 	}
 	int i = 0;
 	for (auto enemy : moveBuffer)
@@ -257,6 +394,7 @@ void Map::loadMap()
 	for (int i = 0; i < width*height; i++)
 	{
 		tEnemies.push_back(nullptr);
+		tLoot.push_back(nullptr);
 	}
 	Dungeon dungeon(width, height);
 	dungeon.generate(70);

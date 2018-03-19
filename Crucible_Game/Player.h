@@ -95,6 +95,7 @@ public:
 	void updateTilePos();
 	void updateAbilities(float dt);
 	void updateAbilities();
+	bool pickup(Item* item);
 	std::vector<AbEffect::Effect> effs;
 	void applyEff(AbEffect::Effect eff);
 	void move(sf::Vector2f offset) {

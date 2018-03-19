@@ -21,6 +21,8 @@ public:
 	int qDmg;
 	int hp;
 	int maxHp;
+	int lvl;
+	int mf;
 	sf::Sprite sprite;
 	sf::Vector2i tilePos;
 	sf::Vector2f pos;
@@ -44,12 +46,16 @@ public:
 
 	void deactivate();
 
+	std::string name;
+
 	Enemy(std::string spriteName, Game* game, sf::Vector2i pos, int hp)
 	{
 		this->game = game;
 		this->hp = hp;
 		this->maxHp = hp;
 		this->tilePos = pos;
+		this->mf = 500;
+		this->lvl = 1;
 		this->pos = { (float)pos.x*TILE_SIZE,(float)pos.y*TILE_SIZE };
 		this->sprite.setTexture(this->game->texmgr.getRef(spriteName));
 		this->sprite.setOrigin(TILE_SIZE / 2, TILE_SIZE / 2);
@@ -67,6 +73,7 @@ public:
 		this->moveRange = 1;
 		this->qDmg = 0;
 		this->speed = 1;
+		this->name = "Ogre";
 		ability = Ability(this->game, game->texmgr.getRef("slash"), "slash_icon",
 			{ 0,3,0.1f }, { 32,32 }, 10, 2, "slash",
 			"Melee slash in an arc");

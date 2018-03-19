@@ -181,6 +181,17 @@ std::vector<Ability*> Inventory::getScrollAbilities()
 	return abilities;
 }
 
+bool Inventory::pickupItem(Item * item)
+{
+	int slot = firstEmptySlot(itemSlots);
+	if (slot != -1)
+	{
+		itemSlots[slot].setItem(item);
+		return true;
+	}
+	return false;
+}
+
 void Inventory::draw()
 {
 	this->game->window.draw(slider);

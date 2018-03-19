@@ -74,7 +74,7 @@ Scroll* ItemGenerator::makeScroll(int aLvl, float mf)
 			int poolat = dist(gen);
 			AbEffect eff = pools[efType][poolat];
 			effs.push_back(eff);
-			if (!efType == EffType::BUFF)
+			if (efType != EffType::BUFF)
 				justbuff = false;
 			pools[efType].erase(pools[efType].begin() + poolat);
 			if (pools[efType].size() == 0)

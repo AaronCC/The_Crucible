@@ -6,6 +6,9 @@
 #include <string>
 #include <sstream>
 #include <iterator>
+#include <time.h>
+#include <stdio.h>
+#include <stdlib.h>
 #include "ItemGenerator.h"
 
 #define H_GLOBE "hGlobe"
@@ -99,24 +102,47 @@ public:
 		seperatorText.setFillColor({ 102, 102, 255 });
 
 		std::string pre = "", suf = "";
-		for (auto buff : item->buffs)
+		if (item->rarity == Item::Rarity::MAGIC || item->rarity == Item::Rarity::NORM)
 		{
-			if (buff.second.getStr() != "")
-				if (buff.second.pre)
-					pre = buff.second.id;
-				else
-					suf = buff.second.id;
+			for (auto buff : item->buffs)
+			{
+				if (buff.second.getStr() != "")
+					if (buff.second.pre)
+						pre = buff.second.id;
+					else
+						suf = buff.second.id;
+			}
 		}
-		std::map<Item::Rarity, sf::Color> rarityColors;
-		rarityColors[Item::Rarity::NORM] = sf::Color::White;
-		rarityColors[Item::Rarity::MAGIC] = { 85, 121, 178 };
-		rarityColors[Item::Rarity::RARE] = { 196, 166, 60 };
-		rarityColors[Item::Rarity::ULTRA] = { 147, 47, 173 };
+		else
+		{
+			std::random_device rd;
+			std::mt19937 gen(rd());
+			int i = helper.numpreprefixes;
+			std::uniform_int_distribution<> dist(0, i-1);
+			pre += helper.inamePrePrefixes[dist(gen)];
+			dist.reset();
+			dist = std::uniform_int_distribution<>(0, helper.inamePrefixes[item->slotType].size() - 1);
+			pre += " " + helper.inamePrefixes[item->slotType][dist(gen)] + ",";
+		}
 		std::string newname = pre + " " + item->name + " " + suf;
 		for (auto line : wrapWord(maxNameChar, newname))
 		{
 			itemText.push_back(sf::Text(line, game->fonts["main_font"], tSize));
-			itemText[linecount].setFillColor(rarityColors[item->rarity]);
+			switch (item->rarity)
+			{
+			case Item::Rarity::NORM:
+				itemText[linecount].setFillColor(NORM_COLOR);
+				break;
+			case Item::Rarity::MAGIC:
+				itemText[linecount].setFillColor(MAGIC_COLOR);
+				break;
+			case Item::Rarity::RARE:
+				itemText[linecount].setFillColor(RARE_COLOR);
+				break;
+			case Item::Rarity::ULTRA:
+				itemText[linecount].setFillColor(ULTRA_COLOR);
+				break;
+			}
 			linecount++;
 		}
 
@@ -124,7 +150,17 @@ public:
 		for (auto line : wrapWord(maxInfoChar, newname))
 		{
 			nameInfoText.push_back(sf::Text(line, game->fonts["main_font"], tSize));
-			nameInfoText[linecount].setFillColor(rarityColors[item->rarity]);
+			switch (item->rarity)
+			{
+			case Item::Rarity::NORM:nameInfoText[linecount].setFillColor(NORM_COLOR);
+				break;
+			case Item::Rarity::MAGIC:nameInfoText[linecount].setFillColor(MAGIC_COLOR);
+				break;
+			case Item::Rarity::RARE:nameInfoText[linecount].setFillColor(RARE_COLOR);
+				break;
+			case Item::Rarity::ULTRA:nameInfoText[linecount].setFillColor(ULTRA_COLOR);
+				break;
+			}
 			linecount++;
 		}
 		linecount = 0;
@@ -330,19 +366,27 @@ public:
 			) return true;
 		return false;
 	}
-
-	bool eqToSlot(int eqIndex, std::vector<InvSlot>& slots, std::vector<std::pair<InvSlot, sf::Text>>& eqSlots)
-	{
-		if (eqSlots[eqIndex].first.getItem() == nullptr)
-			return false;
+	int firstEmptySlot(std::vector<InvSlot>& slots) {
 		for (int i = 0; i < slots.size(); i++)
 		{
 			if (slots[i].getItem() == nullptr)
 			{
-				slots[i].setItem(eqSlots[eqIndex].first.getItem());
-				eqSlots[eqIndex].first.removeItem();
-				return true;
+				return i;
 			}
+		}
+		return -1;
+	}
+	bool pickupItem(Item* item);
+	bool eqToSlot(int eqIndex, std::vector<InvSlot>& slots, std::vector<std::pair<InvSlot, sf::Text>>& eqSlots)
+	{
+		if (eqSlots[eqIndex].first.getItem() == nullptr)
+			return false;
+		int i = firstEmptySlot(slots);
+		if (i != -1)
+		{
+			slots[i].setItem(eqSlots[eqIndex].first.getItem());
+			eqSlots[eqIndex].first.removeItem();
+			return true;
 		}
 		return false;
 	}
@@ -360,19 +404,17 @@ public:
 	bool slotToEq(int index, int eqIndex, std::vector<InvSlot>& slots, std::vector<std::pair<InvSlot, sf::Text>>& eqSlots)
 	{
 		Item* item = slots[index].getItem();
-		bool openSlot = hasOpenSlot();
 		bool twoHEq = false;
 		if (eqSlots[Item::SlotType::MAH].first.getItem() != nullptr)
 			twoHEq = eqSlots[Item::SlotType::MAH].first.getItem()->twoHanded;
 		if (slots[index].getItem() == nullptr)
 			return false;
-		if (item->twoHanded && openSlot)
+		if (item->twoHanded)
 		{
 			eqToSlot(Item::SlotType::OFH, slots, eqSlots);
 		}
 		else if (item->slotType == Item::SlotType::OFH &&
-			twoHEq &&
-			openSlot)
+			twoHEq)
 		{
 			eqToSlot(Item::SlotType::MAH, slots, eqSlots);
 		}
@@ -429,7 +471,7 @@ public:
 		//	{ 0,2,0,-10 },
 		//	Item::SlotType::OFH);
 		//itemSlots[4].setItem(item);
-		for (int i = 0; i < 25; i++)
+		for (int i = 0; i < 5; i++)
 		{
 			Item* item = itemGenerator.makeItem(1, 500);
 			itemSlots[i].setItem(item);

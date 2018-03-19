@@ -22,3 +22,4 @@ item_text_back media/item_text_back.png
 item_info_back media/item_info_back.png
 dummy media/player_temp.png
 ogre media/Ogre.png
+lootbag media/lootbag.png

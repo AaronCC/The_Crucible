@@ -180,6 +180,7 @@ public:
 			{ aStart,aEnd,0.1f }, cd, ct));
 		return false;
 	}
+	
 	bool parseAbAff(std::vector<std::string> data)
 	{
 		bool hasStats;

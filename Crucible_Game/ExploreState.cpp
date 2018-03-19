@@ -23,6 +23,7 @@ ExploreState::ExploreState(Game* game)
 	this->old_mLeftState = true;
 	this->player.updateTilePos();
 	map->getTile(player.tilePos.x, player.tilePos.y)->occupied = true;
+	map->itemGenerator = &player.inventory.itemGenerator;
 	resolveFoW();
 	rTime = 0.01f;
 }
@@ -34,7 +35,6 @@ ExploreState::~ExploreState()
 void ExploreState::draw(const float dt)
 {
 	this->camera.setView();
-
 	this->map->draw(this->game->window, dt);
 	if (fTime >= 1)
 	{
@@ -45,7 +45,6 @@ void ExploreState::draw(const float dt)
 	fTime += dt;
 	fps++;
 	testText.setString("FPS: " + std::to_string(fTotal));
-
 	this->player.draw(dt);
 	//this->game->window.draw(testText);
 }
@@ -119,7 +118,11 @@ void ExploreState::update(const float dt)
 	}
 	this->map->update(dt);
 	if (shouldResolve)
+	{
+		map->updateActionText(player.tilePos);
+		map->updateHoverText();
 		resolveFoW();
+	}
 	this->camera.update(dt);
 }
 
@@ -147,6 +150,11 @@ void ExploreState::handleInput()
 		}
 	}
 	sf::Vector2f mousePos = this->game->window.mapPixelToCoords(sf::Mouse::getPosition(this->game->window), this->view);
+
+	if (map->action == Map::Action::PICKUP && sf::Keyboard::isKeyPressed(sf::Keyboard::E))
+	{
+		map->resolveAction(&player);
+	}
 
 	if (sf::Mouse::isButtonPressed(sf::Mouse::Left) && old_mLeftState == false)
 	{
@@ -324,7 +332,6 @@ void ExploreState::handleInput()
 	if (act)
 		resolveGameState(player.tickCount);
 }
-
 void ExploreState::resolveFoW()
 {
 	std::vector<sf::Vector2i> points;

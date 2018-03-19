@@ -2,6 +2,11 @@
 #define HELPER_H
 #include <SFML/Graphics.hpp>
 
+#define NORM_COLOR sf::Color::White
+#define MAGIC_COLOR { 85, 121, 255 }
+#define RARE_COLOR { 196, 166, 60 }
+#define ULTRA_COLOR { 147, 47, 173 }
+
 class Helper
 {
 public:
@@ -28,7 +33,21 @@ public:
 		"defense",
 		"knowledge",
 		"attack"
-	}; 
+	};
+	static const int numpreprefixes = 10;
+	std::string inamePrePrefixes[10] = {
+		"Pain",
+		"Deadly",
+		"Godlike",
+		"Demi",
+		"Gorgon",
+		"Steel",
+		"Rift",
+		"Brood",
+		"Blood",
+		"Demon"
+	};
+	std::map<int, std::vector<std::string>> inamePrefixes;
 	sf::Color damageColors[6] = {
 		{ 226, 165, 86 },
 		{ 255, 74, 61 },
@@ -204,7 +223,33 @@ public:
 	sf::Vector2f clamp(sf::Vector2f vec, float max);
 	Helper()
 	{
-		
+		/*HED = 0,
+		BDY = 1,
+		MAH = 2,
+		OFH = 3,
+		RNG = 4,
+		AMU = 5,
+		CLK = 6,
+		BLT = 7,
+		SCR = 8*/
+		inamePrefixes[0].push_back("Keep");
+		inamePrefixes[0].push_back("Tower");
+		inamePrefixes[1].push_back("Mantle");
+		inamePrefixes[1].push_back("Carapace");
+		inamePrefixes[2].push_back("Stinger");
+		inamePrefixes[2].push_back("Slayer");
+		inamePrefixes[3].push_back("Hold");
+		inamePrefixes[3].push_back("Wall");
+		inamePrefixes[4].push_back("Loop");
+		inamePrefixes[4].push_back("Snake");
+		inamePrefixes[5].push_back("Chocker");
+		inamePrefixes[5].push_back("Locket");
+		inamePrefixes[6].push_back("Shroud");
+		inamePrefixes[6].push_back("Fog");
+		inamePrefixes[7].push_back("Coil");
+		inamePrefixes[7].push_back("Snake");
+		inamePrefixes[8].push_back("Scroll");
+		inamePrefixes[8].push_back("Papyrus");
 	}
 	~Helper();
 };

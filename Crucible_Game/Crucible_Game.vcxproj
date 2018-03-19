@@ -91,6 +91,7 @@
     <ClCompile Include="Hud.cpp" />
     <ClCompile Include="Item.cpp" />
     <ClCompile Include="ItemGenerator.cpp" />
+    <ClCompile Include="Loot.cpp" />
     <ClCompile Include="Main.cpp" />
     <ClCompile Include="Map.cpp" />
     <ClCompile Include="MenuState.cpp" />
@@ -115,6 +116,7 @@
     <ClInclude Include="Hud.h" />
     <ClInclude Include="Item.h" />
     <ClInclude Include="ItemGenerator.h" />
+    <ClInclude Include="Loot.h" />
     <ClInclude Include="Map.h" />
     <ClInclude Include="MenuState.h" />
     <ClInclude Include="PathFinder.h" />

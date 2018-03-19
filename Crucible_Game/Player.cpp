@@ -360,6 +360,12 @@ void Player::updateAbilities()
 		for (auto eff : itm->getEffectFromMAH())
 			autoAttack.addEffect(eff);
 }
+bool Player::pickup(Item * item)
+{
+	if (inventory.pickupItem(item))
+		return true;
+	return false;
+}
 void Player::applyEff(AbEffect::Effect eff)
 {
 	eff.dur -= 1;

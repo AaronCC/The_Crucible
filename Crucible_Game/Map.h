@@ -6,6 +6,8 @@
 #include "Helper.h"
 #include "Enemy.h"
 #include "PathFinder.h"
+#include "Loot.h"
+
 class Map
 {
 public:
@@ -13,14 +15,25 @@ public:
 	std::vector<Enemy*> aEnemies;
 	std::vector<Tile> tiles;
 	std::vector<Enemy*> tEnemies;
+	std::vector<Loot*> tLoot;
+	std::vector<Loot*> loot;
 	std::vector<Tile>* getTiles() { return &tiles; }
 	int width, height;
 	sf::Vector2u tileSize;
 	sf::Vector2i spawnPos;
 	sf::Vector2f drawSize;
+	std::vector<sf::Text> hoverText;
+	std::vector<sf::Text> actionText;
+	enum Action {
+		PICKUP,
+		NONE
+	};
+	Action action;
+	sf::Vector2i oldMouseIndex;
 	Tile background;
 	Tile canSelect;
 	Tile cantSelect;
+	ItemGenerator* itemGenerator;
 
 	//Tile player;
 	Game* game;
@@ -37,7 +50,11 @@ public:
 	void draw(sf::RenderWindow & window, float dt);
 	sf::Vector2i globalToTilePos(sf::Vector2f global);
 	void update(float dt);
+	void updateHoverText();
 	void handleInput(sf::Event event);
+	void eraseLoot(sf::Vector2i pos);
+	void resolveAction(Player * player);
+	void updateActionText(sf::Vector2i playerPos);
 
 	std::vector<sf::Vector2i> entityOccToClear;
 
