@@ -7,7 +7,7 @@ life_globe media/life_globe.png
 slash media/slash.png
 ability_slot media/ability_slot.png
 slash_icon media/slash_icon.png
-player media/player_temp.png
+player media/player.png
 can_select media/can_select.png
 cant_select media/cant_select.png
 move_icon media/move_icon.png
@@ -19,3 +19,4 @@ text_back media/text_back.png
 item_text_back media/item_text_back.png
 item_info_back media/item_info_back.png
 dummy media/player_temp.png
+ogre media/Ogre.png

@@ -113,6 +113,7 @@ Item * ItemGenerator::makeItem(int aLvl, float mf)
 	int st = dist(gen);
 	ST type = (ST)st;
 	std::vector<BaseItem> basePool;
+
 	for (auto base : bases[type])
 	{
 		if (base.first < aLvl)

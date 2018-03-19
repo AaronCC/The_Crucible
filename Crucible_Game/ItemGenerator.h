@@ -250,6 +250,7 @@ public:
 		afTypeExMap[AF::POIS_RES] = { 2 };
 		afTypeExMap[AF::LGHT_RES] = { 2 };
 		afTypeExMap[AF::PHYS_PRC_L_DMG] = { 0,1,3,4,5,6,7,8 };
+		afTypeExMap[AF::ARM_RAT] = { 2,4,5 };
 
 		//BaseItem* itm = new BaseItem(ST::MAH, "Elegant Sword");
 		/*itm->addAff(AF::PHYS_FLT_DMG, { 1, 5, "Base", true, helper.damageColors[DMG::PHYS],true });

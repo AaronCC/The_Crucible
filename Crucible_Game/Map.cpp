@@ -326,7 +326,7 @@ void Map::loadMap()
 		switch (e.id)
 		{
 		case 'd':
-			enemies.push_back(new Enemy("dummy", game, { e.x,e.y }, 10));
+			enemies.push_back(new Enemy("ogre", game, { e.x,e.y }, 10));
 			tEnemies[e.y*this->width + e.x] = enemies[enemies.size() - 1];
 			getTile(e.x, e.y)->occupied = true;
 			break;

@@ -260,19 +260,19 @@ void Player::draw(float dt)
 
 void Player::updateAnim(sf::View view)
 {
-	sf::Vector2f mousePos = this->game->window.mapPixelToCoords(sf::Mouse::getPosition(this->game->window), view);
-	std::string oldAnim = currentAnim;
+	//sf::Vector2f mousePos = this->game->window.mapPixelToCoords(sf::Mouse::getPosition(this->game->window), view);
+	//std::string oldAnim = currentAnim;
 
-	float xdiff = mousePos.x - position.x;
-	float ydiff = mousePos.y - position.y;
-	sf::Vector2f normalDir = helper.normalized({ xdiff,ydiff },
-		helper.magnitude({ xdiff,ydiff }));
-	double angle = std::acos(helper.dotProduct({ 0,1 }, normalDir))*(180.0 / 3.141592653589793238463);
+	//float xdiff = mousePos.x - position.x;
+	//float ydiff = mousePos.y - position.y;
+	//sf::Vector2f normalDir = helper.normalized({ xdiff,ydiff },
+	//	helper.magnitude({ xdiff,ydiff }));
+	//double angle = std::acos(helper.dotProduct({ 0,1 }, normalDir))*(180.0 / 3.141592653589793238463);
 
-	if (xdiff > 0)
-		angle += 2 * (180 - angle);
+	//if (xdiff > 0)
+	//	angle += 2 * (180 - angle);
 
-	this->sprite.setRotation(angle);
+	//this->sprite.setRotation(angle);
 
 	this->animHandler.changeAnim(anims[currentAnim]);
 	oldWalkState = walkState;

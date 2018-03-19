@@ -89,8 +89,9 @@ bool Enemy::update()
 	this->tilePos.y = std::ceil((pos.y) / (float)TILE_SIZE);
 	sf::Vector2f halfTSize = { TILE_SIZE / 2, TILE_SIZE / 2 };
 	sprite.setPosition(pos);
-	hpBar.setPosition(pos - halfTSize);
-	hpBarBack.setPosition(pos - halfTSize);
+	float hHeight = hpBar.getSize().y;
+	hpBar.setPosition(pos - halfTSize - sf::Vector2f{ 0,hHeight });
+	hpBarBack.setPosition(pos - halfTSize - sf::Vector2f{ 0,hHeight });
 	if (qDmg != 0)
 	{
 		this->hp -= qDmg;
@@ -114,8 +115,11 @@ void Enemy::draw()
 	if (dead)
 		return;
 	this->game->window.draw(this->sprite);
-	this->game->window.draw(this->hpBarBack);
-	this->game->window.draw(this->hpBar);;
+	if (hp < maxHp)
+	{
+		this->game->window.draw(this->hpBarBack);
+		this->game->window.draw(this->hpBar);;
+	}
 	for (auto point : wayPoints)
 	{
 		this->waySprite.setPosition({ (float)point.x * TILE_SIZE,(float)point.y * TILE_SIZE });

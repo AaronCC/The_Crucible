@@ -61,7 +61,10 @@ public:
 
 	std::string getTypeString()
 	{
-		return typeStrings[slotType];
+		std::string str = typeStrings[slotType];
+		if (twoHanded)
+			str = "2H " + str;
+		return str;
 	}
 	virtual std::string getName()
 	{
