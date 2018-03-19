@@ -80,3 +80,9 @@
 2 6 0 Worn Cloak; 5 -1 5 15 0
 ;Belt bases
 2 7 0 Heavy Belt; 5 -1 5 19 0
+;type hasstats stats dmgtype a1 a2 dur ilvl
+3 0 1 1 10 1 0
+3 1 1 19 5; 5 0 0 10 0
+;texname iconname description name animstart animend cd ct
+4 slash slash_icon slash; Blue Slash; 0 3 5 1
+4 slash2 slash_icon2 slash; Red Slash; 0 3 5 1

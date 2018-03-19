@@ -81,8 +81,8 @@ public:
 	}
 	std::vector<AbEffect> getEffectFromMAH() {
 		std::vector<AbEffect> effs;
-		for(auto dmg : damage)
-			effs.push_back(AbEffect(AbEffect::Effect({}, dmg, 1)));
+		for (auto dmg : damage)
+			effs.push_back(AbEffect(AbEffect::Effect({}, dmg, 1,AbEffect::EffType::INST)));
 		return effs;
 	}
 	std::vector<std::string> getDamageString()
@@ -159,7 +159,7 @@ public:
 	std::string getDesc() {
 		return ability->description;
 	}
-	
+
 	std::vector<std::pair<sf::Color, std::string>> getBuffString()
 	{
 		std::map<AbEffect::DamageType, std::string> damageStrings;
@@ -176,7 +176,7 @@ public:
 		damageColors[AbEffect::DamageType::POIS] = sf::Color({ 131, 211, 69 });
 
 		std::vector<std::pair<sf::Color, std::string>> buffStr;
-		if(ability->info.range == 1)
+		if (ability->info.range == 1)
 			buffStr.push_back({ sf::Color::White, "Melee" + ability->areadesc[(int)ability->info.area] });
 		else
 			buffStr.push_back({ sf::Color::White, "Ranged" + ability->areadesc[(int)ability->info.area] });
@@ -202,6 +202,18 @@ public:
 					buffStr.push_back({ damageColors[eff.damage.type], min + "-" + max + " " + type + " over " + std::to_string(eff.dur) + " ticks" });
 				else
 					buffStr.push_back({ damageColors[eff.damage.type], min + " " + type + " over " + std::to_string(eff.dur) + " ticks" });
+			}
+			Helper::Stats stats = eff.stats;
+			for (int i = 0; i < Helper::numbuffs; i++)
+			{
+				int v1 = stats.buffs[(Helper::Affix)i].v1;
+				if (v1 != -1)
+				{
+					if (v1 > 0)
+						buffStr.push_back({ sf::Color::White,"Buffs " + helper.buffnames[i] + " by " + std::to_string(v1) + " for " + std::to_string(eff.dur) + " ticks" });
+					else
+						buffStr.push_back({ sf::Color::White,"Debuffs " + helper.buffnames[i] + " by " + std::to_string(v1) + " for " + std::to_string(eff.dur) + " ticks" });
+				}
 			}
 		}
 		return buffStr;

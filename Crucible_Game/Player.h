@@ -48,6 +48,7 @@ public:
 
 	Helper::Stats stats;
 	Helper::Stats bStats;
+	Helper::Stats eStats;
 
 	float testTimer = 0;
 
@@ -94,6 +95,8 @@ public:
 	void updateTilePos();
 	void updateAbilities(float dt);
 	void updateAbilities();
+	std::vector<AbEffect::Effect> effs;
+	void applyEff(AbEffect::Effect eff);
 	void move(sf::Vector2f offset) {
 		position += offset;
 		position.x = std::round(position.x);
@@ -217,7 +220,7 @@ public:
 
 		setPos(position);
 
-		this->playerInfo = PlayerInfo(game,bStats);
+		this->playerInfo = PlayerInfo(game, bStats);
 		this->inventory = Inventory(this->game);
 
 		this->engaged = false;

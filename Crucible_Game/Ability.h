@@ -24,6 +24,13 @@ public:
 		POIS = 4,
 		NONE = 5
 	};
+
+	enum EffType {
+		INST,
+		DOT,
+		BUFF,
+		DEBUFF
+	};
 	struct Damage {
 		DamageType type;
 		int min, max;
@@ -51,12 +58,14 @@ public:
 	struct Effect {
 		Helper::Stats stats;
 		Damage damage;
+		EffType type;
 		int dur;
-		Effect(Helper::Stats stats, Damage damage, int dur)
+		Effect(Helper::Stats stats, Damage damage, int dur, EffType type)
 		{
 			this->stats = stats;
 			this->damage = damage;
 			this->dur = dur;
+			this->type = type;
 		}
 		Effect() {}
 	};
@@ -197,6 +206,15 @@ public:
 				else
 					str.push_back(std::to_string(damage.min * ef.dur) + "-" + std::to_string(damage.max * ef.dur) + " " + helper.damagenames[(int)damage.type] + " over " +
 						std::to_string(ef.dur) + " ticks");
+			}
+			Helper::Stats stats = e.getEffects().stats;
+			for (int i = 0; i < Helper::numbuffs; i ++)
+			{
+				int v1 = stats.buffs[(Helper::Affix)i].v1;
+				if (v1 != 0)
+				{
+					str.push_back(helper.buffnames[i] + " " + std::to_string(v1));
+				}
 			}
 		}
 		return str;

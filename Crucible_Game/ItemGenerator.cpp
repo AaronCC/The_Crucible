@@ -36,6 +36,7 @@ Scroll* ItemGenerator::makeScroll(int aLvl, float mf)
 	std::random_device rd;
 	std::mt19937 gen(rd());
 	Item::Rarity rarity = getRarity(mf);
+	bool justbuff = true;
 	if (rarity == Item::Rarity::NORM)
 		rarity = Item::Rarity::MAGIC;
 	std::uniform_int_distribution<> dist(0, (int)rarity - 1);
@@ -48,17 +49,17 @@ Scroll* ItemGenerator::makeScroll(int aLvl, float mf)
 		abBase.anim, { TILE_SIZE,TILE_SIZE }, abBase.cd, abBase.tc,
 		abBase.name, abBase.description);
 	std::vector<AbEffect> effs;
-	std::map<EfType, std::vector<AbEffect>> pools;
-	std::vector<EfType> choices;
+	std::map<EffType, std::vector<AbEffect>> pools;
+	std::vector<EffType> choices;
 	for (int i = 0; i < numEfType; i++)
 	{
-		for (auto eff : abAffixes[(EfType)i])
+		for (auto eff : abAffixes[(EffType)i])
 		{
 			if (eff.second <= aLvl)
-				pools[(EfType)i].push_back(eff.first);
+				pools[(EffType)i].push_back(eff.first);
 		}
-		if (pools[(EfType)i].size() > 0)
-			choices.push_back((EfType)i);
+		if (pools[(EffType)i].size() > 0)
+			choices.push_back((EffType)i);
 	}
 	if (choices.size() > 0)
 		for (int i = 0; i < numaff; i++)
@@ -66,25 +67,37 @@ Scroll* ItemGenerator::makeScroll(int aLvl, float mf)
 			dist.reset();
 			dist = std::uniform_int_distribution<>(0, choices.size() - 1);
 			int choice = dist(gen);
-			EfType efType = choices[choice];
+			EffType efType = choices[choice];
 			int poolsize = pools[efType].size();
 			dist.reset();
 			dist = std::uniform_int_distribution<>(0, poolsize - 1);
 			int poolat = dist(gen);
 			AbEffect eff = pools[efType][poolat];
 			effs.push_back(eff);
+			if (!efType == EffType::BUFF)
+				justbuff = false;
 			pools[efType].erase(pools[efType].begin() + poolat);
 			if (pools[efType].size() == 0)
 				choices.erase(choices.begin() + choice);
 			if (choices.size() <= 0)
 				break;
 		}
-	dist.reset();
-	dist = std::uniform_int_distribution<>(0, Ability::numarea - 1);
-	Ability::Area area = (Ability::Area)dist(gen);
-	dist.reset();
-	dist = std::uniform_int_distribution<>(0, 3);
-	int range = dist(gen) + 1;
+	Ability::Area area;
+	int range;
+	if (!justbuff)
+	{
+		dist.reset();
+		dist = std::uniform_int_distribution<>(0, Ability::numarea - 1);
+		area = (Ability::Area)dist(gen);
+		dist.reset();
+		dist = std::uniform_int_distribution<>(0, 3);
+		range = dist(gen) + 1;
+	}
+	else
+	{
+		area = Ability::Area::TARGET;
+		range = 0;
+	}
 	Ability::AbInfo info{ area,range };
 	ab->setInfo(info);
 	for (auto eff : effs)

@@ -46,6 +46,7 @@ void Player::updatePlayerStats()
 		Helper::Stats stats = itm->getStatBuffs();
 		bStats = bStats + stats;
 	}
+	bStats = bStats + eStats;
 	playerInfo.updateInfo(bStats);
 }
 void Player::handleInput()
@@ -358,6 +359,13 @@ void Player::updateAbilities()
 	if (itm != nullptr)
 		for (auto eff : itm->getEffectFromMAH())
 			autoAttack.addEffect(eff);
+}
+void Player::applyEff(AbEffect::Effect eff)
+{
+	eff.dur -= 1;
+	this->eStats = this->eStats + eff.stats;
+	if (eff.dur > 0)
+		effs.push_back(eff);
 }
 void Player::updateAbilityBar()
 {

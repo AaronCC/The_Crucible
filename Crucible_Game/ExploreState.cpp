@@ -63,52 +63,55 @@ void ExploreState::update(const float dt)
 		/*rTimeTotal += dt;
 		if (rTimeTotal >= rTime)
 		{*/
-			std::queue<std::string> msgs;
-			if (player.queuedAction == Player::Action::ABILITY)
+		std::queue<std::string> msgs;
+		if (player.queuedAction == Player::Action::ABILITY)
+		{
+			std::vector<AbEffect::Effect> abEffs = player.queuedAbility->getBuffedEffects(&player.bStats);
+
+			for (auto eff : abEffs)
 			{
-				std::vector<AbEffect::Effect> abEffs = player.queuedAbility->getBuffedEffects(&player.bStats);
-				for (auto point : player.getQueuedPoints())
-				{
-					Enemy* enemy = map->getEnemyAt(point.x, point.y);
-					if (enemy != nullptr)
+				if (eff.type == AbEffect::EffType::BUFF)
+					player.applyEff(eff);
+				else
+					for (auto point : player.getQueuedPoints())
 					{
-						for (auto eff : abEffs)
-						{
+						Enemy* enemy = map->getEnemyAt(point.x, point.y);
+						if (enemy != nullptr)
 							enemy->applyEff(eff);
-						}
 					}
-					if (map->getTile(point.x, point.y)->passable)
-					{
-						sf::Vector2i los = map->hasLineOfSight(player.tilePos, point);
-						player.resolveAbilityOnTile(los);
-					}
+			}
+			for (auto point : player.getQueuedPoints())
+				if (map->getTile(point.x, point.y)->passable)
+				{
+					sf::Vector2i los = map->hasLineOfSight(player.tilePos, point);
+					player.resolveAbilityOnTile(los);
 				}
+			player.resolveAbilityCDs(resolving.second);
+			map->updateEntityAI(player.tickCount, player.tilePos, &pf);
+			map->resolveEntityAI(resolving.second);
+			resolving = { false,0 };
+			shouldResolve = true;
+			player.clearQueuedPoints();
+			msgs.push(player.activateQueuedAbility());
+		}
+		else if (player.queuedAction == Player::Action::MOVE)
+		{
+			if (player.moveNext())
+			{
+				resolveFoW();
+				msgs.push("Moved");
+			}
+			else
+			{
+				map->getTile(player.tilePos.x, player.tilePos.y)->occupied = true;
+				this->player.clearWayPoints();
 				player.resolveAbilityCDs(resolving.second);
-				map->updateEntityAI(player.tickCount, player.tilePos, &pf);
+				map->updateEntityAI(resolving.second, player.tilePos, &pf);
 				map->resolveEntityAI(resolving.second);
 				resolving = { false,0 };
 				shouldResolve = true;
-				player.clearQueuedPoints();
-				msgs.push(player.activateQueuedAbility());
+				player.quickMove = false;
 			}
-			else if (player.queuedAction == Player::Action::MOVE)
-			{
-				if (player.moveNext())
-				{
-					resolveFoW();
-					msgs.push("Moved");
-				}
-				else
-				{
-					map->getTile(player.tilePos.x, player.tilePos.y)->occupied = true;
-					this->player.clearWayPoints();
-					player.resolveAbilityCDs(resolving.second);
-					map->updateEntityAI(resolving.second, player.tilePos, &pf);
-					map->resolveEntityAI(resolving.second);
-					resolving = { false,0 };
-					shouldResolve = true;
-					player.quickMove = false;
-				}
 			//}
 			//rTimeTotal = 0;
 			player.queueHudMsg(msgs);
@@ -187,11 +190,11 @@ void ExploreState::handleInput()
 			else
 			{
 				if (playerOccToClear != sf::Vector2i{ -1, -1 })
-				if (playerOccToClear != sf::Vector2i{ -1, -1 })
-				{
-					map->getTile(playerOccToClear.x, playerOccToClear.y)->occupied = false;
-					playerOccToClear = { -1, -1 };
-				}
+					if (playerOccToClear != sf::Vector2i{ -1, -1 })
+					{
+						map->getTile(playerOccToClear.x, playerOccToClear.y)->occupied = false;
+						playerOccToClear = { -1, -1 };
+					}
 				this->player.clearWayPoints();
 				this->player.addWayPoint(point);
 				this->player.queuedAction = Player::Action::MOVE;
@@ -359,6 +362,25 @@ void ExploreState::resolveGameState(float ticks)
 	resolving = { true, ticks };
 	if (player.queuedAction == Player::Action::MOVE)
 		map->getTile(player.tilePos.x, player.tilePos.y)->occupied = false;
+	std::vector<int> erase;
+	for (int i = 0; i < player.effs.size(); i++)
+	{
+		AbEffect::Effect& eff = player.effs[i];
+		eff.dur -= 1;
+		//dealDamage(eff.damage.getDamage());
+		if (eff.dur < 1)
+		{
+			player.eStats = player.eStats - eff.stats;
+			erase.push_back(i);
+		}
+	}
+	int i = 0;
+	for (auto e : erase)
+	{
+		e -= i;
+		player.effs.erase(player.effs.begin() + e);
+		i++;
+	}
 	/*
 	std::queue<std::string> msgs;
 	if (player.queuedAction == Player::Action::ABILITY)

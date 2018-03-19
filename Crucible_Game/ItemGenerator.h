@@ -13,18 +13,13 @@
 #define BaseItem Item::BaseItem
 #define ST Item::SlotType
 #define DMG AbEffect::DamageType
+#define EffType AbEffect::EffType
 
 class ItemGenerator
 {
 public:
 	Game * game;
 	static const int numEfType = 4;
-	enum EfType {
-		INST,
-		DOT,
-		BUFF,
-		DEBUFF
-	};
 	struct AbBase {
 		std::string texName;
 		std::string iconName;
@@ -39,7 +34,7 @@ public:
 	std::vector<AbBase> abBases;
 
 	std::map<ST, std::vector<std::pair<int, BaseItem>>> bases;
-	std::map<EfType, std::vector<std::pair<AbEffect::Effect, int>>> abAffixes;
+	std::map<EffType, std::vector<std::pair<AbEffect::Effect, int>>> abAffixes;
 
 	std::map<AF, std::vector<std::pair<AFV, int>>> suffixes;
 	std::map<AF, std::vector<std::pair<AFV, int>>> prefixes;
@@ -50,7 +45,7 @@ public:
 	void addPrefix(AF af, AFV afv, int ilvl) {
 		prefixes[af].push_back({ afv,ilvl });
 	}
-	void addAbAffix(EfType type, AbEffect::Effect ef, int ilvl) {
+	void addAbAffix(EffType type, AbEffect::Effect ef, int ilvl) {
 		abAffixes[type].push_back({ ef ,ilvl });
 	}
 
@@ -131,13 +126,13 @@ public:
 			name += data[i] + " ";
 			i++;
 		}
-		name += data[i].substr(0,data[i].size()-1);
-		ss = std::stringstream(data[i+1]);
+		name += data[i].substr(0, data[i].size() - 1);
+		ss = std::stringstream(data[i + 1]);
 		ss >> a1;
-		ss = std::stringstream(data[i+2]);
-		ss >> a2; 
+		ss = std::stringstream(data[i + 2]);
+		ss >> a2;
 		ss = std::stringstream(data[i + 3]);
-		ss >> dtypeInt;		
+		ss >> dtypeInt;
 		ss = std::stringstream(data[i + 4]);
 		ss >> afInt;
 		ss = std::stringstream(data[i + 5]);
@@ -152,14 +147,90 @@ public:
 		bases[type].push_back({ 0,*bi });
 		return true;
 	}
-	bool parseAbBase(std::string data, std::string name)
+	bool parseAbBase(std::vector<std::string> data)
 	{
-
+		int i = 0, cd, ct;
+		unsigned int aStart, aEnd;
+		std::string texname = data[0];
+		std::string iconname = data[1];
+		std::string desc = "";
+		while (data[i][data[i].size() - 1] != ';')
+		{
+			desc += data[i] + " ";
+			i++;
+		}
+		desc += data[i].substr(0,data[i].size() - 1); 
+		i++;
+		std::string name;
+		while (data[i][data[i].size() - 1] != ';')
+		{
+			name += data[i] + " ";
+			i++;
+		}
+		name += data[i].substr(0,data[i].size() - 1);
+		std::stringstream ss(data[i + 1]);
+		ss >> aStart;	
+		ss = std::stringstream(data[i + 2]);
+		ss >> aEnd;
+		ss = std::stringstream(data[i + 3]);
+		ss >> cd;
+		ss = std::stringstream(data[i + 4]);
+		ss >> ct;
+		abBases.push_back(AbBase(texname, iconname, desc, name,
+			{ aStart,aEnd,0.1f }, cd, ct));
 		return false;
 	}
-	bool parseAbAff(std::string data, std::string name)
+	bool parseAbAff(std::vector<std::string> data)
 	{
-
+		bool hasStats;
+		bool buff;
+		int dmgtype, a1, a2, dur, ilvl, b, i = 2;
+		std::stringstream ss(data[0]);
+		ss >> b;
+		hasStats = (bool)b;
+		Helper::Stats stats{};
+		if (hasStats)
+		{
+			int af, afv;
+			ss = std::stringstream (data[1]);
+			ss >> b;
+			buff = (bool)b;
+			while (data[i + 1][data[i + 1].size() - 1] != ';')
+			{
+				ss = std::stringstream(data[i]);
+				ss >> af;
+				i++;
+				ss = std::stringstream(data[i]);
+				ss >> afv;
+				stats.buffs[(AF)af] = AFV{ afv,-1,"",true,sf::Color::White,false };
+			}
+			ss = std::stringstream(data[i]);
+			ss >> af;
+			i++;
+			ss = std::stringstream(data[i]);
+			ss >> afv;
+			stats.buffs[(AF)af] = AFV{ afv,-1,"",true,sf::Color::White,false };
+		}
+		else
+			i = 0;
+		ss = std::stringstream(data[i + 1]);
+		ss >> dmgtype;
+		ss = std::stringstream(data[i + 2]);
+		ss >> a1;
+		ss = std::stringstream(data[i + 3]);
+		ss >> a2;
+		ss = std::stringstream(data[i + 4]);
+		ss >> dur;
+		ss = std::stringstream(data[i + 5]);
+		ss >> ilvl;
+		if (!hasStats && dur == 1)
+			abAffixes[EffType::INST].push_back({ AbEffect::Effect(Helper::Stats(), AbEffect::Damage((DMG)dmgtype, a1, a2), dur, EffType::INST) ,ilvl });
+		else if(!hasStats)
+			abAffixes[EffType::DOT].push_back({ AbEffect::Effect(Helper::Stats(), AbEffect::Damage((DMG)dmgtype, a1, a2), dur, EffType::DOT) ,ilvl });
+		else if(hasStats && buff)
+			abAffixes[EffType::BUFF].push_back({ AbEffect::Effect(stats, AbEffect::Damage((DMG)dmgtype, a1, a2), dur,EffType::BUFF) ,ilvl });
+		else if (hasStats && !buff)
+			abAffixes[EffType::DEBUFF].push_back({ AbEffect::Effect(stats, AbEffect::Damage((DMG)dmgtype, a1, a2), dur, EffType::DEBUFF) ,ilvl });
 		return false;
 	}
 	void loadAffixes() {
@@ -216,11 +287,11 @@ public:
 					std::cout << "\nadded base";
 					break;
 				case Parsing::AB_AF:
-					parseAbAff(results[1], results[2]);
+					parseAbAff(results);
 					std::cout << "\nadded ab affix";
 					break;
 				case Parsing::AB_BAS:
-					parseAbBase(results[1], results[2]);
+					parseAbBase(results);
 					std::cout << "\nadded ab base";
 					break;
 				default:
@@ -256,11 +327,11 @@ public:
 		/*itm->addAff(AF::PHYS_FLT_DMG, { 1, 5, "Base", true, helper.damageColors[DMG::PHYS],true });
 		bases[ST::MAH].push_back({ 0,*itm });*/
 
-		abBases.push_back(AbBase("slash", "slash_icon", "Melee slash in an arc", "Slash",
-			{ 0,3,0.1f }, 10, 1));
+		//abBases.push_back(AbBase("slash", "slash_icon", "Melee slash in an arc", "Slash",
+		//	{ 0,3,0.1f }, 10, 1));
 
-		abAffixes[INST].push_back({ AbEffect::Effect(Helper::Stats(), AbEffect::Damage(AbEffect::DamageType::PHYS, 1, 10), 1) ,0 });
-		abAffixes[DOT].push_back({ AbEffect::Effect(Helper::Stats(), AbEffect::Damage(AbEffect::DamageType::POIS, 1, 10), 5), 0 });
+		//abAffixes[INST].push_back({ AbEffect::Effect(Helper::Stats(), AbEffect::Damage(AbEffect::DamageType::PHYS, 1, 10), 1) ,0 });
+		//abAffixes[DOT].push_back({ AbEffect::Effect(Helper::Stats(), AbEffect::Damage(AbEffect::DamageType::POIS, 1, 10), 5), 0 });
 	}
 
 	Scroll * makeScroll(int aLvl, float mf);
