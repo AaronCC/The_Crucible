@@ -602,4 +602,5 @@ void PlayerInfo::draw()
 			this->game->window.draw(this->abilities[i][j]);
 		}
 	}
+	this->game->window.draw(title);
 }

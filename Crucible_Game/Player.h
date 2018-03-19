@@ -173,7 +173,7 @@ public:
 		this->mIndex = mIndex;
 		this->view = view;
 		this->game = game;
-		this->lightRadius = 4;
+		this->lightRadius = 6;
 		this->resolveActions = false;
 		this->tickCount = 0;
 		this->friction = 15.f;

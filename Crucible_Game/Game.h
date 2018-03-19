@@ -17,8 +17,8 @@ class Game
 {
 public: 
 
-	const float aspectRatio = 800 / (float)600;
-	const sf::Vector2u windowSize{ 800,600 };
+	const float aspectRatio = 1000 / (float)800;
+	const sf::Vector2u windowSize{ 1000, 800 };
 	std::stack<GameState*> states;
 
 	void pushState(GameState* state);

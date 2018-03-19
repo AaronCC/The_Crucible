@@ -54,14 +54,14 @@ void Map::draw(sf::RenderWindow & window, float dt)
 		}
 	}
 
+	for (auto l : loot)
+	{
+		l->draw(this->game->window);
+	}
 	for (auto enemy : enemies)
 	{
 		if (!enemy->dead)
 			enemy->draw();
-	}
-	for (auto l : loot)
-	{
-		l->draw(this->game->window);
 	}
 	for (auto t : actionText)
 		window.draw(t);
@@ -171,6 +171,21 @@ void Map::updateHoverText()
 			break;
 		}
 		hoverText[0].setOutlineThickness(1);
+
+		if (sf::Keyboard::isKeyPressed(sf::Keyboard::LAlt))
+		{
+			std::vector<std::pair<sf::Color, std::string>> info = loot->item->getBuffString();
+			int count = 0;
+			for (auto i : info)
+			{
+				sf::Text text{ i.second, game->fonts["main_font"], tSize };
+				text.setFillColor(i.first);
+				text.setOutlineThickness(1);
+				text.setPosition((mouseIndex.x * tileSize.x) + (TILE_SIZE / 2), (mouseIndex.y * tileSize.y) - (TILE_SIZE / 2) + (count*tSize));
+				hoverText.push_back(text);
+				count++;
+			}
+		}
 	}
 	else
 		hoverText.clear();

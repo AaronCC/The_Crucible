@@ -8,6 +8,7 @@
 #include "Helper.h"
 #include "PathFinder.h"
 
+
 class ExploreState : public GameState
 {
 public:
@@ -23,6 +24,7 @@ public:
 	float rTimeTotal = 0;
 	float rTime;
 
+	std::vector<sf::Vector2i> lightPoints;
 	std::vector<Tile*> fowCache;
 	sf::Vector2i playerOccToClear;
 	std::vector<Ability*> activeAbilities;
@@ -30,6 +32,7 @@ public:
 	virtual void draw(const float dt);
 	virtual void update(const float dt);
 	virtual void handleInput();
+	void getLightPoints(sf::Vector2i start, int radius);
 	void resolveFoW();
 	void resolveGameState(float ticks);
 

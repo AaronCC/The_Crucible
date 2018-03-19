@@ -29,7 +29,7 @@ class InvSlot {
 #define slotBorder 2
 
 public:
-	sf::Vector2f start{ 25, 10 };
+	sf::Vector2f start{ 125, 110 };
 	sf::RectangleShape infoBack;
 	sf::RectangleShape slotBack;
 	sf::Text slotTypeText;
@@ -254,11 +254,12 @@ public:
 	Game * game;
 	sf::Font font;
 	std::vector<sf::Text> info;
+	sf::Text title;
 	std::vector<std::vector<sf::Text>> abilities;
 	Helper helper;
 
-	sf::Vector2f start = { 10, 10 };
-	sf::Vector2f abStart = { 150, 10 };
+	sf::Vector2f start = { 105, 105 };
+	sf::Vector2f abStart = { 255, 115 };
 
 	PlayerInfo(Game* game, Helper::Stats stats)
 	{
@@ -311,6 +312,8 @@ public:
 			j++;
 			pos.y += tSize;
 		}
+		this->title = sf::Text("Character Sheet", game->fonts["main_font"], tSize);
+		this->title.setPosition(start.x, start.y - 30);
 	}
 
 	PlayerInfo() {}
@@ -334,6 +337,7 @@ public:
 	sf::Sprite itemInfoBack;
 	sf::RectangleShape slider;
 	ItemGenerator itemGenerator;
+	sf::Vector2f start{ 100, 100 };
 	bool hoveringEq = false;
 	enum Hovering {
 		ITM,
@@ -437,7 +441,7 @@ public:
 		itemTextBack.setOrigin(0, 0);
 		itemInfoBack.setOrigin(0, 0);
 		invTitle = sf::Text("Inventory", game->fonts["main_font"], tSize);
-		invTitle.setPosition({ invWidth - (charWidth * 10), invHeight - 30 });
+		invTitle.setPosition({ start.x,  start.y - 30 });
 		invTitle.setFillColor(sf::Color::White);
 		hovType = Hovering::NONE;
 		/* TEMP */
@@ -533,11 +537,11 @@ public:
 		slider.setSize({ 10, (invHeight + 10) / ((float)itemSlots.size() - maxScHeight + 2) });
 		slider.setFillColor(sf::Color::White);
 		slider.setOrigin({ 0,0 });
-		slider.setPosition({ 10,10 });
+		slider.setPosition(sf::Vector2f{ 10,10 }+start);
 		deleteButton.first.setSize({ invSlotW / 2,invSlotH });
 		deleteButton.first.setFillColor(sf::Color::Black);
 		deleteButton.first.setOrigin({ 0,0 });
-		deleteButton.first.setPosition({ 25 + xOffset,10 + invHeight - (1.5*spacing) });
+		deleteButton.first.setPosition(sf::Vector2f{ 25 + xOffset,10 + invHeight - (1.5*spacing) }+start);
 		deleteButton.first.setOutlineThickness(2.f);
 		deleteButton.first.setOutlineColor(sf::Color::Black);
 		deleteButton.second = sf::Text("Destroy", game->fonts["main_font"], tSize);
@@ -731,7 +735,7 @@ public:
 		else if (slotScIndex >= itemSlots.size() - maxScHeight) {
 			slotScIndex = itemSlots.size() - maxScHeight;
 		}
-		slider.setPosition({ 10,10 + (slotScIndex*(float)slider.getSize().y) });
+		slider.setPosition(sf::Vector2f{ 10,10 + (slotScIndex*(float)slider.getSize().y) }+start);
 	}
 
 	void draw();
@@ -766,7 +770,7 @@ public:
 	};
 	ShowState showState;
 
-	sf::Sprite msgBack;
+	sf::RectangleShape msgBack;
 
 	struct Cooldown {
 		float totalTime;
@@ -782,7 +786,7 @@ public:
 	std::map<sf::Keyboard::Key, std::pair<sf::Sprite, bool>> aSlotSprites;
 	std::pair<sf::Sprite, bool> lmbSprite;
 	std::pair<sf::Sprite, bool> rmbSprite;
-	sf::Vector2f msgStart = sf::Vector2f(6, 478);
+	sf::Vector2f msgStart;
 
 	sf::Sprite cdSprite;
 
@@ -804,9 +808,6 @@ public:
 	Hud(Game * game, std::vector<std::string> eData)
 	{
 		this->showState = ShowState::SHOW_NONE;
-		msgTitle = sf::Text("Game Messages", game->fonts["main_font"], tSize);
-		msgTitle.setPosition({ invWidth - (charWidth * 13), 10 });
-		msgTitle.setFillColor(sf::Color::White);
 		//font.loadFromFile("C:/Windows/Fonts/Arial.ttf");
 		for (int i = 0; i < A_SLOT_COUNT; i++)
 		{
@@ -853,11 +854,18 @@ public:
 
 		cdSprite.setTexture(this->game->texmgr.getRef("cooldown_icon"));
 		cdSprite.setOrigin(0, slotW);
-		msgBack.setTexture(this->game->texmgr.getRef("text_back"));
+		msgBack.setSize({800.f,500.f});
+		sf::Vector2u diff = this->game->windowSize - sf::Vector2u{800, 600};
 		msgBack.setOrigin(0, 0);
-		msgBack.setPosition(0, 0);
-
+		msgBack.setPosition((float)(diff.x/2), (float)(diff.y/2));
+		msgBack.setFillColor(sf::Color::Black);
+		msgBack.setOutlineThickness(4);
+		msgBack.setOutlineColor(sf::Color::White);
 		keys[sf::Keyboard::Tilde] = false;
+		msgStart = sf::Vector2f(this->msgBack.getPosition() + sf::Vector2f{ 6,480 });
+		msgTitle = sf::Text("Game Messages", game->fonts["main_font"], tSize);
+		msgTitle.setPosition({ msgBack.getPosition().x, msgBack.getPosition().y - 30 });
+		msgTitle.setFillColor(sf::Color::White);
 	}
 
 	void draw(float dt);

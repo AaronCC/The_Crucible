@@ -155,6 +155,10 @@ void ExploreState::handleInput()
 	{
 		map->resolveAction(&player);
 	}
+	if (sf::Keyboard::isKeyPressed(sf::Keyboard::LAlt) && map->hoverText.size() > 0)
+	{
+		map->updateHoverText();
+	}
 
 	if (sf::Mouse::isButtonPressed(sf::Mouse::Left) && old_mLeftState == false)
 	{
@@ -332,15 +336,40 @@ void ExploreState::handleInput()
 	if (act)
 		resolveGameState(player.tickCount);
 }
+void ExploreState::getLightPoints(sf::Vector2i start, int radius)
+{
+	Tile* tile = map->getTile(start.x, start.y);
+	if (!tile->passable)
+	{
+		tile->reveal();
+		fowCache.push_back(tile);
+		lightPoints.push_back(start);
+		return;
+	}
+	if (radius == 0)
+		return;
+	if (tile->fow)
+	{
+		tile->reveal();
+		fowCache.push_back(tile);
+		lightPoints.push_back(start);
+	}
+	getLightPoints({ start.x + 1, start.y }, radius -1);
+	getLightPoints({ start.x - 1, start.y }, radius - 1);
+	getLightPoints({ start.x, start.y + 1 }, radius - 1);
+	getLightPoints({ start.x, start.y - 1 }, radius - 1);
+	return;
+}
 void ExploreState::resolveFoW()
 {
-	std::vector<sf::Vector2i> points;
+	lightPoints.clear();
 	for (auto tile : fowCache)
 	{
 		tile->fow = true;
 	}
 	fowCache.clear();
-	for (int y = -player.lightRadius; y <= player.lightRadius; y++)
+	getLightPoints(player.tilePos,player.lightRadius);
+	/*for (int y = -player.lightRadius; y <= player.lightRadius; y++)
 	{
 		for (int x = -player.lightRadius; x <= player.lightRadius; x++)
 		{
@@ -352,8 +381,8 @@ void ExploreState::resolveFoW()
 			points.push_back({ pos.x,pos.y });
 			fowCache.push_back(tile);
 		}
-	}
-	if (map->activateObjsAtTile(points))
+	}*/
+	if (map->activateObjsAtTile(lightPoints))
 	{
 		if (!player.engaged)
 			resolving.second = 0;
