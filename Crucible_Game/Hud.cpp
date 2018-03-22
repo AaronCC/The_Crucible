@@ -51,6 +51,45 @@ void Hud::queueMsg(std::string msg)
 	gameMsgs.push_back(text);
 }
 
+void Hud::equipCon() {
+	Consumable temp = consumables[0];
+	consumables[0] = consumables[conAt];
+	consumables[conAt] = temp;
+	showCons();
+}
+
+bool Hud::hoverCon(sf::Vector2f mPos)
+{
+	sf::Vector2f size = { slotW, slotW };
+	sf::Vector2f pos = conPos;
+	if (conHover)
+	{
+		int diff = (consumables.size()-1) * slotW;
+		size.y += diff;
+		pos.y -= diff;
+	}
+	if (
+		mPos.x >= pos.x &&
+		mPos.y >= pos.y &&
+		mPos.x <= pos.x + size.x &&
+		mPos.y <= pos.y + size.y
+		)
+	{
+		conAt = std::floor(((conPos.y +slotW) - mPos.y) / slotW);
+		return true;
+	}
+	return false;
+}
+
+void Hud::showCons()
+{
+	for (int i = 0; i < consumables.size(); i++)
+	{
+		consumables[i].setSpritePos(conPos - sf::Vector2f(0, slotW*i));
+	}
+	conHover = true;
+}
+
 void Hud::draw(float dt)
 {
 	for (auto element : elements)
@@ -85,6 +124,18 @@ void Hud::draw(float dt)
 			this->game->window.draw(cdSprite);
 		}
 	}
+	this->game->window.draw(conText);
+	if (consumables.size() > 0)
+	{
+		consumables[0].draw(this->game->window);
+		if (conHover)
+			for (int i = 1; i < consumables.size(); i++)
+			{
+				consumables[i].draw(this->game->window);
+			}
+	}
+	else
+		this->game->window.draw(conBack);
 	sf::Vector2f offset = { 0,0 };
 	if (showState != ShowState::SHOW_NONE)
 	{
@@ -108,8 +159,25 @@ void Hud::updateCD(unsigned int slot, float ticks)
 		cooldowns[slot].timer -= ticks;
 	}
 }
+void Hud::checkHover(sf::View view)
+{
+	sf::Vector2f mousePos = this->game->window.mapPixelToCoords(sf::Mouse::getPosition(this->game->window), view);
+
+	if (showState == Hud::ShowState::SHOW_NONE)
+	{
+		if (oldMousePos != mousePos)
+		{
+			if (hoverCon(mousePos))
+				showCons();
+			else
+				conHover = false;
+		}
+	}
+	oldMousePos = mousePos;
+}
 void Hud::update(float dt)
 {
+	
 	for (int cd = 0; cd < A_SLOT_COUNT; cd++)
 	{
 		if (cooldowns[cd].active)
@@ -142,6 +210,19 @@ void Hud::updateHealth(float percent)
 	elements[H_POOL].setTextureRect({ 0, newH,hRect.width,(int)(hRect.height * percent) });
 	sf::Vector2f pos = elements[H_GLOBE].getPosition();
 	elements[H_POOL].setPosition(pos.x, pos.y + newH);
+}
+
+bool Hud::useConsumable() {
+	if (consumables.size() > 0)
+	{
+		if (consumables[0].use())
+		{
+			consumables.erase(consumables.begin());
+			showCons();
+			return true;
+		}
+	}
+	return false;
 }
 
 void Hud::handleInput()
@@ -465,7 +546,7 @@ void Inventory::update(sf::Vector2f mousePos)
 				offset = (((eqItems[hovering].first.maxInfoChar + 1) - textL) / 2.f)*(charWidth);
 				eqItems[hovering].first.baseInfoText[i].setPosition(mousePos.x + offset, mousePos.y + ((i + nSize)*ySpacing));
 			}
-			eqItems[hovering].first.seperatorText.setPosition(mousePos.x + (infoWidth/2) - (charWidth*2), mousePos.y + ((baseSize + nSize)*ySpacing));
+			eqItems[hovering].first.seperatorText.setPosition(mousePos.x + (infoWidth / 2) - (charWidth * 2), mousePos.y + ((baseSize + nSize)*ySpacing));
 			nSize += eqItems[hovering].first.baseInfoText.size() + 2;
 			for (int i = 0; i < eqItems[hovering].first.buffInfoText.size(); i++)
 			{
@@ -491,7 +572,7 @@ void Inventory::update(sf::Vector2f mousePos)
 				offset = (((itemSlots[hovering].maxInfoChar + 1) - textL) / 2.f)*(charWidth);
 				itemSlots[hovering].nameInfoText[i].setPosition(mousePos.x + offset, mousePos.y + (i*ySpacing));
 			}
-			
+
 			textL = itemSlots[hovering].slotTypeText.getString().getSize();
 			offset = (((itemSlots[hovering].maxInfoChar + 1) - textL) / 2.f)*(charWidth);
 			itemSlots[hovering].slotTypeText.setPosition(mousePos.x + offset, mousePos.y + ((nSize - 2)*ySpacing));
@@ -531,13 +612,13 @@ void Inventory::update(sf::Vector2f mousePos)
 			textL = eqScrolls[hovering].first.slotTypeText.getString().getSize();
 			offset = (((eqScrolls[hovering].first.maxInfoChar + 1) - textL) / 2.f)*(charWidth);
 			eqScrolls[hovering].first.slotTypeText.setPosition(mousePos.x + offset, mousePos.y + ((nSize - 2)*ySpacing));
-		/*	for (int i = 0; i < eqScrolls[hovering].first.baseInfoText.size(); i++)
-			{
-				textL = eqScrolls[hovering].first.baseInfoText[i].getString().getSize();
-				offset = (((eqScrolls[hovering].first.maxInfoChar + 1) - textL) / 2.f)*(charWidth);
-				eqScrolls[hovering].first.baseInfoText[i].setPosition(mousePos.x + offset, mousePos.y + ((i + nSize)*ySpacing));
-			}
-			nSize += eqScrolls[hovering].first.baseInfoText.size() + 1;*/
+			/*	for (int i = 0; i < eqScrolls[hovering].first.baseInfoText.size(); i++)
+				{
+					textL = eqScrolls[hovering].first.baseInfoText[i].getString().getSize();
+					offset = (((eqScrolls[hovering].first.maxInfoChar + 1) - textL) / 2.f)*(charWidth);
+					eqScrolls[hovering].first.baseInfoText[i].setPosition(mousePos.x + offset, mousePos.y + ((i + nSize)*ySpacing));
+				}
+				nSize += eqScrolls[hovering].first.baseInfoText.size() + 1;*/
 			for (int i = 0; i < eqScrolls[hovering].first.buffInfoText.size(); i++)
 			{
 				textL = eqScrolls[hovering].first.buffInfoText[i].getString().getSize();
@@ -564,14 +645,14 @@ void Inventory::update(sf::Vector2f mousePos)
 			}
 			textL = scrollSlots[hovering].slotTypeText.getString().getSize();
 			offset = (((scrollSlots[hovering].maxInfoChar + 1) - textL) / 2.f)*(charWidth);
-			scrollSlots[hovering].slotTypeText.setPosition(mousePos.x + offset, mousePos.y + ((nSize - 2)*ySpacing)); 
-		/*	for (int i = 0; i < scrollSlots[hovering].baseInfoText.size(); i++)
-			{
-				textL = scrollSlots[hovering].baseInfoText[i].getString().getSize();
-				offset = (((scrollSlots[hovering].maxInfoChar + 1) - textL) / 2.f)*(charWidth);
-				scrollSlots[hovering].baseInfoText[i].setPosition(mousePos.x + offset, mousePos.y + ((i + nSize)*ySpacing));
-			}
-			nSize += scrollSlots[hovering].baseInfoText.size() + 1;*/
+			scrollSlots[hovering].slotTypeText.setPosition(mousePos.x + offset, mousePos.y + ((nSize - 2)*ySpacing));
+			/*	for (int i = 0; i < scrollSlots[hovering].baseInfoText.size(); i++)
+				{
+					textL = scrollSlots[hovering].baseInfoText[i].getString().getSize();
+					offset = (((scrollSlots[hovering].maxInfoChar + 1) - textL) / 2.f)*(charWidth);
+					scrollSlots[hovering].baseInfoText[i].setPosition(mousePos.x + offset, mousePos.y + ((i + nSize)*ySpacing));
+				}
+				nSize += scrollSlots[hovering].baseInfoText.size() + 1;*/
 			for (int i = 0; i < scrollSlots[hovering].buffInfoText.size(); i++)
 			{
 				textL = scrollSlots[hovering].buffInfoText[i].getString().getSize();

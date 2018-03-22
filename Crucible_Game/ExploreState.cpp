@@ -131,7 +131,6 @@ void ExploreState::handleInput()
 	sf::Event event;
 	std::queue<std::string> msgs;
 	bool act = false;
-
 	while (this->game->window.pollEvent(event))
 	{
 		player.handleEvent(event);
@@ -162,6 +161,10 @@ void ExploreState::handleInput()
 
 	if (sf::Mouse::isButtonPressed(sf::Mouse::Left) && old_mLeftState == false)
 	{
+		if (player.hud.conHover)
+		{
+			player.hud.equipCon();
+		}
 		if (player.hud.showState == Hud::ShowState::SHOW_INV && (player.inventory.showInfo || player.inventory.delHover))
 		{
 			player.inventory.select();
@@ -331,6 +334,9 @@ void ExploreState::handleInput()
 		player.resolveLineOfSight(map->hasLineOfSight(player.tilePos, map->mouseIndex));
 		player.checkLineOfSight = false;
 	}
+
+	oldMousePos = mousePos;
+
 	sf::Vector2f center = view.getCenter();
 	player.queueHudMsg(msgs);
 	if (act)
@@ -354,7 +360,7 @@ void ExploreState::getLightPoints(sf::Vector2i start, int radius)
 		fowCache.push_back(tile);
 		lightPoints.push_back(start);
 	}
-	getLightPoints({ start.x + 1, start.y }, radius -1);
+	getLightPoints({ start.x + 1, start.y }, radius - 1);
 	getLightPoints({ start.x - 1, start.y }, radius - 1);
 	getLightPoints({ start.x, start.y + 1 }, radius - 1);
 	getLightPoints({ start.x, start.y - 1 }, radius - 1);
@@ -368,7 +374,7 @@ void ExploreState::resolveFoW()
 		tile->fow = true;
 	}
 	fowCache.clear();
-	getLightPoints(player.tilePos,player.lightRadius);
+	getLightPoints(player.tilePos, player.lightRadius);
 	/*for (int y = -player.lightRadius; y <= player.lightRadius; y++)
 	{
 		for (int x = -player.lightRadius; x <= player.lightRadius; x++)

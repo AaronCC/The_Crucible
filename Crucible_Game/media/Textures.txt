@@ -23,3 +23,5 @@ item_info_back media/item_info_back.png
 dummy media/player_temp.png
 ogre media/Ogre.png
 lootbag media/lootbag.png
+hpot media/health_pot.png
+ppot media/purple_pot.png

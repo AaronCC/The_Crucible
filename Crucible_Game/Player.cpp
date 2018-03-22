@@ -79,6 +79,15 @@ void Player::handleInput()
 	{
 		keys[sf::Keyboard::I] = false;
 	}
+	if (sf::Keyboard::isKeyPressed(sf::Keyboard::E) && keys[sf::Keyboard::E] == false)
+	{
+		hud.useConsumable();
+		keys[sf::Keyboard::E] = true;
+	}
+	else if (!sf::Keyboard::isKeyPressed(sf::Keyboard::E))
+	{
+		keys[sf::Keyboard::E] = false;
+	}
 	if (sf::Keyboard::isKeyPressed(sf::Keyboard::Tilde) && keys[sf::Keyboard::Tilde] == false)
 	{
 		updateAbilityBar();
@@ -310,6 +319,7 @@ void Player::update(float dt)
 	updateTilePos();
 
 	hud.update(dt);
+	hud.checkHover(hudView);
 
 	if (this->hud.showState == Hud::ShowState::SHOW_INV)
 		inventory.update(this->game->window.mapPixelToCoords(sf::Mouse::getPosition(this->game->window), hudView));

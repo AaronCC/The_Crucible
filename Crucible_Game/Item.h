@@ -176,7 +176,9 @@ public:
 		damageColors[AbEffect::DamageType::POIS] = sf::Color({ 131, 211, 69 });
 
 		std::vector<std::pair<sf::Color, std::string>> buffStr;
-		if (ability->info.range == 1)
+		if (ability->info.range == 0)
+			buffStr.push_back({ sf::Color::White, "Buff"});
+		else if (ability->info.range == 1)
 			buffStr.push_back({ sf::Color::White, "Melee" + ability->areadesc[(int)ability->info.area] });
 		else
 			buffStr.push_back({ sf::Color::White, "Ranged" + ability->areadesc[(int)ability->info.area] });

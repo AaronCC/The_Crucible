@@ -24,6 +24,8 @@ public:
 	float rTimeTotal = 0;
 	float rTime;
 
+	sf::Vector2f oldMousePos;
+
 	std::vector<sf::Vector2i> lightPoints;
 	std::vector<Tile*> fowCache;
 	sf::Vector2i playerOccToClear;

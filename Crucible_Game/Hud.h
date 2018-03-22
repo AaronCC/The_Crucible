@@ -10,6 +10,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include "ItemGenerator.h"
+#include "Consumable.h"
 
 #define H_GLOBE "hGlobe"
 #define H_POOL "hPool"
@@ -118,7 +119,7 @@ public:
 			std::random_device rd;
 			std::mt19937 gen(rd());
 			int i = helper.numpreprefixes;
-			std::uniform_int_distribution<> dist(0, i-1);
+			std::uniform_int_distribution<> dist(0, i - 1);
 			pre += helper.inamePrePrefixes[dist(gen)];
 			dist.reset();
 			dist = std::uniform_int_distribution<>(0, helper.inamePrefixes[item->slotType].size() - 1);
@@ -277,10 +278,10 @@ public:
 				affstr = "0";
 			str = affstr + " " + helper.buffnames[i];
 			info.push_back(sf::Text(str, this->game->fonts["main_font"], tSize));
-			info[i].setPosition(start + sf::Vector2f{ 0, (float)(tSize+2)*i });
+			info[i].setPosition(start + sf::Vector2f{ 0, (float)(tSize + 2)*i });
 		}
 	}
-	void setAbilities(std::vector<Ability*> abilities, Ability* default,Helper::Stats stats)
+	void setAbilities(std::vector<Ability*> abilities, Ability* default, Helper::Stats stats)
 	{
 		this->abilities.clear();
 		int i = 0, j = 0;
@@ -751,8 +752,15 @@ public:
 	std::map<std::string, sf::Sprite> elements;
 	Game* game;
 
+	sf::RectangleShape conBack;
+	std::vector<Consumable> consumables;
+	bool conHover = false;
+	int conAt;
+
 	sf::Text slotText[A_SLOT_COUNT];
 	sf::Font font;
+
+	sf::Vector2f oldMousePos;
 
 	sf::Text msgTitle;
 
@@ -787,6 +795,8 @@ public:
 	std::pair<sf::Sprite, bool> lmbSprite;
 	std::pair<sf::Sprite, bool> rmbSprite;
 	sf::Vector2f msgStart;
+	sf::Text conText;
+	sf::Vector2f conPos;
 
 	sf::Sprite cdSprite;
 
@@ -794,6 +804,8 @@ public:
 		std::string lmbID, std::string rmbID);
 
 	void queueMsg(std::string msg);
+
+	void equipCon();
 
 	void setCooldown(int index, float timer) {
 		if (index >= A_SLOT_COUNT)
@@ -814,6 +826,8 @@ public:
 			slotText[i].setFont(game->fonts["main_font"]);
 			if (i < A_SLOT_COUNT - 2)
 				slotText[i].setString(std::to_string(i + 1));
+			slotText[i].setOutlineThickness(1);
+			slotText[1].setFillColor(sf::Color::White);
 		}
 		slotText[A_SLOT_COUNT - 2].setString("LMB");
 		slotText[A_SLOT_COUNT - 1].setString("RMB");
@@ -839,7 +853,7 @@ public:
 			elements[slotID].setTexture(game->texmgr.getRef(eData[eCount]));
 			elements[slotID].setPosition(slotPos);
 			elements[slotID].setOrigin(0, elements[slotID].getTexture()->getSize().y);
-			slotText[i].setPosition(slotPos.x + (slotW / 2) - (slotText[i].getString().getSize() * 4.f), slotPos.y - slotW - 20.f);
+			slotText[i].setPosition(slotPos.x + (slotW / 2) - (slotText[i].getString().getSize() * 4.f), slotPos.y - slotW - tSize-2);
 			slotText[i].setCharacterSize(tSize);
 		}
 		eCount++;
@@ -854,10 +868,10 @@ public:
 
 		cdSprite.setTexture(this->game->texmgr.getRef("cooldown_icon"));
 		cdSprite.setOrigin(0, slotW);
-		msgBack.setSize({800.f,500.f});
-		sf::Vector2u diff = this->game->windowSize - sf::Vector2u{800, 600};
+		msgBack.setSize({ 800.f,500.f });
+		sf::Vector2u diff = this->game->windowSize - sf::Vector2u{ 800, 600 };
 		msgBack.setOrigin(0, 0);
-		msgBack.setPosition((float)(diff.x/2), (float)(diff.y/2));
+		msgBack.setPosition((float)(diff.x / 2), (float)(diff.y / 2));
 		msgBack.setFillColor(sf::Color::Black);
 		msgBack.setOutlineThickness(4);
 		msgBack.setOutlineColor(sf::Color::White);
@@ -866,13 +880,31 @@ public:
 		msgTitle = sf::Text("Game Messages", game->fonts["main_font"], tSize);
 		msgTitle.setPosition({ msgBack.getPosition().x, msgBack.getPosition().y - 30 });
 		msgTitle.setFillColor(sf::Color::White);
+		conText = sf::Text("E", game->fonts["main_font"], tSize);
+		conText.setOutlineThickness(1);
+		conPos = { slotStart + sf::Vector2f(slotW * 9,-slotW) };
+		conBack.setSize({ TILE_SIZE, TILE_SIZE });
+		conBack.setPosition(conPos);
+		conBack.setOutlineThickness(1);
+		conBack.setFillColor(sf::Color::Black);
+		conText.setPosition(conPos - sf::Vector2f{ 0,tSize+2 });
+		consumables.push_back({ game,"hpot",{ 0,Consumable::ConType::H_POT } });
+		consumables.push_back({ game,"ppot",{ 0,Consumable::ConType::H_POT } });
+		consumables[0].setSpritePos(conPos);
+		conAt = 0;
 	}
+
+	bool hoverCon(sf::Vector2f mPos);
+	void showCons();
 
 	void draw(float dt);
 	void updateCD(unsigned int slot, float ticks);
+	void checkHover(sf::View view);
 	void update(float dt);
 
 	void updateHealth(float dmg);
+
+	bool useConsumable();
 
 	void handleInput();
 

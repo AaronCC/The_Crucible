@@ -83,6 +83,7 @@
     <ClCompile Include="Ability.cpp" />
     <ClCompile Include="AnimationHandler.cpp" />
     <ClCompile Include="Camera.cpp" />
+    <ClCompile Include="Consumable.cpp" />
     <ClCompile Include="Enemy.cpp" />
     <ClCompile Include="ExploreState.cpp" />
     <ClCompile Include="Game.cpp" />
@@ -105,6 +106,7 @@
     <ClInclude Include="Ability.h" />
     <ClInclude Include="AnimationHandler.h" />
     <ClInclude Include="Camera.h" />
+    <ClInclude Include="Consumable.h" />
     <ClInclude Include="Dungeon.h" />
     <ClInclude Include="Enemy.h" />
     <ClInclude Include="ExploreState.h" />
