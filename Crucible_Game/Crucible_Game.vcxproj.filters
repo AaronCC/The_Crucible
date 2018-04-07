@@ -158,6 +158,9 @@
     <ClInclude Include="Consumable.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="CaveGen.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Text Include="media\Textures.txt">

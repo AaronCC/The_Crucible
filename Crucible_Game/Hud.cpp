@@ -212,17 +212,18 @@ void Hud::updateHealth(float percent)
 	elements[H_POOL].setPosition(pos.x, pos.y + newH);
 }
 
-bool Hud::useConsumable() {
+Consumable::ConEffect Hud::useConsumable() {
+	Consumable::ConEffect eff{};
 	if (consumables.size() > 0)
 	{
+		eff = consumables[0].getEffect();
 		if (consumables[0].use())
 		{
 			consumables.erase(consumables.begin());
 			showCons();
-			return true;
 		}
 	}
-	return false;
+	return eff;
 }
 
 void Hud::handleInput()

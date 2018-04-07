@@ -1,5 +1,6 @@
 grass media/ground_grass.png
 dungeon media/ground_dungeon.png
+cave media/ground_cave.png
 walktest media/walktest.png
 button media/button.png
 globe media/globe.png
@@ -25,3 +26,7 @@ ogre media/Ogre.png
 lootbag media/lootbag.png
 hpot media/health_pot.png
 ppot media/purple_pot.png
+poison media/poison.png
+poison_icon media/poison_icon.png
+spiral media/spiral.png
+spiral_icon media/spiral_icon.png

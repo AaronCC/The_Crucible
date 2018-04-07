@@ -99,7 +99,18 @@ void Game::loadTiles()
 			staticAnim, // Downstairs
 		},
 			TileType::STATIC);
-
+	this->tileAtlas["cave"] =
+		Tile(this->tileSize, 1, texmgr.getRef("cave"), texmgr.getRef("fow"), texmgr.getRef("fow_dark"),
+			{
+				staticAnim, // Unused
+				staticAnim, // Floor
+				staticAnim, // Corridor
+				staticAnim, // Wall
+				staticAnim, // ClosedDoor
+				staticAnim, // OpenDoor
+				staticAnim, // Downstairs
+			},
+			TileType::STATIC);
 	this->tileAtlas["can_select"] =
 		Tile(this->tileSize, 1, texmgr.getRef("can_select"), texmgr.getRef("fow"), texmgr.getRef("fow_dark"),
 			{

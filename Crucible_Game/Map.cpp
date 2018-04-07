@@ -112,8 +112,12 @@ void Map::update(float dt)
 			getTile(enemy.tilePos.x, enemy.tilePos.y)->occupied = false;
 			oldPosBuffer.push_back(enemy.tilePos);
 			Loot* newloot = new Loot(enemy.mf, enemy.lvl, enemy.tilePos, this->game, this->itemGenerator);
-			tLoot[enemy.tilePos.y * this->width + enemy.tilePos.x] = newloot;
+			if (tLoot[enemy.tilePos.y * this->width + enemy.tilePos.x][0] == nullptr)
+				tLoot[enemy.tilePos.y * this->width + enemy.tilePos.x][0] = newloot;
+			else
+				tLoot[enemy.tilePos.y * this->width + enemy.tilePos.x].push_back(newloot);
 			loot.push_back(newloot);
+			enemy.tilePos = { 0,0 };
 		}
 	}
 	for (auto pos : oldPosBuffer)
@@ -149,7 +153,7 @@ void Map::updateHoverText()
 			hoverText[1].setOutlineThickness(1);
 		}
 	}
-	else if ((loot = tLoot[mouseIndex.y*this->width + mouseIndex.x]) != nullptr)
+	else if ((loot = tLoot[mouseIndex.y*this->width + mouseIndex.x][0]) != nullptr)
 	{
 		std::string name = loot->item->name;
 		hoverText.clear();
@@ -247,7 +251,7 @@ void Map::handleInput(sf::Event event)
 }
 void Map::eraseLoot(sf::Vector2i pos)
 {
-	Loot* newLoot = tLoot[pos.y*this->width + pos.x];
+	Loot* newLoot = tLoot[pos.y*this->width + pos.x][0];
 	if (newLoot != nullptr)
 	{
 		for (int i = 0; i < loot.size(); i++)
@@ -258,7 +262,10 @@ void Map::eraseLoot(sf::Vector2i pos)
 				break;
 			}
 		}
-		tLoot[pos.y * this->width + pos.x] = nullptr;
+		if (tLoot[pos.y * this->width + pos.x].size() > 1)
+			tLoot[pos.y * this->width + pos.x].erase(tLoot[pos.y * this->width + pos.x].begin());
+		else
+			tLoot[pos.y * this->width + pos.x][0] = nullptr;
 	}
 }
 void Map::resolveAction(Player* player)
@@ -268,7 +275,7 @@ void Map::resolveAction(Player* player)
 	switch (action)
 	{
 	case Action::PICKUP:
-		newLoot = tLoot[player->tilePos.y *this->width + player->tilePos.x];
+		newLoot = tLoot[player->tilePos.y *this->width + player->tilePos.x][0];
 		if (newLoot != nullptr)
 		{
 			itm = newLoot->item;
@@ -288,7 +295,7 @@ void Map::updateActionText(sf::Vector2i playerPos)
 {
 	actionText.clear();
 	this->action = Action::NONE;
-	Loot* newLoot = tLoot[playerPos.y *this->width + playerPos.x];
+	Loot* newLoot = tLoot[playerPos.y *this->width + playerPos.x][0];
 	if (newLoot != nullptr)
 	{
 		actionText.push_back(sf::Text("e: pickup", game->fonts["main_font"], tSize));
@@ -367,6 +374,7 @@ void Map::resolveEntityAI(float tickCount)
 			{
 				std::pair<sf::Vector2i, sf::Vector2i> occ_tiles;
 				occ_tiles = enemy->resolveTick(tickCount);
+				// If the enemy moved
 				if (occ_tiles.first != occ_tiles.second)
 				{
 					getTile(occ_tiles.first.x, occ_tiles.first.y)->occupied = false;
@@ -399,17 +407,107 @@ void Map::resolveEntityAI(float tickCount)
 		tEnemies[pos.y*this->width + pos.x] = nullptr;
 	}
 }
-
-void Map::loadMap()
+void Map::loadCave()
 {
-	width = 79;
-	height = 24;
+	width = 50;
+	height = 50;
 	tEnemies.clear();
+	tLoot.clear();
 	tEnemies.reserve(width*height);
+	tLoot.reserve(width*height);
 	for (int i = 0; i < width*height; i++)
 	{
 		tEnemies.push_back(nullptr);
-		tLoot.push_back(nullptr);
+		tLoot.push_back({ nullptr });
+	}
+	int* map = new int[width*height];
+	CaveGen cave(map, width, height, 3, 4, 1);
+	std::map<int,std::vector<sf::Vector2i>> caves = cave.flood();
+	int max = 0, maxCave = -1;
+	for (auto c : caves)
+	{
+		if (c.second.size() > max)
+		{
+			max = c.second.size();
+			maxCave = c.first;
+		}
+	}
+	this->spawnPos = caves[maxCave][0];
+	cave.floodConnect(caves);
+	cave.print();
+	tiles.reserve(width * height);
+	sf::Vector2i pos = { 0,0 };
+	for (int y = 0; y < height; ++y)
+	{
+		for (int x = 0; x < width; x++)
+		{
+			char t = cave.getTile(x, y);
+			this->tiles.push_back(game->tileAtlas.at("cave"));
+			switch (t)
+			{
+			case Dungeon::Tile::Unused:
+			{
+				this->tiles[y*this->width + x].tileVariant = 0;
+				break;
+			}
+			case Dungeon::Tile::Floor:
+			{
+				this->tiles[y*this->width + x].tileVariant = 1;
+				this->tiles[y*this->width + x].passable = false;
+				break;
+			}
+			case Dungeon::Tile::Wall:
+			{
+				this->tiles[y*this->width + x].tileVariant = 2;
+				this->tiles[y*this->width + x].passable = false;
+				break;
+			}
+			case Dungeon::Tile::ClosedDoor:
+			{
+				this->tiles[y*this->width + x].tileVariant = 3;
+				break;
+			}
+			case Dungeon::Tile::OpenDoor:
+			{
+				this->tiles[y*this->width + x].tileVariant = 4;
+				break;
+			}
+			case Dungeon::Tile::UpStairs:
+			{
+				this->tiles[y*this->width + x].tileVariant = 5;
+				break;
+			}
+			case Dungeon::Tile::DownStairs:
+			{
+				this->tiles[y*this->width + x].tileVariant = 6;
+				break;
+			}
+			default:
+				break;
+			}
+
+			this->tiles[y*this->width + x].setPosition(pos, x, y);
+			this->tiles[y*this->width + x].sprite.setPosition((sf::Vector2f)pos);
+			pos.x += tileSize.x;
+		}
+		pos.x -= tileSize.x * width;
+		pos.y += tileSize.y;
+	}
+}
+void Map::loadDungeon()
+{
+	loadCave();
+	return;
+	width = 79;
+	height = 24;
+	tEnemies.clear();
+	tLoot.clear();
+	tEnemies.reserve(width*height);
+	tLoot.reserve(width*height);
+	for (int i = 0; i < width*height; i++)
+	{
+		tEnemies.push_back(nullptr);
+		tLoot.push_back({ nullptr });
 	}
 	Dungeon dungeon(width, height);
 	dungeon.generate(70);
@@ -423,6 +521,7 @@ void Map::loadMap()
 		for (int x = 0; x < width; x++)
 		{
 			char t = dungeon.getTile(x, y);
+			//char t = cave.getTile(x, y);
 			this->tiles.push_back(game->tileAtlas.at("dungeon"));
 			switch (t)
 			{

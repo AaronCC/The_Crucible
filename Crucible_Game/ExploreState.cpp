@@ -13,7 +13,7 @@ ExploreState::ExploreState(Game* game)
 	Animation walkAnim(0, 0, 0.1);
 	camera = Camera(game, &player);
 	map = new Map(game, &camera);
-	map->loadMap();
+	map->loadDungeon();
 	player = Player(game,
 		sf::Vector2u(32, 32),
 		this->game->texmgr.getRef("player"),
@@ -143,7 +143,7 @@ void ExploreState::handleInput()
 		}
 		case sf::Event::KeyReleased:
 		{
-
+			
 		}
 		default: break;
 		}
@@ -301,7 +301,8 @@ void ExploreState::handleInput()
 		Tile* tile = map->getTile(point.first, point.second);
 		if (tile->passable)
 		{
-			act = true; if (map->getEnemyAt(point.first, point.second) != nullptr)
+			act = true; 
+			if (map->getEnemyAt(point.first, point.second) != nullptr)
 			{
 				player.queueAutoAttack();
 				player.resolveMeleeLineOfSight({ point.first,point.second });
@@ -344,6 +345,8 @@ void ExploreState::handleInput()
 }
 void ExploreState::getLightPoints(sf::Vector2i start, int radius)
 {
+	if (start.x < 0 || start.y < 0 || start.x >= map->width || start.y >= map->height)
+		return;
 	Tile* tile = map->getTile(start.x, start.y);
 	if (!tile->passable)
 	{

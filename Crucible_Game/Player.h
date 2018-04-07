@@ -87,6 +87,8 @@ public:
 	void lockActions();
 	void updatePlayerStats();
 	void handleInput();
+	void heal(int hVal);
+	void applyConEffect(Consumable::ConEffect eff);
 	void queueAutoAttack();
 	void queueAbility(int slotIndex);
 	void handleEvent(sf::Event event);

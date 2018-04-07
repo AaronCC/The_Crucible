@@ -81,7 +81,9 @@ void Player::handleInput()
 	}
 	if (sf::Keyboard::isKeyPressed(sf::Keyboard::E) && keys[sf::Keyboard::E] == false)
 	{
-		hud.useConsumable();
+		Consumable::ConEffect eff = hud.useConsumable();
+		if (eff.v1 != -1)
+			applyConEffect(eff);
 		keys[sf::Keyboard::E] = true;
 	}
 	else if (!sf::Keyboard::isKeyPressed(sf::Keyboard::E))
@@ -195,7 +197,26 @@ void Player::handleInput()
 		}
 	}
 }
-
+void Player::heal(int hVal)
+{
+	health += hVal;
+	if (health > maxHealth)
+		health = maxHealth;
+	hud.updateHealth(health/(float)maxHealth);
+}
+void Player::applyConEffect(Consumable::ConEffect eff)
+{
+	switch (eff.type)
+	{
+	case Consumable::H_POT:
+		heal(eff.v1);
+		break;
+	case Consumable::S_POT:
+		break;
+	default:
+		break;
+	}
+}
 void Player::queueAutoAttack()
 {
 	queuedAbility = new Ability(autoAttack);

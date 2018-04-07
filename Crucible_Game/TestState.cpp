@@ -13,7 +13,7 @@ TestState::TestState(Game* game)
 	Animation walkAnim(0, 0, 0.1);
 	camera = Camera(game, &player);
 	map = new Map(game, &camera);
-	map->loadMap();
+	map->loadDungeon();
 	/*player = Player(game,
 		sf::Vector2u(32, 32),
 		this->game->texmgr.getRef("player"),

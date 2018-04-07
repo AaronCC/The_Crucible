@@ -30,7 +30,7 @@ class InvSlot {
 #define slotBorder 2
 
 public:
-	sf::Vector2f start{ 125, 110 };
+	sf::Vector2f start{ 25, 10 };
 	sf::RectangleShape infoBack;
 	sf::RectangleShape slotBack;
 	sf::Text slotTypeText;
@@ -259,8 +259,8 @@ public:
 	std::vector<std::vector<sf::Text>> abilities;
 	Helper helper;
 
-	sf::Vector2f start = { 105, 105 };
-	sf::Vector2f abStart = { 255, 115 };
+	sf::Vector2f start = { 5, 5 };
+	sf::Vector2f abStart = { 155, 15 };
 
 	PlayerInfo(Game* game, Helper::Stats stats)
 	{
@@ -476,7 +476,7 @@ public:
 		//	{ 0,2,0,-10 },
 		//	Item::SlotType::OFH);
 		//itemSlots[4].setItem(item);
-		for (int i = 0; i < 5; i++)
+		for (int i = 0; i < 25; i++)
 		{
 			Item* item = itemGenerator.makeItem(1, 500);
 			itemSlots[i].setItem(item);
@@ -888,8 +888,8 @@ public:
 		conBack.setOutlineThickness(1);
 		conBack.setFillColor(sf::Color::Black);
 		conText.setPosition(conPos - sf::Vector2f{ 0,tSize+2 });
-		consumables.push_back({ game,"hpot",{ 0,Consumable::ConType::H_POT } });
-		consumables.push_back({ game,"ppot",{ 0,Consumable::ConType::H_POT } });
+		consumables.push_back({ game,"hpot",{ 10,Consumable::ConType::H_POT } });
+		consumables.push_back({ game,"ppot",{ 0,Consumable::ConType::S_POT } });
 		consumables[0].setSpritePos(conPos);
 		conAt = 0;
 	}
@@ -902,9 +902,9 @@ public:
 	void checkHover(sf::View view);
 	void update(float dt);
 
-	void updateHealth(float dmg);
+	void updateHealth(float percent);
 
-	bool useConsumable();
+	Consumable::ConEffect useConsumable();
 
 	void handleInput();
 

@@ -86,3 +86,5 @@
 ;texname iconname description name animstart animend cd ct
 4 slash slash_icon slash; Blue Slash; 0 3 5 1
 4 slash2 slash_icon2 slash; Red Slash; 0 3 5 1
+4 poison poison_icon slash; Cloud; 0 3 5 1
+4 spiral spiral_icon slash; Spiral; 0 3 5 1

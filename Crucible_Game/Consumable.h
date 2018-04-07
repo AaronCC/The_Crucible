@@ -7,14 +7,15 @@ class Consumable
 {
 public:
 	enum ConType {
-		H_POT
+		H_POT,
+		S_POT
 	};
 	sf::RectangleShape back;
 	Game* game;
 	struct ConEffect {
 		int v1;
 		ConType type;
-		ConEffect() {}
+		ConEffect():v1(-1) {}
 		ConEffect(int v1, ConType type) : v1(v1), type(type) {
 
 		}

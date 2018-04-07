@@ -106,6 +106,7 @@
     <ClInclude Include="Ability.h" />
     <ClInclude Include="AnimationHandler.h" />
     <ClInclude Include="Camera.h" />
+    <ClInclude Include="CaveGen.h" />
     <ClInclude Include="Consumable.h" />
     <ClInclude Include="Dungeon.h" />
     <ClInclude Include="Enemy.h" />

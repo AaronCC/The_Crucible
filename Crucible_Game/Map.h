@@ -6,6 +6,7 @@
 #include "Helper.h"
 #include "Enemy.h"
 #include "PathFinder.h"
+#include "CaveGen.h"
 #include "Loot.h"
 
 class Map
@@ -15,7 +16,7 @@ public:
 	std::vector<Enemy*> aEnemies;
 	std::vector<Tile> tiles;
 	std::vector<Enemy*> tEnemies;
-	std::vector<Loot*> tLoot;
+	std::vector<std::vector<Loot*>> tLoot;
 	std::vector<Loot*> loot;
 	std::vector<Tile>* getTiles() { return &tiles; }
 	int width, height;
@@ -64,7 +65,9 @@ public:
 
 	void resolveEntityAI(float tickCount);
 
-	void Map::loadMap();
+	void loadCave();
+
+	void Map::loadDungeon();
 
 	Enemy * getEnemyAt(int x, int y);
 
