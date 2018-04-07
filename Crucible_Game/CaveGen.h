@@ -2,23 +2,10 @@
 #include <iostream>
 #include <random>
 #include <SFML/Graphics.hpp>
-#include "PathFinder.h"
 #include <map>
 
 class CaveGen {
 public:
-	enum Tile
-	{
-		Unused = ' ',
-		Floor = '.',
-		Corridor = ',',
-		Wall = '#',
-		ClosedDoor = '+',
-		OpenDoor = '-',
-		UpStairs = '<',
-		DownStairs = '>'
-	};
-	char iToTile[2] = { '#', '.' };
 	CaveGen(int _map[], const int _width, const int _height, int _dLimit, int _bLimit, int iterations) {
 		this->map = _map;
 		this->width = _width;
@@ -31,37 +18,34 @@ public:
 			for (int c = 0; c < width; c++)
 			{
 				if (random() < liveChance)
-					map[r*width + c] = 1;
+					map[r*width + c] = 1; // start alive
 				else
-					map[r*width + c] = 0;
+					map[r*width + c] = 0; // start dead
 			}
 		}
 		for (int i = 0; i < iterations; i++)
-			iterate();
-		for (int c = 0; c < width; c++)
+			iterate(); // New cycle based on current map state
+		for (int c = 0; c < width; c++) // Border columns
 		{
 			map[c] = 0;
 			map[(height - 1)*width + c] = 0;
 		}
-		for (int r = 0; r < height; r++)
+		for (int r = 0; r < height; r++) // Border rows
 		{
 			map[r*width] = 0;
 			map[r*width + (width - 1)] = 0;
 		}
 		print();
 	}
-	CaveGen()
-	{
-
-	}
-	char getTile(int c, int r)
+	CaveGen() {}
+	char getTile(int c, int r) // Get tile at
 	{
 		if (map[r*width + c] == 0)
 			return '#';
 		else
 			return ' ';
 	}
-	void print() {
+	void print() { // Print the cave
 		for (int r = 0; r < height; r++)
 		{
 			for (int c = 0; c < width; c++)
@@ -71,35 +55,36 @@ public:
 			std::cout << "\n";
 		}
 	}
-	void iterate() {
+	void iterate() { // Iterate on current cave state
 		const int size = width * height;
-		newMap = new int[size];
+		newMap = new int[size]; // New state
 		for (int c = 0; c < width; c++)
 		{
 			for (int r = 0; r < height; r++)
 			{
-				int nCount = getAliveNeighbors(c, r);
-				if ((bool)map[r*width + c]) {
-					if (nCount < dLimit)
-						newMap[r*width + c] = 0;
+				int nCount = getAliveNeighbors(c, r); // number of adjacent living neighbors
+				if ((bool)map[r*width + c]) { // If alive
+					if (nCount < dLimit) // If the number of alive neighbors is less than deathlimit
+						newMap[r*width + c] = 0; // this node is dead
 					else
-						newMap[r*width + c] = 1;
+						newMap[r*width + c] = 1; // this node is alive
 				}
-				else
+				else // If dead
 				{
-					if (nCount > bLimit)
-						newMap[r*width + c] = 1;
+					if (nCount > bLimit) // If the number of alive neighbors is greater than birthlimit
+						newMap[r*width + c] = 1; // this node is alive
 					else
-						newMap[r*width + c] = 0;
+						newMap[r*width + c] = 0; // this node is dead
 				}
 			}
 		}
+		// Copy the new map to our map pointer
 		std::memcpy(map, newMap, size * sizeof(int));
 	}
-
+	// Connects caves to main cave
 	void floodConnect(std::map<int, std::vector<sf::Vector2i>> caves)
 	{
-		PathFinder pf;
+		// Find which cave is largest
 		int max = 0, maxCave = -1;
 		for (auto c : caves)
 		{
@@ -109,22 +94,26 @@ public:
 				maxCave = c.first;
 			}
 		}
+		// For each cave
 		for (auto cave : caves)
 		{
 			if (cave.first == maxCave)
 				continue;
+			// Find random start ( from largest cave )
 			std::random_device rd;
 			std::mt19937 gen(rd());
 			std::uniform_int_distribution<> dist(0, caves[maxCave].size() - 1);
 			sf::Vector2i start = caves[maxCave][dist(gen)];
+			// Find random end ( from connection )
 			dist.reset();
 			dist = std::uniform_int_distribution<>(0, cave.second.size() - 1);
 			sf::Vector2i end = cave.second[dist(gen)];
+			// Clear a path from largest to connection
 			for (auto point : getPath(start, end))
 				map[point.y*width + point.x] = 1;
 		}
 	}
-
+	// Get a path from two points
 	std::vector<sf::Vector2i> getPath(sf::Vector2i start, sf::Vector2i end)
 	{
 		std::vector<sf::Vector2i> path = {};
@@ -142,7 +131,7 @@ public:
 		}
 		return path;
 	}
-
+	// Use recursive flood fill to find caves
 	std::map<int, std::vector<sf::Vector2i>> flood()
 	{
 		std::map<int, std::vector<sf::Vector2i>> caves;
@@ -156,18 +145,21 @@ public:
 				}
 		return caves;
 	}
+	// Recursively floods caves
 	std::vector<sf::Vector2i> floodfill(int c, int r, int fill)
 	{
 		std::vector<sf::Vector2i> caves = {};
-		if (c < 0 || r < 0 || c >= width || r >= height)
+		if (c < 0 || r < 0 || c >= width || r >= height) // Check bounds
 			return caves;
 		int target = map[r*width + c];
-		if (target == fill || target == 0)
+		if (target == fill || target == 0) // Have we been here yet, or is this a wall
 			return caves;
 		else
 		{
-			map[r*width + c] = fill;
-			caves.push_back({ c,r });
+			map[r*width + c] = fill; // Fill the tile
+			caves.push_back({ c,r }); // Add tile to current cave
+			
+			// Check surrounding tiles
 			for (auto cave : floodfill(c - 1, r, fill))
 				caves.push_back(cave);
 			for (auto cave : floodfill(c + 1, r, fill))
@@ -190,7 +182,7 @@ private:
 		std::uniform_int_distribution<> dist(0, 99);
 		return dist(gen) + 1;
 	}
-	int getAliveNeighbors(int x, int y)
+	int getAliveNeighbors(int x, int y) // Get surrounding living neighbor count
 	{
 		int count = 0;
 		for (int i = -1; i < 2; i++) {
@@ -210,13 +202,10 @@ private:
 		}
 		return count;
 	}
-	//char clist[26] = { 'a','b','c','d','e','f','g','h','i','j','k','l','m','n','o','p','q','r','s','t','u','v','w','x','y','z' };
 	std::string iToChar(int i)
 	{
 		switch (i)
 		{
-		case 1:
-			return " ";
 		case 0:
 			return "#";
 		default:
