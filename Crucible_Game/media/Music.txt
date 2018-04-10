@@ -1,1 +1,2 @@
-menumusic media/daybreak.wav
+menutheme media/soliloquy.wav
+exploretheme media/exploretheme.wav

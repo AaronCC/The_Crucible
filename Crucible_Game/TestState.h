@@ -9,7 +9,6 @@
 
 class TestState : public GameState
 {
-
 public:
 	TestState(Game* game);
 	~TestState();

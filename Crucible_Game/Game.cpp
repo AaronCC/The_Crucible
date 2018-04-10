@@ -11,6 +11,8 @@ Game::Game()
 	this->window.setFramerateLimit(60);
 	tileSize = sf::Vector2u(TILE_SIZE, TILE_SIZE);
 	loadTextures();
+	loadMusic();
+	loadSounds();
 	loadFonts();
 	loadTiles();
 }

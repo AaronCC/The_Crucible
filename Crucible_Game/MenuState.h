@@ -20,6 +20,7 @@ private:
 	Gui buttons;
 	sf::Font testFont;
 	sf::Text testText;
+	sf::Sprite background;
 };
 
 #endif /* MENU_STATE_H*/

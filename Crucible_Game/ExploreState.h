@@ -7,6 +7,7 @@
 #include "Camera.h"
 #include "Helper.h"
 #include "PathFinder.h"
+#include <random>
 
 
 class ExploreState : public GameState

@@ -8,19 +8,20 @@ MenuState::MenuState(Game* game)
 	testText.setFont(testFont);
 	testText.setPosition(200, 200);
 	testText.setString("Crucible Game");
+	background.setTexture(this->game->texmgr.getRef("mainmenu"));
 	Animation btnAnim(0, 0, 1);
 	buttons = Gui(
 		GuiStyle(sf::Color::Black, sf::Color::White, &testFont, false),
 		true,
-		{"button","button"},
-		{ { btnAnim }, { btnAnim } },
-		{ std::pair<std::string,std::string>("btn1","btn1"),
-		  std::pair<std::string,std::string>("btn1","btn1") },
-		{ 64,32 },
-		{ { (float)this->game->windowSize.x/2, (float)this->game->windowSize.y/2 },
-		  { 400, 400 } },
+		{ "beginbutton" },
+		{ { btnAnim } },
+		{ std::pair<std::string,std::string>("btn1","btn1") },
+		{ 128, 64 },
+		{ { (float)this->game->windowSize.x/2, (float)this->game->windowSize.y/2 } },
 		EType::BUTTON, 0, game);
 	initView();
+	this->themeName = "menutheme";
+	this->game->sndmgr.getMusicRef(themeName);
 }
 
 MenuState::~MenuState()
@@ -29,8 +30,9 @@ MenuState::~MenuState()
 
 void MenuState::draw(const float dt)
 {
+	this->game->window.draw(background);
 	this->game->window.setView(this->view);
-	this->game->window.draw(testText);
+	//this->game->window.draw(testText);
 	this->buttons.draw(this->game->window, dt);
 }
 

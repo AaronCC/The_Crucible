@@ -338,7 +338,7 @@ public:
 	sf::Sprite itemInfoBack;
 	sf::RectangleShape slider;
 	ItemGenerator itemGenerator;
-	sf::Vector2f start{ 100, 100 };
+	sf::Vector2f start{ 0, 0 };
 	bool hoveringEq = false;
 	enum Hovering {
 		ITM,
@@ -868,10 +868,10 @@ public:
 
 		cdSprite.setTexture(this->game->texmgr.getRef("cooldown_icon"));
 		cdSprite.setOrigin(0, slotW);
-		msgBack.setSize({ 800.f,500.f });
-		sf::Vector2u diff = this->game->windowSize - sf::Vector2u{ 800, 600 };
+		msgBack.setSize({ 800.f-8.f, 500.f });
+		//sf::Vector2u diff = this->game->windowSize - sf::Vector2u{ 800, 600 };
 		msgBack.setOrigin(0, 0);
-		msgBack.setPosition((float)(diff.x / 2), (float)(diff.y / 2));
+		msgBack.setPosition(4, 4);
 		msgBack.setFillColor(sf::Color::Black);
 		msgBack.setOutlineThickness(4);
 		msgBack.setOutlineColor(sf::Color::White);

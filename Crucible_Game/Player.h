@@ -146,10 +146,12 @@ public:
 		abilities.push_back(queuedAbility);
 		if (queuedAbilitySlotNum != -1)
 			hud.setCooldown(queuedAbilitySlotNum, queuedCooldown);
+		this->game->sndmgr.playSound(queuedAbility->soundeffect);
 		queuedAbility = nullptr;
 		queuedAction = Action::NONE;
 		return msg;
 	}
+
 	void resolveAbilityCDs(float ticks)
 	{
 		for (int cd = 0; cd < hud.cooldowns.size(); cd++)

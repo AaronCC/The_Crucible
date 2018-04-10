@@ -104,6 +104,7 @@ bool Enemy::update()
 			this->pos = { (float)tilePos.x*TILE_SIZE, (float)tilePos.y*TILE_SIZE };*/
 			this->deactivate();
 			this->dead = true;
+			this->game->sndmgr.playSound("death1");
 			return true;
 		}
 	}

@@ -3,6 +3,7 @@ dungeon media/ground_dungeon.png
 cave media/ground_cave.png
 walktest media/walktest.png
 button media/button.png
+beginbutton media/beginbutton.png
 globe media/globe.png
 life_globe media/life_globe.png
 slash media/slash.png
@@ -30,3 +31,4 @@ poison media/poison.png
 poison_icon media/poison_icon.png
 spiral media/spiral.png
 spiral_icon media/spiral_icon.png
+mainmenu media/mainmenu.png

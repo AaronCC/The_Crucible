@@ -394,7 +394,10 @@ void Player::updateAbilities()
 bool Player::pickup(Item * item)
 {
 	if (inventory.pickupItem(item))
+	{
+		this->game->sndmgr.playSound("pickup1");
 		return true;
+	}
 	return false;
 }
 void Player::applyEff(AbEffect::Effect eff)

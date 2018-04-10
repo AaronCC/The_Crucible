@@ -298,7 +298,7 @@ void Map::updateActionText(sf::Vector2i playerPos)
 	Loot* newLoot = tLoot[playerPos.y *this->width + playerPos.x][0];
 	if (newLoot != nullptr)
 	{
-		actionText.push_back(sf::Text("e: pickup", game->fonts["main_font"], tSize));
+		actionText.push_back(sf::Text("[e] pickup", game->fonts["main_font"], tSize));
 		actionText[0].setFillColor(sf::Color::White);
 		actionText[0].setOutlineThickness(1);
 		actionText[0].setPosition((playerPos.x * tileSize.x) - (TILE_SIZE / 2), (playerPos.y * tileSize.y) - (tSize * 3.5));
@@ -322,6 +322,13 @@ void Map::updateActionText(sf::Vector2i playerPos)
 		}
 		actionText[1].setOutlineThickness(1);
 		this->action = Action::PICKUP;
+	}
+	else if (getTile(playerPos.x, playerPos.y)->tileVariant == 5)
+	{
+		actionText.push_back(sf::Text("[r] go up", game->fonts["main_font"], tSize));
+		actionText[0].setFillColor(sf::Color::White);
+		actionText[0].setOutlineThickness(1);
+		actionText[0].setPosition((playerPos.x * tileSize.x) - (TILE_SIZE / 2), (playerPos.y * tileSize.y) - (tSize * 3.5));
 	}
 }
 
@@ -496,8 +503,8 @@ void Map::loadCave()
 }
 void Map::loadDungeon()
 {
-	loadCave();
-	return;
+	//loadCave();
+	//return;
 	width = 79;
 	height = 24;
 	tEnemies.clear();

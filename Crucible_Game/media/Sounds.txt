@@ -1,0 +1,3 @@
+swordslash media/swordslash.wav
+death1 media/death1.wav
+pickup1 media/pickup1.wav

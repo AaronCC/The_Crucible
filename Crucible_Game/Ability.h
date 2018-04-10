@@ -236,7 +236,9 @@ public:
 		this->texName = a.texName;
 		this->effs = a.effs;
 		this->damageAffixes = a.damageAffixes;
+		this->soundeffect = a.soundeffect;
 	}
+	std::string soundeffect;
 	std::string texName;
 	Ability(Game* game,
 		sf::Texture& texture,
@@ -263,6 +265,7 @@ public:
 		this->animHandler.addAnim(animation);
 		this->duration = animation.duration * animation.getLength();
 		this->description = description;
+		this->soundeffect = "swordslash";
 
 		damageAffixes[AbEffect::DamageType::COLD] = Helper::Affix::COLD_PRC_DMG;
 		damageAffixes[AbEffect::DamageType::FIRE] = Helper::Affix::FIRE_PRC_DMG;

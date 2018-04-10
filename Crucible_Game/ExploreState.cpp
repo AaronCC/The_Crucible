@@ -26,6 +26,8 @@ ExploreState::ExploreState(Game* game)
 	map->itemGenerator = &player.inventory.itemGenerator;
 	resolveFoW();
 	rTime = 0.01f;
+	this->themeName = "exploretheme";
+	this->game->sndmgr.getMusicRef(this->themeName);
 }
 
 ExploreState::~ExploreState()
@@ -329,6 +331,22 @@ void ExploreState::handleInput()
 	}
 	else if (!sf::Keyboard::isKeyPressed(sf::Keyboard::D))
 		old_dState = false;
+	if (sf::Keyboard::isKeyPressed(sf::Keyboard::R))
+	{
+		if (map->getTile(player.tilePos.x, player.tilePos.y)->tileVariant == 6)
+		{
+			std::random_device rd;
+			std::mt19937 gen(rd());
+			std::uniform_int_distribution<> dist(0, 1);
+			bool cave = dist(gen);
+			this->map = new Map(game, &camera);
+			if (cave)
+				map->loadCave();
+			else
+				map->loadDungeon();
+			pf = PathFinder(map->getTiles(), map->height, map->width);
+		}
+	}
 	this->player.handleInput();
 	if (player.checkLineOfSight)
 	{
