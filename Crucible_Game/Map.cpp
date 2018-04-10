@@ -330,6 +330,13 @@ void Map::updateActionText(sf::Vector2i playerPos)
 		actionText[0].setOutlineThickness(1);
 		actionText[0].setPosition((playerPos.x * tileSize.x) - (TILE_SIZE / 2), (playerPos.y * tileSize.y) - (tSize * 3.5));
 	}
+	else if(getTile(playerPos.x, playerPos.y)->tileVariant == 6)
+	{
+		actionText.push_back(sf::Text("[r] go down", game->fonts["main_font"], tSize));
+		actionText[0].setFillColor(sf::Color::White);
+		actionText[0].setOutlineThickness(1);
+		actionText[0].setPosition((playerPos.x * tileSize.x) - (TILE_SIZE / 2), (playerPos.y * tileSize.y) - (tSize * 3.5));
+	}
 }
 
 //std::vector<Enemy*> Map::getEnemiesAtPoint(sf::Vector2i point)
@@ -428,7 +435,7 @@ void Map::loadCave()
 		tLoot.push_back({ nullptr });
 	}
 	int* map = new int[width*height];
-	CaveGen cave(map, width, height, 3, 4, 1);
+	CaveGen cave(map, width, height, 3, 4, 4);
 	std::map<int,std::vector<sf::Vector2i>> caves = cave.flood();
 	int max = 0, maxCave = -1;
 	for (auto c : caves)
@@ -440,8 +447,8 @@ void Map::loadCave()
 		}
 	}
 	this->spawnPos = caves[maxCave][0];
-	cave.floodConnect(caves);
-	cave.print();
+	//cave.floodConnect(caves);
+	//cave.print();
 	tiles.reserve(width * height);
 	sf::Vector2i pos = { 0,0 };
 	for (int y = 0; y < height; ++y)
@@ -503,8 +510,8 @@ void Map::loadCave()
 }
 void Map::loadDungeon()
 {
-	//loadCave();
-	//return;
+	loadCave();
+	return;
 	width = 79;
 	height = 24;
 	tEnemies.clear();

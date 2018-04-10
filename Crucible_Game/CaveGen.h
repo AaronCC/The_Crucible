@@ -27,23 +27,23 @@ public:
 			iterate(); // New cycle based on current map state
 		for (int c = 0; c < width; c++) // Border columns
 		{
-			map[c] = 0;
-			map[(height - 1)*width + c] = 0;
+			map[c] = 1;
+			map[(height - 1)*width + c] = 1;
 		}
 		for (int r = 0; r < height; r++) // Border rows
 		{
-			map[r*width] = 0;
-			map[r*width + (width - 1)] = 0;
+			map[r*width] = 1;
+			map[r*width + (width - 1)] = 1;
 		}
-		print();
+		//print();
 	}
 	CaveGen() {}
 	char getTile(int c, int r) // Get tile at
 	{
-		if (map[r*width + c] == 0)
-			return '#';
-		else
+		if (map[r*width + c] != 1)
 			return ' ';
+		else
+			return '#';
 	}
 	void print() { // Print the cave
 		for (int r = 0; r < height; r++)
@@ -134,11 +134,12 @@ public:
 	// Use recursive flood fill to find caves
 	std::map<int, std::vector<sf::Vector2i>> flood()
 	{
+		print();
 		std::map<int, std::vector<sf::Vector2i>> caves;
 		int fcount = 2;
 		for (int r = 0; r < height; r++)
 			for (int c = 0; c < width; c++)
-				if (map[r*width + c] == 1)
+				if (map[r*width + c] == 0)
 				{
 					caves[fcount] = floodfill(c, r, fcount);
 					fcount++;
@@ -152,7 +153,7 @@ public:
 		if (c < 0 || r < 0 || c >= width || r >= height) // Check bounds
 			return caves;
 		int target = map[r*width + c];
-		if (target == fill || target == 0) // Have we been here yet, or is this a wall
+		if (target == fill || target == 1) // Have we been here yet, or is this a wall
 			return caves;
 		else
 		{
@@ -207,9 +208,9 @@ private:
 		switch (i)
 		{
 		case 0:
-			return "#";
-		default:
 			return " ";
+		default:
+			return "#";
 			break;
 		}
 	}
