@@ -31,6 +31,13 @@ public:
 			texName(tn), iconName(in), description(desc), name(n), anim(anim), cd(cd), tc(tc) {}
 	};
 
+	int getRand_100() {
+		std::random_device rd;
+		std::mt19937 gen(rd());
+		std::uniform_int_distribution<> dist(0, 99);
+		return dist(gen) + 1;
+	}
+
 	std::vector<AbBase> abBases;
 
 	std::map<ST, std::vector<std::pair<int, BaseItem>>> bases;
@@ -336,6 +343,8 @@ public:
 	}
 
 	Scroll * makeScroll(int aLvl, float mf);
+
+	Ability * makeEnemyAbility(int aLvl, Item::Rarity rarity);
 
 	bool canRollAf(Item::SlotType type, AF af);
 

@@ -87,17 +87,21 @@ public:
 	void lockActions();
 	void updatePlayerStats();
 	void handleInput();
+	void damage(int hVal);
 	void heal(int hVal);
 	void applyConEffect(Consumable::ConEffect eff);
 	void queueAutoAttack();
 	void queueAbility(int slotIndex);
 	void handleEvent(sf::Event event);
 	void draw(float dt);
+	void drawHud(float dt);
 	void update(float dt);
 	void updateTilePos();
 	void updateAbilities(float dt);
 	void updateAbilities();
-	bool pickup(Item* item);
+	bool pickup_ITM(Item* item);
+	bool pickup_SCR(Scroll* item);
+	bool pickup_CON(Consumable* item);
 	std::vector<AbEffect::Effect> effs;
 	void applyEff(AbEffect::Effect eff);
 	void move(sf::Vector2f offset) {
@@ -236,6 +240,8 @@ public:
 			{ 0,3,0.1f }, { 32,32 }, 0, 1, "Default Attack",
 			"Melee slash in an arc");
 		autoAttack.setInfo(Ability::AbInfo(0, 1));
+
+		hud.updateHealth(maxHealth, maxHealth, 1.f);
 	}
 
 	void updateAbilityBar();

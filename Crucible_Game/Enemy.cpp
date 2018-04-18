@@ -1,4 +1,5 @@
 #include "Enemy.h"
+
 std::pair<sf::Vector2i, sf::Vector2i> Enemy::resolveTick(float newTicks)
 {
 	sf::Vector2i oldPos, newPos;
@@ -50,18 +51,32 @@ void Enemy::dealDamage(int dmg)
 
 sf::Vector2i Enemy::updateAI(float newTicks, sf::Vector2i playerPos, PathFinder* pf)
 {
+	wayPoints.clear();
+	queuedAbility = nullptr;
 	sf::Vector2i diff = playerPos - tilePos;
 	std::pair<int, int> point = { tilePos.x, tilePos.y };
-	if (std::abs(diff.x) > moveRange || std::abs(diff.y) > moveRange)
+	this->tickCount += newTicks;
+	if ((std::abs(diff.x) <= ability.info.range || std::abs(diff.y) <= ability.info.range) 
+		&& losToPlayer && tickCount >= ability.tickCost)
 	{
-		wayPoints.clear();
+		tickCount -= ability.tickCost;
+		queuedAbility = new Ability(ability);
+		queuedAbility->pushPosition({ playerPos.x * (float)TILE_SIZE,playerPos.y * (float)TILE_SIZE });
+		queuedAbility->activate({ 0,0 }, { 0,0 });
+		this->game->sndmgr.playSound(queuedAbility->soundeffect);
+		abilities.push_back(queuedAbility);
+	}
+	else if ((!losToPlayer && std::abs(diff.x) > moveRange || std::abs(diff.y) > moveRange) ||
+		(std::abs(diff.x) > moveRange + ability.info.range || std::abs(diff.y) > moveRange + ability.info.range))
+	{
 		std::vector<std::pair<int, int>> path = pf->findPath(this->tilePos, playerPos);
-		this->tickCount += newTicks;
 		for (int i = path.size() - 1; i >= 0; i--)
 		{
+			point = path[i];
+			if (sf::Vector2i{ point.first, point.second } == playerPos)
+				continue;
 			if (tickCount >= speed)
 			{
-				point = path[i];
 				wayPoints.push_back({ point.first,point.second });
 				tickCount -= speed;
 			}
@@ -69,7 +84,11 @@ sf::Vector2i Enemy::updateAI(float newTicks, sf::Vector2i playerPos, PathFinder*
 				break;
 		}
 	}
-	return { point.first,point.second };
+	/*else
+		tickCount -= newTicks;*/
+	if (wayPoints.size() > 0)
+		return wayPoints[wayPoints.size() - 1];
+	else return { 0,0 };
 }
 
 void Enemy::applyEff(AbEffect::Effect eff)
@@ -81,7 +100,7 @@ void Enemy::applyEff(AbEffect::Effect eff)
 		effs.push_back(eff);
 }
 
-bool Enemy::update()
+bool Enemy::update(float dt)
 {
 	if (dead)
 		return false;
@@ -108,26 +127,45 @@ bool Enemy::update()
 			return true;
 		}
 	}
+	int i = 0;
+	std::vector<int> rmCache;
+	for (auto ability : abilities)
+	{
+		ability->update(dt);
+		if (!ability->isAlive)
+			rmCache.push_back(i);
+		i++;
+	}
+	for (int rm = 0; rm < rmCache.size(); rm++)
+	{
+		abilities.erase(abilities.begin() + rmCache[rm]);
+		if (rm < rmCache.size() - 1)
+			rmCache[rm + 1]--;
+	}
 	return false;
 }
 
-void Enemy::draw()
+void Enemy::draw(float dt)
 {
 	if (dead)
 		return;
 	this->game->window.draw(this->sprite);
-	if (hp < maxHp)
-	{
-		this->game->window.draw(this->hpBarBack);
-		this->game->window.draw(this->hpBar);;
-	}
 	for (auto point : wayPoints)
 	{
 		this->waySprite.setPosition({ (float)point.x * TILE_SIZE,(float)point.y * TILE_SIZE });
 		this->game->window.draw(waySprite);
 	}
 }
-
+void Enemy::drawAbility(float dt)
+{
+	for (auto ab : abilities)
+		ab->draw(dt);
+	if (hp < maxHp)
+	{
+		this->game->window.draw(this->hpBarBack);
+		this->game->window.draw(this->hpBar);;
+	}
+}
 Enemy::~Enemy()
 {
 }

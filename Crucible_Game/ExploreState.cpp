@@ -24,10 +24,12 @@ ExploreState::ExploreState(Game* game)
 	this->player.updateTilePos();
 	map->getTile(player.tilePos.x, player.tilePos.y)->occupied = true;
 	map->itemGenerator = &player.inventory.itemGenerator;
+	map->populateDungeon();
 	resolveFoW();
 	rTime = 0.01f;
-	this->themeName = "exploretheme";
-	this->game->sndmgr.getMusicRef(this->themeName);
+	this->game->sndmgr.stopPlaying();
+	//this->themeName = "exploretheme";
+	//this->game->sndmgr.getMusicRef(this->themeName);
 }
 
 ExploreState::~ExploreState()
@@ -48,6 +50,8 @@ void ExploreState::draw(const float dt)
 	fps++;
 	testText.setString("FPS: " + std::to_string(fTotal));
 	this->player.draw(dt);
+	this->map->drawL2(this->game->window, dt);
+	this->player.drawHud(dt);
 	//this->game->window.draw(testText);
 }
 
@@ -57,8 +61,7 @@ void ExploreState::update(const float dt)
 	sf::Vector2f oldPos = player.position;
 	this->player.update(dt);
 	this->player.updateAnim(this->camera.view);
-	if (player.resolveActions)
-		resolveGameState(player.tickCount);
+	std::vector<AbEffect::Effect> effs;
 	if (resolving.first)
 	{
 		/*rTimeTotal += dt;
@@ -84,11 +87,13 @@ void ExploreState::update(const float dt)
 			for (auto point : player.getQueuedPoints())
 				if (map->getTile(point.x, point.y)->passable)
 				{
-					sf::Vector2i los = map->hasLineOfSight(player.tilePos, point);
+					sf::Vector2i los = map->truncLineOfSight(player.tilePos, point);
 					player.resolveAbilityOnTile(los);
 				}
 			player.resolveAbilityCDs(resolving.second);
-			map->updateEntityAI(player.tickCount, player.tilePos, &pf);
+			effs = map->updateEntityAI(player.tickCount, player.tilePos, &pf);
+			for (auto eff : effs)
+				player.applyEff(eff);
 			map->resolveEntityAI(resolving.second);
 			resolving = { false,0 };
 			shouldResolve = true;
@@ -107,7 +112,11 @@ void ExploreState::update(const float dt)
 				map->getTile(player.tilePos.x, player.tilePos.y)->occupied = true;
 				this->player.clearWayPoints();
 				player.resolveAbilityCDs(resolving.second);
-				map->updateEntityAI(resolving.second, player.tilePos, &pf);
+				effs = map->updateEntityAI(resolving.second, player.tilePos, &pf);
+				for (auto eff : effs)
+				{
+					player.applyEff(eff);
+				}
 				map->resolveEntityAI(resolving.second);
 				resolving = { false,0 };
 				shouldResolve = true;
@@ -118,6 +127,8 @@ void ExploreState::update(const float dt)
 			player.queueHudMsg(msgs);
 		}
 	}
+	if (player.resolveActions || effs.size() > 0)
+		resolveGameState(player.tickCount);
 	this->map->update(dt);
 	if (shouldResolve)
 	{
@@ -350,7 +361,7 @@ void ExploreState::handleInput()
 	this->player.handleInput();
 	if (player.checkLineOfSight)
 	{
-		player.resolveLineOfSight(map->hasLineOfSight(player.tilePos, map->mouseIndex));
+		player.resolveLineOfSight(map->truncLineOfSight(player.tilePos, map->mouseIndex));
 		player.checkLineOfSight = false;
 	}
 
@@ -430,7 +441,7 @@ void ExploreState::resolveGameState(float ticks)
 	{
 		AbEffect::Effect& eff = player.effs[i];
 		eff.dur -= 1;
-		//dealDamage(eff.damage.getDamage());
+		player.damage(eff.damage.getDamage());
 		if (eff.dur < 1)
 		{
 			player.eStats = player.eStats - eff.stats;

@@ -66,7 +66,7 @@ void Player::handleInput()
 		updateAbilityBar();
 		updatePlayerStats();
 		updateAbilities();
-		this->playerInfo.setAbilities(this->inventory.getScrollAbilities(), &autoAttack,bStats);
+		this->playerInfo.setAbilities(this->inventory.getScrollAbilities(), &autoAttack, bStats);
 		if (this->hud.showState == Hud::ShowState::SHOW_INV)
 		{
 			this->hud.showState = Hud::ShowState::SHOW_NONE;
@@ -79,23 +79,23 @@ void Player::handleInput()
 	{
 		keys[sf::Keyboard::I] = false;
 	}
-	if (sf::Keyboard::isKeyPressed(sf::Keyboard::E) && keys[sf::Keyboard::E] == false)
+	if (sf::Keyboard::isKeyPressed(sf::Keyboard::R) && keys[sf::Keyboard::R] == false)
 	{
 		Consumable::ConEffect eff = hud.useConsumable();
 		if (eff.v1 != -1)
 			applyConEffect(eff);
-		keys[sf::Keyboard::E] = true;
+		keys[sf::Keyboard::R] = true;
 	}
-	else if (!sf::Keyboard::isKeyPressed(sf::Keyboard::E))
+	else if (!sf::Keyboard::isKeyPressed(sf::Keyboard::R))
 	{
-		keys[sf::Keyboard::E] = false;
+		keys[sf::Keyboard::R] = false;
 	}
 	if (sf::Keyboard::isKeyPressed(sf::Keyboard::Tilde) && keys[sf::Keyboard::Tilde] == false)
 	{
 		updateAbilityBar();
 		updatePlayerStats();
 		updateAbilities();
-		this->playerInfo.setAbilities(this->inventory.getScrollAbilities(), &autoAttack,bStats);
+		this->playerInfo.setAbilities(this->inventory.getScrollAbilities(), &autoAttack, bStats);
 		if (hud.showState == Hud::ShowState::SHOW_MSG)
 			hud.showState = Hud::ShowState::SHOW_NONE;
 		else
@@ -111,7 +111,7 @@ void Player::handleInput()
 		updateAbilityBar();
 		updatePlayerStats();
 		updateAbilities();
-		this->playerInfo.setAbilities(this->inventory.getScrollAbilities(), &autoAttack,bStats);
+		this->playerInfo.setAbilities(this->inventory.getScrollAbilities(), &autoAttack, bStats);
 		if (this->hud.showState == Hud::ShowState::SHOW_INFO)
 		{
 			this->hud.showState = Hud::ShowState::SHOW_NONE;
@@ -127,7 +127,7 @@ void Player::handleInput()
 	if (sf::Keyboard::isKeyPressed(sf::Keyboard::J))
 	{
 		health -= 1;
-		hud.updateHealth(health / (float)maxHealth);
+		hud.updateHealth(health, maxHealth, health / (float)maxHealth);
 		if (health <= 0)
 		{
 			health = maxHealth;
@@ -197,15 +197,24 @@ void Player::handleInput()
 		}
 	}
 }
+void Player::damage(int hVal)
+{
+	health -= hVal;
+	if (health <= 0)
+	{
+	}
+	hud.updateHealth(health, maxHealth, health / (float)maxHealth);
+}
 void Player::heal(int hVal)
 {
 	health += hVal;
 	if (health > maxHealth)
 		health = maxHealth;
-	hud.updateHealth(health/(float)maxHealth);
+	hud.updateHealth(health, maxHealth, health / (float)maxHealth);
 }
 void Player::applyConEffect(Consumable::ConEffect eff)
 {
+	this->game->sndmgr.playSound("buff");
 	switch (eff.type)
 	{
 	case Consumable::H_POT:
@@ -276,6 +285,11 @@ void Player::draw(float dt)
 			queueSprite.setPosition(point.x * TILE_SIZE.x, point.y * TILE_SIZE.y);
 			this->game->window.draw(queueSprite);
 		}
+
+	return;
+}
+void Player::drawHud(float dt)
+{
 	this->game->window.setView(hudView);
 	this->hud.draw(dt);
 	if (this->hud.showState == Hud::ShowState::SHOW_INV)
@@ -286,9 +300,7 @@ void Player::draw(float dt)
 	{
 		this->playerInfo.draw();
 	}
-	return;
 }
-
 void Player::updateAnim(sf::View view)
 {
 	//sf::Vector2f mousePos = this->game->window.mapPixelToCoords(sf::Mouse::getPosition(this->game->window), view);
@@ -391,7 +403,7 @@ void Player::updateAbilities()
 		for (auto eff : itm->getEffectFromMAH())
 			autoAttack.addEffect(eff);
 }
-bool Player::pickup(Item * item)
+bool Player::pickup_ITM(Item * item)
 {
 	if (inventory.pickupItem(item))
 	{
@@ -400,10 +412,22 @@ bool Player::pickup(Item * item)
 	}
 	return false;
 }
+bool Player::pickup_SCR(Scroll * scroll)
+{
+	if (inventory.pickupScroll(scroll))
+	{
+		this->game->sndmgr.playSound("pickup1");
+		return true;
+	}
+	return false;
+}
+bool Player::pickup_CON(Consumable * con)
+{
+	hud.addConsumable(con);
+	return true;
+}
 void Player::applyEff(AbEffect::Effect eff)
 {
-	eff.dur -= 1;
-	this->eStats = this->eStats + eff.stats;
 	if (eff.dur > 0)
 		effs.push_back(eff);
 }

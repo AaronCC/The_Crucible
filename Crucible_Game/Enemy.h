@@ -23,6 +23,7 @@ public:
 	int maxHp;
 	int lvl;
 	int mf;
+	Ability* queuedAbility = nullptr;
 	sf::Sprite sprite;
 	sf::Vector2i tilePos;
 	sf::Vector2f pos;
@@ -40,6 +41,10 @@ public:
 
 	std::vector<sf::Vector2i> wayPoints;
 
+	std::vector<Ability*> abilities;
+
+	bool losToPlayer;
+
 	std::pair<sf::Vector2i, sf::Vector2i> resolveTick(float tickCount);
 
 	void move(sf::Vector2i pos);
@@ -48,14 +53,14 @@ public:
 
 	std::string name;
 
-	Enemy(std::string spriteName, Game* game, sf::Vector2i pos, int hp)
-	{
+	Enemy(std::string spriteName, Game* game, sf::Vector2i pos, int hp, int lvl, Ability* attack)
+	{ 
 		this->game = game;
 		this->hp = hp;
 		this->maxHp = hp;
 		this->tilePos = pos;
 		this->mf = 500;
-		this->lvl = 1;
+		this->lvl = lvl;
 		this->pos = { (float)pos.x*TILE_SIZE,(float)pos.y*TILE_SIZE };
 		this->sprite.setTexture(this->game->texmgr.getRef(spriteName));
 		this->sprite.setOrigin(TILE_SIZE / 2, TILE_SIZE / 2);
@@ -74,10 +79,14 @@ public:
 		this->qDmg = 0;
 		this->speed = 1;
 		this->name = "Ogre";
-		ability = Ability(this->game, game->texmgr.getRef("slash"), "slash_icon",
-			{ 0,3,0.1f }, { 32,32 }, 10, 2, "slash",
-			"Melee slash in an arc");
-		ability.setInfo(Ability::AbInfo(0, 1));
+		losToPlayer = false;
+		ability = Ability(*attack);
+		/*ability = Ability(this->game, game->texmgr.getRef("poison"), "poison_icon",
+			{ 0,3,0.1f }, { 32,32 }, 0, 2, "Default Attack",
+			"Melee slash in an arc");*/
+		ability.setSound("enemyattack1");
+		/* ability.addEffect(AbEffect(AbEffect::Effect({}, { AbEffect::DamageType::POIS,2,10 }, 1, AbEffect::EffType::INST)));
+		ability.setInfo(Ability::AbInfo(0, 1));*/
 	}
 
 	void dealDamage(int dmg);
@@ -86,8 +95,10 @@ public:
 
 	void applyEff(AbEffect::Effect eff);
 
-	bool update();
-	void draw();
+	bool update(float dt);
+	void draw(float dt);
+
+	void drawAbility(float dt);
 
 	~Enemy();
 };

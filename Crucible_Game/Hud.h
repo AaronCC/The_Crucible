@@ -382,6 +382,7 @@ public:
 		return -1;
 	}
 	bool pickupItem(Item* item);
+	bool pickupScroll(Scroll * item);
 	bool eqToSlot(int eqIndex, std::vector<InvSlot>& slots, std::vector<std::pair<InvSlot, sf::Text>>& eqSlots)
 	{
 		if (eqSlots[eqIndex].first.getItem() == nullptr)
@@ -769,6 +770,8 @@ public:
 	sf::Vector2f slotStart;
 	float slotW = 32.f;
 
+	sf::Text hpText;
+
 	std::vector<sf::Text> gameMsgs;
 	enum ShowState {
 		SHOW_MSG,
@@ -832,6 +835,7 @@ public:
 		slotText[A_SLOT_COUNT - 2].setString("LMB");
 		slotText[A_SLOT_COUNT - 1].setString("RMB");
 
+
 		unsigned int eCount = 0;
 		this->game = game;
 		/* Health */
@@ -844,6 +848,14 @@ public:
 		elements[H_POOL].setPosition(15.f, game->windowSize.y - 15.f);
 		elements[H_POOL].setOrigin(0, elements[H_POOL].getTexture()->getSize().y);
 		eCount++;
+
+		hpText.setFont(game->fonts["main_font"]);
+		hpText.setString("-1/-1");
+		hpText.setFillColor(sf::Color::White);
+		hpText.setOutlineThickness(1);
+		sf::Vector2f hglobepos = elements[H_GLOBE].getPosition();
+		hpText.setCharacterSize(12);
+		hpText.setPosition({ hglobepos.x + 8.f, hglobepos.y - 40.f });
 
 		slotStart = { 95.f, game->windowSize.y - 15.f };
 		for (int i = 0; i < A_SLOT_COUNT; i++)
@@ -880,7 +892,7 @@ public:
 		msgTitle = sf::Text("Game Messages", game->fonts["main_font"], tSize);
 		msgTitle.setPosition({ msgBack.getPosition().x, msgBack.getPosition().y - 30 });
 		msgTitle.setFillColor(sf::Color::White);
-		conText = sf::Text("E", game->fonts["main_font"], tSize);
+		conText = sf::Text("R", game->fonts["main_font"], tSize);
 		conText.setOutlineThickness(1);
 		conPos = { slotStart + sf::Vector2f(slotW * 9,-slotW) };
 		conBack.setSize({ TILE_SIZE, TILE_SIZE });
@@ -888,12 +900,13 @@ public:
 		conBack.setOutlineThickness(1);
 		conBack.setFillColor(sf::Color::Black);
 		conText.setPosition(conPos - sf::Vector2f{ 0,tSize+2 });
-		consumables.push_back({ game,"hpot",{ 10,Consumable::ConType::H_POT } });
-		consumables.push_back({ game,"ppot",{ 0,Consumable::ConType::S_POT } });
+		consumables.push_back({ game,"hpot",{ 10,Consumable::ConType::H_POT },"Lesser Health Potion" });
+		consumables.push_back({ game,"ppot",{ 0,Consumable::ConType::S_POT },"Lesser Stat Potion" });
 		consumables[0].setSpritePos(conPos);
 		conAt = 0;
 	}
 
+	void addConsumable(Consumable* con) { consumables.push_back(*con); }
 	bool hoverCon(sf::Vector2f mPos);
 	void showCons();
 
@@ -902,7 +915,7 @@ public:
 	void checkHover(sf::View view);
 	void update(float dt);
 
-	void updateHealth(float percent);
+	void updateHealth(int at, int max, float percent);
 
 	Consumable::ConEffect useConsumable();
 

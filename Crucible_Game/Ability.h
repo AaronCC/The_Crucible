@@ -71,6 +71,7 @@ public:
 	};
 	Effect eff;
 
+
 	virtual Effect getEffects() { return eff; }
 
 	AbEffect(Effect eff)
@@ -117,6 +118,8 @@ public:
 	std::vector<sf::Vector2i> getActiveTiles(sf::Vector2i pPos, sf::Vector2i mPos);
 
 	void pushPosition(sf::Vector2f pos);
+
+	void setSound(std::string sound) { this->soundeffect = sound; }
 
 	sf::Sprite sprite;
 	AnimationHandler animHandler;

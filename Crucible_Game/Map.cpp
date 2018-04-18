@@ -1,8 +1,6 @@
 #include "Map.h"
 #include <time.h>
-#include "Dungeon.h"
-
-sf::Vector2i Map::hasLineOfSight(sf::Vector2i from, sf::Vector2i to)
+sf::Vector2i Map::truncLineOfSight(sf::Vector2i from, sf::Vector2i to)
 {
 	sf::Vector2i dir = to - from;
 	sf::Vector2i atLocal;
@@ -29,7 +27,72 @@ sf::Vector2i Map::hasLineOfSight(sf::Vector2i from, sf::Vector2i to)
 	}
 	return to;
 }
+bool Map::hasLineOfSight(sf::Vector2i from, sf::Vector2i to)
+{
+	sf::Vector2i dir = to - from;
+	sf::Vector2i atLocal;
+	sf::Vector2i diff;
+	sf::Vector2i nextLocal;
+	sf::Vector2f ray = { dir.x * 32.f, dir.y * 32.f };
+	sf::Vector2f at = { from.x * 32.f, from.y * 32.f };
+	float mag = helper.magnitude(ray);
+	sf::Vector2f rayI = helper.normalized(ray, mag) * 12.f;
+	atLocal = globalToTilePos(at);
+	while (atLocal != to)
+	{
+		while (globalToTilePos(at) == atLocal)
+		{
+			at += rayI;
+		}
+		nextLocal = globalToTilePos(at);
+		diff += nextLocal - atLocal;
+		if (std::abs(diff.x) >= std::abs(dir.x) && std::abs(diff.y) >= std::abs(dir.y) && getTile(to.x, to.y)->passable)
+			return true;
+		if (!getTile(nextLocal.x, nextLocal.y)->passable)
+			return false;
+		atLocal = nextLocal;
+	}
+	return false;
+}
+void Map::drawL2(sf::RenderWindow & window, float dt)
+{
+	// Get the camera's position
+	sf::Vector2f camPos = this->camera->view.getCenter();
+	sf::Vector2f center = camPos / 32.f;
+	// Calculate the start tile
+	sf::Vector2f drawStart = { (int)center.x - (drawSize.x / 2), (int)center.y - (drawSize.y / 2) };
+	// Clamp
+	drawStart.x = drawStart.x < 0 ? 0 : drawStart.x;
+	drawStart.y = drawStart.y < 0 ? 0 : drawStart.y;
+	// Calc end tile
+	sf::Vector2f drawEnd = { drawStart.x + drawSize.x, drawStart.y + drawSize.y };
+	// Clamp
+	drawEnd.x = drawEnd.x > width ? width : drawEnd.x;
+	drawEnd.y = drawEnd.y > height ? height : drawEnd.y;
+	for (auto t : actionText)
+		window.draw(t);
+	for (auto enemy : enemies)
+	{
+		if (!enemy->dead)
+			enemy->drawAbility(dt);
+	}
+	for (int y = drawStart.y; y < drawEnd.y; ++y)
+	{
+		for (int x = drawStart.x; x < drawEnd.x; ++x)
+		{
+			this->tiles[y*this->width + x].drawFoW(window, dt);
+		}
+	}
+	if (this->tiles[mouseIndex.y*this->width + mouseIndex.x].passable)
+		canSelect.draw(window, dt);
+	else
+		cantSelect.draw(window, dt);
 
+	for (auto text : hoverText)
+	{
+		window.draw(text);
+	}
+}
 void Map::draw(sf::RenderWindow & window, float dt)
 {
 	// Get the camera's position
@@ -53,34 +116,14 @@ void Map::draw(sf::RenderWindow & window, float dt)
 			this->tiles[y*this->width + x].draw(window, dt);
 		}
 	}
-
-	for (auto l : loot)
-	{
-		l->draw(this->game->window);
-	}
 	for (auto enemy : enemies)
 	{
 		if (!enemy->dead)
-			enemy->draw();
+			enemy->draw(dt);
 	}
-	for (auto t : actionText)
-		window.draw(t);
-	for (int y = drawStart.y; y < drawEnd.y; ++y)
+	for (auto l : loot)
 	{
-		for (int x = drawStart.x; x < drawEnd.x; ++x)
-		{
-			this->tiles[y*this->width + x].drawFoW(window, dt);
-		}
-	}
-
-	if (this->tiles[mouseIndex.y*this->width + mouseIndex.x].passable)
-		canSelect.draw(window, dt);
-	else
-		cantSelect.draw(window, dt);
-
-	for (auto text : hoverText)
-	{
-		window.draw(text);
+		l->draw(this->game->window);
 	}
 	return;
 }
@@ -107,16 +150,19 @@ void Map::update(float dt)
 	{
 		Enemy& enemy = *enemies[i];
 
-		if (enemy.update())
+		if (enemy.update(dt))
 		{
 			getTile(enemy.tilePos.x, enemy.tilePos.y)->occupied = false;
 			oldPosBuffer.push_back(enemy.tilePos);
 			Loot* newloot = new Loot(enemy.mf, enemy.lvl, enemy.tilePos, this->game, this->itemGenerator);
-			if (tLoot[enemy.tilePos.y * this->width + enemy.tilePos.x][0] == nullptr)
-				tLoot[enemy.tilePos.y * this->width + enemy.tilePos.x][0] = newloot;
-			else
-				tLoot[enemy.tilePos.y * this->width + enemy.tilePos.x].push_back(newloot);
-			loot.push_back(newloot);
+			if (newloot->type != Loot::LootType::NONE)
+			{
+				if (tLoot[enemy.tilePos.y * this->width + enemy.tilePos.x][0] == nullptr)
+					tLoot[enemy.tilePos.y * this->width + enemy.tilePos.x][0] = newloot;
+				else
+					tLoot[enemy.tilePos.y * this->width + enemy.tilePos.x].push_back(newloot);
+				loot.push_back(newloot);
+			}
 			enemy.tilePos = { 0,0 };
 		}
 	}
@@ -124,7 +170,6 @@ void Map::update(float dt)
 	{
 		tEnemies[pos.y*this->width + pos.x] = nullptr;
 	}
-	Loot* loot;
 	if (oldMouseIndex != mouseIndex)
 		updateHoverText();
 	oldMouseIndex = mouseIndex;
@@ -137,7 +182,7 @@ void Map::updateHoverText()
 	if (getTile(mouseIndex.x, mouseIndex.y)->occupied)
 	{
 		Enemy* enemy = tEnemies[mouseIndex.y*this->width + mouseIndex.x];
-		if (enemy != nullptr)
+		if (enemy != nullptr && enemy->active)
 		{
 			std::string name = enemy->name;
 			std::string hp = std::to_string(enemy->hp);
@@ -155,11 +200,11 @@ void Map::updateHoverText()
 	}
 	else if ((loot = tLoot[mouseIndex.y*this->width + mouseIndex.x][0]) != nullptr)
 	{
-		std::string name = loot->item->name;
+		std::string name = loot->getName();
 		hoverText.clear();
 		hoverText.push_back(sf::Text(name, game->fonts["main_font"], tSize));
 		hoverText[0].setPosition((mouseIndex.x * tileSize.x) - (TILE_SIZE / 2), (mouseIndex.y * tileSize.y) - (tSize * 2.5));
-		switch (loot->item->rarity)
+		switch (loot->getRarity())
 		{
 		case Item::Rarity::NORM:
 			hoverText[0].setFillColor(NORM_COLOR);
@@ -178,7 +223,7 @@ void Map::updateHoverText()
 
 		if (sf::Keyboard::isKeyPressed(sf::Keyboard::LAlt))
 		{
-			std::vector<std::pair<sf::Color, std::string>> info = loot->item->getBuffString();
+			std::vector<std::pair<sf::Color, std::string>> info = loot->getBuffString();
 			int count = 0;
 			for (auto i : info)
 			{
@@ -270,7 +315,9 @@ void Map::eraseLoot(sf::Vector2i pos)
 }
 void Map::resolveAction(Player* player)
 {
-	Item * itm;
+	Item * itm = nullptr;
+	Scroll * scr = nullptr;
+	Consumable * con = nullptr;
 	Loot * newLoot;
 	switch (action)
 	{
@@ -278,13 +325,43 @@ void Map::resolveAction(Player* player)
 		newLoot = tLoot[player->tilePos.y *this->width + player->tilePos.x][0];
 		if (newLoot != nullptr)
 		{
-			itm = newLoot->item;
-			if (itm != nullptr)
-				if (player->pickup(itm))
+			switch (newLoot->type)
+			{
+			case Loot::LootType::ITEM:
+				itm = newLoot->item;
+				break;
+			case Loot::LootType::SCROLL:
+				scr = newLoot->scroll;
+				break;
+			case Loot::LootType::CONSUMABLE:
+				con = newLoot->con;
+				break;
+			default:
+				break;
+			}
+			if (itm != nullptr) {
+				if (player->pickup_ITM(itm))
 				{
 					eraseLoot(player->tilePos);
 					updateActionText(player->tilePos);
 				}
+			}
+			else if (scr != nullptr)
+			{
+				if (player->pickup_SCR(scr))
+				{
+					eraseLoot(player->tilePos);
+					updateActionText(player->tilePos);
+				}
+			}
+			else if (con != nullptr)
+			{
+				if (player->pickup_CON(con))
+				{
+					eraseLoot(player->tilePos);
+					updateActionText(player->tilePos);
+				}
+			}
 		}
 		break;
 	default:
@@ -302,10 +379,10 @@ void Map::updateActionText(sf::Vector2i playerPos)
 		actionText[0].setFillColor(sf::Color::White);
 		actionText[0].setOutlineThickness(1);
 		actionText[0].setPosition((playerPos.x * tileSize.x) - (TILE_SIZE / 2), (playerPos.y * tileSize.y) - (tSize * 3.5));
-		std::string name = newLoot->item->name;
+		std::string name = newLoot->getName();
 		actionText.push_back(sf::Text(name, game->fonts["main_font"], tSize));
 		actionText[1].setPosition((playerPos.x * tileSize.x) - (TILE_SIZE / 2), (playerPos.y * tileSize.y) - (tSize * 2.5));
-		switch (newLoot->item->rarity)
+		switch (newLoot->getRarity())
 		{
 		case Item::Rarity::NORM:
 			actionText[1].setFillColor(NORM_COLOR);
@@ -330,7 +407,7 @@ void Map::updateActionText(sf::Vector2i playerPos)
 		actionText[0].setOutlineThickness(1);
 		actionText[0].setPosition((playerPos.x * tileSize.x) - (TILE_SIZE / 2), (playerPos.y * tileSize.y) - (tSize * 3.5));
 	}
-	else if(getTile(playerPos.x, playerPos.y)->tileVariant == 6)
+	else if (getTile(playerPos.x, playerPos.y)->tileVariant == 6)
 	{
 		actionText.push_back(sf::Text("[r] go down", game->fonts["main_font"], tSize));
 		actionText[0].setFillColor(sf::Color::White);
@@ -350,8 +427,9 @@ void Map::updateActionText(sf::Vector2i playerPos)
 //	return aEnemies;
 //}
 
-void Map::updateEntityAI(float tickCount, sf::Vector2i pPos, PathFinder* pf)
+std::vector<AbEffect::Effect> Map::updateEntityAI(float _tickCount, sf::Vector2i pPos, PathFinder* pf)
 {
+	std::vector<AbEffect::Effect> effs;
 	for (auto point : entityOccToClear)
 	{
 		getTile(point.x, point.y)->occupied = false;
@@ -362,13 +440,21 @@ void Map::updateEntityAI(float tickCount, sf::Vector2i pPos, PathFinder* pf)
 		Enemy* enemy = aEnemies[i];
 		if (enemy->dead)
 			continue;
-		sf::Vector2i end = enemy->updateAI(tickCount, pPos, pf);
+		if (enemy->tickCount + _tickCount >= enemy->ability.tickCost)
+			enemy->losToPlayer = hasLineOfSight(enemy->tilePos, pPos);
+		sf::Vector2i end = enemy->updateAI(_tickCount, pPos, pf);
+		if (enemy->queuedAbility != nullptr)
+		{
+			for (auto eff : enemy->ability.getEffects())
+				effs.push_back(eff);
+		}
 		getTile(end.x, end.y)->occupied = true;
 		if (end != enemy->tilePos)
 		{
 			entityOccToClear.push_back(end);
 		}
 	}
+	return effs;
 }
 
 void Map::resolveEntityAI(float tickCount)
@@ -423,6 +509,7 @@ void Map::resolveEntityAI(float tickCount)
 }
 void Map::loadCave()
 {
+	level++;
 	width = 50;
 	height = 50;
 	tEnemies.clear();
@@ -436,7 +523,7 @@ void Map::loadCave()
 	}
 	int* map = new int[width*height];
 	CaveGen cave(map, width, height, 3, 4, 4);
-	std::map<int,std::vector<sf::Vector2i>> caves = cave.flood();
+	std::map<int, std::vector<sf::Vector2i>> caves = cave.flood();
 	int max = 0, maxCave = -1;
 	for (auto c : caves)
 	{
@@ -488,8 +575,10 @@ void Map::loadCave()
 			}
 			case Dungeon::Tile::UpStairs:
 			{
-				this->tiles[y*this->width + x].tileVariant = 5;
+				this->tiles[y*this->width + x].tileVariant = 0;
 				break;
+				/*this->tiles[y*this->width + x].tileVariant = 5;
+				break;*/
 			}
 			case Dungeon::Tile::DownStairs:
 			{
@@ -510,8 +599,9 @@ void Map::loadCave()
 }
 void Map::loadDungeon()
 {
-	loadCave();
-	return;
+	level++;
+	//loadCave();
+	//return;
 	width = 79;
 	height = 24;
 	tEnemies.clear();
@@ -526,7 +616,8 @@ void Map::loadDungeon()
 	Dungeon dungeon(width, height);
 	dungeon.generate(70);
 	dungeon.print();
-	std::vector<Dungeon::Entity> entities = dungeon.getEntities();
+	entities.clear();
+	entities = dungeon.getEntities();
 	tiles.reserve(width * height);
 	sf::Vector2i pos = { 0,0 };
 	this->spawnPos = { width / 2, (height / 2) + 1 };
@@ -587,12 +678,17 @@ void Map::loadDungeon()
 		pos.x -= tileSize.x * width;
 		pos.y += tileSize.y;
 	}
+	
+}
+
+void Map::populateDungeon()
+{
 	for (auto e : entities)
 	{
 		switch (e.id)
 		{
 		case 'd':
-			enemies.push_back(new Enemy("ogre", game, { e.x,e.y }, 10));
+			enemies.push_back(new Enemy("ogre", game, { e.x,e.y }, 10, level, itemGenerator->makeEnemyAbility(level, Item::Rarity::MAGIC)));
 			tEnemies[e.y*this->width + e.x] = enemies[enemies.size() - 1];
 			getTile(e.x, e.y)->occupied = true;
 			break;

@@ -125,6 +125,7 @@ void Hud::draw(float dt)
 		}
 	}
 	this->game->window.draw(conText);
+	this->game->window.draw(hpText);
 	if (consumables.size() > 0)
 	{
 		consumables[0].draw(this->game->window);
@@ -203,13 +204,15 @@ void Hud::update(float dt)
 	}
 }
 
-void Hud::updateHealth(float percent)
+void Hud::updateHealth(int at, int max, float percent)
 {
 	sf::IntRect hRect = elements[H_GLOBE].getTextureRect();
 	int newH = (1.f - percent)*(float)hRect.height;
 	elements[H_POOL].setTextureRect({ 0, newH,hRect.width,(int)(hRect.height * percent) });
 	sf::Vector2f pos = elements[H_GLOBE].getPosition();
 	elements[H_POOL].setPosition(pos.x, pos.y + newH);
+
+	hpText.setString(std::to_string(at) + "/" + std::to_string(max));
 }
 
 Consumable::ConEffect Hud::useConsumable() {
@@ -273,7 +276,16 @@ bool Inventory::pickupItem(Item * item)
 	}
 	return false;
 }
-
+bool Inventory::pickupScroll(Scroll * item)
+{
+	int slot = firstEmptySlot(scrollSlots);
+	if (slot != -1)
+	{
+		scrollSlots[slot].setItem(item);
+		return true;
+	}
+	return false;
+}
 void Inventory::draw()
 {
 	this->game->window.draw(slider);

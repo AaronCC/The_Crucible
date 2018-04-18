@@ -18,6 +18,9 @@ void Tile::draw(sf::RenderWindow& window, float dt)
 	/* Draw the tile */
 	window.draw(this->sprite);
 
+	if (occupied)
+		window.draw(this->fowSprite);
+
 	/*if (occupied)
 		window.draw(this->fowSprite);*/
 	return;

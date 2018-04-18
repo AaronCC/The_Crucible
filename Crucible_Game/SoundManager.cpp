@@ -41,6 +41,7 @@ sf::Music & SoundManager::getMusicRef(const std::string & music)
 		this->musics.at(playing).stop();
 	this->musics.at(music).setVolume(25);
 	this->musics.at(music).play();
+	this->musics.at(music).setLoop(true);
 	playing = music;
 	return this->musics.at(music);
 }

@@ -1,3 +1,5 @@
--- TO DO --
-Asset loading / unloading / tracking
-
+fix eth enemy bug (move onto each other, untargetable)
+consumable generator
+enemy variety
+(erase bug?)
+Populate/loot

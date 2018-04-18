@@ -8,6 +8,7 @@
 #include "PathFinder.h"
 #include "CaveGen.h"
 #include "Loot.h"
+#include "Dungeon.h"
 
 class Map
 {
@@ -25,6 +26,9 @@ public:
 	sf::Vector2f drawSize;
 	std::vector<sf::Text> hoverText;
 	std::vector<sf::Text> actionText;
+
+	int level = 0;
+
 	enum Action {
 		PICKUP,
 		NONE
@@ -35,6 +39,7 @@ public:
 	Tile canSelect;
 	Tile cantSelect;
 	ItemGenerator* itemGenerator;
+	std::vector<Dungeon::Entity> entities;
 
 	//Tile player;
 	Game* game;
@@ -46,7 +51,11 @@ public:
 	sf::Vector2i getSelectPos();
 	sf::Vector2i mouseIndex;
 	Helper helper;
-	sf::Vector2i hasLineOfSight(sf::Vector2i from, sf::Vector2i to);
+	sf::Vector2i truncLineOfSight(sf::Vector2i from, sf::Vector2i to);
+
+	bool hasLineOfSight(sf::Vector2i from, sf::Vector2i to);
+
+	void drawL2(sf::RenderWindow & window, float dt);
 
 	void draw(sf::RenderWindow & window, float dt);
 	sf::Vector2i globalToTilePos(sf::Vector2f global);
@@ -61,13 +70,15 @@ public:
 
 //	std::vector<Enemy*> getEnemiesAtPoint(sf::Vector2i point);
 
-	void updateEntityAI(float tickCount, sf::Vector2i pPos, PathFinder* pf);
+	std::vector<AbEffect::Effect> updateEntityAI(float tickCount, sf::Vector2i pPos, PathFinder* pf);
 
 	void resolveEntityAI(float tickCount);
 
 	void loadCave();
 
 	void Map::loadDungeon();
+
+	void populateDungeon();
 
 	Enemy * getEnemyAt(int x, int y);
 

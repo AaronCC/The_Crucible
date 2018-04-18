@@ -1,3 +1,5 @@
 swordslash media/swordslash.wav
 death1 media/death1.wav
 pickup1 media/pickup1.wav
+buff media/buff.wav
+enemyattack1 media/enemyattack1.wav

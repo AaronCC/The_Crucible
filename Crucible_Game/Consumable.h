@@ -10,6 +10,7 @@ public:
 		H_POT,
 		S_POT
 	};
+	std::string name;
 	sf::RectangleShape back;
 	Game* game;
 	struct ConEffect {
@@ -41,9 +42,10 @@ public:
 		return false;
 	}
 	void draw(sf::RenderWindow & window);
-	Consumable(Game* game, std::string texName, ConEffect eff)
+	Consumable(Game* game, std::string texName, ConEffect eff, std::string name)
 		: effect(eff) {
 		this->game = game;
+		this->name = name;
 		this->sprite.setTexture(this->game->texmgr.getRef(texName));
 		back.setSize({ TILE_SIZE, TILE_SIZE });
 		back.setOutlineThickness(1);
