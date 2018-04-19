@@ -6,6 +6,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include "Game.h"
+#include "Consumable.h"
 #include <iostream>
 #include <fstream>
 #include <sstream>
@@ -344,9 +345,11 @@ public:
 
 	Scroll * makeScroll(int aLvl, float mf);
 
-	Ability * makeEnemyAbility(int aLvl, Item::Rarity rarity);
+	Ability * makeEnemyAbility(int aLvl, Item::Rarity rarity, bool melee);
 
 	bool canRollAf(Item::SlotType type, AF af);
+
+	Consumable * makeConsumable(int aLvl);
 
 	Item::Rarity getRarity(float mf);
 

@@ -10,9 +10,12 @@ public:
 		H_POT,
 		S_POT
 	};
+	int ilvl;
+
 	std::string name;
 	sf::RectangleShape back;
 	Game* game;
+
 	struct ConEffect {
 		int v1;
 		ConType type;
@@ -42,10 +45,11 @@ public:
 		return false;
 	}
 	void draw(sf::RenderWindow & window);
-	Consumable(Game* game, std::string texName, ConEffect eff, std::string name)
+	Consumable(Game* game, std::string texName, ConEffect eff, std::string name, int ilvl)
 		: effect(eff) {
 		this->game = game;
 		this->name = name;
+		this->ilvl = ilvl;
 		this->sprite.setTexture(this->game->texmgr.getRef(texName));
 		back.setSize({ TILE_SIZE, TILE_SIZE });
 		back.setOutlineThickness(1);

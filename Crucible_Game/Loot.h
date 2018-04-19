@@ -60,6 +60,7 @@ public:
 			this->scroll = itemGenerator->makeScroll(ilvl, mf);
 			break;
 		case CONSUMABLE:
+			this->con = itemGenerator->makeConsumable(ilvl);
 			break;
 		case NONE:
 			break;

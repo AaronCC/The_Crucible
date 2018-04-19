@@ -58,13 +58,28 @@ void Hud::equipCon() {
 	showCons();
 }
 
+void Hud::addConsumable(Consumable * con)
+{
+	for (int i = 0; i < consumables.size(); i++)
+	{
+		Consumable& _con = consumables[i];
+		if (con->name == _con.name && con->ilvl == _con.ilvl)
+		{
+			_con.add();
+			return;
+		}
+	}
+	con->setSpritePos(conPos);
+	consumables.push_back(*con);
+}
+
 bool Hud::hoverCon(sf::Vector2f mPos)
 {
 	sf::Vector2f size = { slotW, slotW };
 	sf::Vector2f pos = conPos;
 	if (conHover)
 	{
-		int diff = (consumables.size()-1) * slotW;
+		int diff = (consumables.size() - 1) * slotW;
 		size.y += diff;
 		pos.y -= diff;
 	}
@@ -75,7 +90,7 @@ bool Hud::hoverCon(sf::Vector2f mPos)
 		mPos.y <= pos.y + size.y
 		)
 	{
-		conAt = std::floor(((conPos.y +slotW) - mPos.y) / slotW);
+		conAt = std::floor(((conPos.y + slotW) - mPos.y) / slotW);
 		return true;
 	}
 	return false;
@@ -178,7 +193,7 @@ void Hud::checkHover(sf::View view)
 }
 void Hud::update(float dt)
 {
-	
+
 	for (int cd = 0; cd < A_SLOT_COUNT; cd++)
 	{
 		if (cooldowns[cd].active)

@@ -900,13 +900,13 @@ public:
 		conBack.setOutlineThickness(1);
 		conBack.setFillColor(sf::Color::Black);
 		conText.setPosition(conPos - sf::Vector2f{ 0,tSize+2 });
-		consumables.push_back({ game,"hpot",{ 10,Consumable::ConType::H_POT },"Lesser Health Potion" });
-		consumables.push_back({ game,"ppot",{ 0,Consumable::ConType::S_POT },"Lesser Stat Potion" });
+		consumables.push_back({ game,"hpot",{ 10,Consumable::ConType::H_POT },"Meager Health Potion" ,1});
+		consumables.push_back({ game,"ppot",{ 0,Consumable::ConType::S_POT },"Meager Stat Potion" ,1});
 		consumables[0].setSpritePos(conPos);
 		conAt = 0;
 	}
 
-	void addConsumable(Consumable* con) { consumables.push_back(*con); }
+	void addConsumable(Consumable* con);
 	bool hoverCon(sf::Vector2f mPos);
 	void showCons();
 

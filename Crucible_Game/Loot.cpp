@@ -21,7 +21,7 @@ std::string Loot::getName()
 	case SCROLL:
 		return scroll->name;
 	case CONSUMABLE:
-		return "CON_NAME";
+		return con->name;
 		//return con->name;
 	default:
 		return "NULL_LOOT";

@@ -56,7 +56,7 @@ sf::Vector2i Enemy::updateAI(float newTicks, sf::Vector2i playerPos, PathFinder*
 	sf::Vector2i diff = playerPos - tilePos;
 	std::pair<int, int> point = { tilePos.x, tilePos.y };
 	this->tickCount += newTicks;
-	if ((std::abs(diff.x) <= ability.info.range || std::abs(diff.y) <= ability.info.range) 
+	if ((std::abs(diff.x) <= ability.info.range && std::abs(diff.y) <= ability.info.range) 
 		&& losToPlayer && tickCount >= ability.tickCost)
 	{
 		tickCount -= ability.tickCost;

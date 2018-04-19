@@ -156,7 +156,7 @@ void ExploreState::handleInput()
 		}
 		case sf::Event::KeyReleased:
 		{
-			
+
 		}
 		default: break;
 		}
@@ -314,7 +314,7 @@ void ExploreState::handleInput()
 		Tile* tile = map->getTile(point.first, point.second);
 		if (tile->passable)
 		{
-			act = true; 
+			act = true;
 			if (map->getEnemyAt(point.first, point.second) != nullptr)
 			{
 				player.queueAutoAttack();
@@ -342,20 +342,23 @@ void ExploreState::handleInput()
 	}
 	else if (!sf::Keyboard::isKeyPressed(sf::Keyboard::D))
 		old_dState = false;
-	if (sf::Keyboard::isKeyPressed(sf::Keyboard::R))
+	if (sf::Keyboard::isKeyPressed(sf::Keyboard::F))
 	{
-		if (map->getTile(player.tilePos.x, player.tilePos.y)->tileVariant == 6)
+		if (this->map->getTile(player.tilePos.x, player.tilePos.y)->tileVariant == 6)
 		{
-			std::random_device rd;
-			std::mt19937 gen(rd());
-			std::uniform_int_distribution<> dist(0, 1);
-			bool cave = dist(gen);
-			this->map = new Map(game, &camera);
-			if (cave)
-				map->loadCave();
-			else
-				map->loadDungeon();
-			pf = PathFinder(map->getTiles(), map->height, map->width);
+			//std::random_device rd;
+			//std::mt19937 gen(rd());
+			//std::uniform_int_distribution<> dist(0, 1);
+			//bool cave = dist(gen);
+			map = new Map(game, &camera);
+			map->loadDungeon();
+			pf = PathFinder(this->map->getTiles(), this->map->width, this->map->height);
+			this->old_mLeftState = true;
+			this->player.updateTilePos();
+			map->getTile(player.tilePos.x, player.tilePos.y)->occupied = true;
+			map->itemGenerator = &player.inventory.itemGenerator;
+			map->populateDungeon();
+			resolveFoW();
 		}
 	}
 	this->player.handleInput();

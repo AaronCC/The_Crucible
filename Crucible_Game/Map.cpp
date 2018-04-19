@@ -402,14 +402,14 @@ void Map::updateActionText(sf::Vector2i playerPos)
 	}
 	else if (getTile(playerPos.x, playerPos.y)->tileVariant == 5)
 	{
-		actionText.push_back(sf::Text("[r] go up", game->fonts["main_font"], tSize));
+		actionText.push_back(sf::Text("[f] go up", game->fonts["main_font"], tSize));
 		actionText[0].setFillColor(sf::Color::White);
 		actionText[0].setOutlineThickness(1);
 		actionText[0].setPosition((playerPos.x * tileSize.x) - (TILE_SIZE / 2), (playerPos.y * tileSize.y) - (tSize * 3.5));
 	}
 	else if (getTile(playerPos.x, playerPos.y)->tileVariant == 6)
 	{
-		actionText.push_back(sf::Text("[r] go down", game->fonts["main_font"], tSize));
+		actionText.push_back(sf::Text("[f] go down", game->fonts["main_font"], tSize));
 		actionText[0].setFillColor(sf::Color::White);
 		actionText[0].setOutlineThickness(1);
 		actionText[0].setPosition((playerPos.x * tileSize.x) - (TILE_SIZE / 2), (playerPos.y * tileSize.y) - (tSize * 3.5));
@@ -440,8 +440,7 @@ std::vector<AbEffect::Effect> Map::updateEntityAI(float _tickCount, sf::Vector2i
 		Enemy* enemy = aEnemies[i];
 		if (enemy->dead)
 			continue;
-		if (enemy->tickCount + _tickCount >= enemy->ability.tickCost)
-			enemy->losToPlayer = hasLineOfSight(enemy->tilePos, pPos);
+		enemy->losToPlayer = hasLineOfSight(enemy->tilePos, pPos);
 		sf::Vector2i end = enemy->updateAI(_tickCount, pPos, pf);
 		if (enemy->queuedAbility != nullptr)
 		{
@@ -659,11 +658,14 @@ void Map::loadDungeon()
 			}
 			case Dungeon::Tile::UpStairs:
 			{
-				this->tiles[y*this->width + x].tileVariant = 5;
+				this->tiles[y*this->width + x].tileVariant = 0;
 				break;
+				/*this->tiles[y*this->width + x].tileVariant = 5;
+				break;*/
 			}
 			case Dungeon::Tile::DownStairs:
 			{
+				spawnPos = { x + 1, y };
 				this->tiles[y*this->width + x].tileVariant = 6;
 				break;
 			}
@@ -678,17 +680,28 @@ void Map::loadDungeon()
 		pos.x -= tileSize.x * width;
 		pos.y += tileSize.y;
 	}
-	
+
 }
 
 void Map::populateDungeon()
 {
+	int roll;
+	Ability* ogreAbility = itemGenerator->makeEnemyAbility(level, Item::Rarity::MAGIC, true);
+	Ability* wraithAbility = itemGenerator->makeEnemyAbility(level, Item::Rarity::MAGIC, false);
 	for (auto e : entities)
 	{
 		switch (e.id)
 		{
 		case 'd':
-			enemies.push_back(new Enemy("ogre", game, { e.x,e.y }, 10, level, itemGenerator->makeEnemyAbility(level, Item::Rarity::MAGIC)));
+			roll = itemGenerator->getRand_100();
+			if (roll <= 50)
+			{
+				enemies.push_back(new Enemy("ogre", game, { e.x,e.y }, 10, level, ogreAbility,
+					"enemyattack1"));
+			}
+			else
+				enemies.push_back(new Enemy("wraith", game, { e.x,e.y }, 10, level, wraithAbility,
+					"enemyattack2"));
 			tEnemies[e.y*this->width + e.x] = enemies[enemies.size() - 1];
 			getTile(e.x, e.y)->occupied = true;
 			break;

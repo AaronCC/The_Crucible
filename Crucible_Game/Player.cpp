@@ -424,6 +424,7 @@ bool Player::pickup_SCR(Scroll * scroll)
 bool Player::pickup_CON(Consumable * con)
 {
 	hud.addConsumable(con);
+	this->game->sndmgr.playSound("pickup1");
 	return true;
 }
 void Player::applyEff(AbEffect::Effect eff)

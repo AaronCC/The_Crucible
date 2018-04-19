@@ -82,7 +82,7 @@ public:
 	std::vector<AbEffect> getEffectFromMAH() {
 		std::vector<AbEffect> effs;
 		for (auto dmg : damage)
-			effs.push_back(AbEffect(AbEffect::Effect({}, dmg, 1,AbEffect::EffType::INST)));
+			effs.push_back(AbEffect(AbEffect::Effect({}, dmg, 1, AbEffect::EffType::INST)));
 		return effs;
 	}
 	std::vector<std::string> getDamageString()
@@ -177,7 +177,7 @@ public:
 
 		std::vector<std::pair<sf::Color, std::string>> buffStr;
 		if (ability->info.range == 0)
-			buffStr.push_back({ sf::Color::White, "Buff"});
+			buffStr.push_back({ sf::Color::White, "Buff" });
 		else if (ability->info.range == 1)
 			buffStr.push_back({ sf::Color::White, "Melee" + ability->areadesc[(int)ability->info.area] });
 		else
@@ -191,19 +191,22 @@ public:
 			std::string min = std::to_string(eff.damage.min * eff.dur);
 			std::string max = std::to_string(eff.damage.max * eff.dur);
 			std::string type = damageStrings[eff.damage.type];
-			if (eff.dur == 1)
+			if (eff.type != AbEffect::EffType::BUFF && eff.type != AbEffect::EffType::DEBUFF)
 			{
-				if (min != max)
-					buffStr.push_back({ damageColors[eff.damage.type], min + "-" + max + " " + type });
+				if (eff.dur == 1)
+				{
+					if (min != max)
+						buffStr.push_back({ damageColors[eff.damage.type], min + "-" + max + " " + type });
+					else
+						buffStr.push_back({ damageColors[eff.damage.type], min + " " + type });
+				}
 				else
-					buffStr.push_back({ damageColors[eff.damage.type], min + " " + type });
-			}
-			else
-			{
-				if (min != max)
-					buffStr.push_back({ damageColors[eff.damage.type], min + "-" + max + " " + type + " over " + std::to_string(eff.dur) + " ticks" });
-				else
-					buffStr.push_back({ damageColors[eff.damage.type], min + " " + type + " over " + std::to_string(eff.dur) + " ticks" });
+				{
+					if (min != max)
+						buffStr.push_back({ damageColors[eff.damage.type], min + "-" + max + " " + type + " over " + std::to_string(eff.dur) + " ticks" });
+					else
+						buffStr.push_back({ damageColors[eff.damage.type], min + " " + type + " over " + std::to_string(eff.dur) + " ticks" });
+				}
 			}
 			Helper::Stats stats = eff.stats;
 			for (int i = 0; i < Helper::numbuffs; i++)

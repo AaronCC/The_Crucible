@@ -105,7 +105,7 @@ Scroll* ItemGenerator::makeScroll(int aLvl, float mf)
 	scroll = new Scroll(ab->name, Item::SlotType::SCR, ab, rarity);
 	return scroll;
 }
-Ability * ItemGenerator::makeEnemyAbility(int aLvl, Item::Rarity rarity)
+Ability * ItemGenerator::makeEnemyAbility(int aLvl, Item::Rarity rarity, bool melee)
 {
 	std::random_device rd;
 	std::mt19937 gen(rd());
@@ -162,9 +162,13 @@ Ability * ItemGenerator::makeEnemyAbility(int aLvl, Item::Rarity rarity)
 	dist.reset();
 	dist = std::uniform_int_distribution<>(0, Ability::numarea - 1);
 	area = Ability::Area::TARGET;
-	dist.reset();
-	dist = std::uniform_int_distribution<>(0, 3);
-	range = dist(gen) + 1;
+	if (melee)
+		range = 1;
+	else {
+		dist.reset();
+		dist = std::uniform_int_distribution<>(0, 2);
+		range = dist(gen) + 2;
+	}
 	Ability::AbInfo info{ area,range };
 	ab->setInfo(info);
 	for (auto eff : effs)
@@ -179,6 +183,13 @@ bool ItemGenerator::canRollAf(Item::SlotType type, AF af)
 			return false;
 	}
 	return true;
+}
+
+Consumable * ItemGenerator::makeConsumable(int aLvl)
+{
+	int roll = getRand_100();
+	std::string tiers[5] = { "Meager", "Lesser", "Medium", "Greater", "Mega" };
+	return new Consumable{ game,"hpot",{ 10*aLvl,Consumable::ConType::H_POT },tiers[aLvl - 1] + " Health Potion",aLvl };
 }
 
 Item * ItemGenerator::makeItem(int aLvl, float mf)

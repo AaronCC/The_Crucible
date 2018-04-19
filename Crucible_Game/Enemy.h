@@ -53,7 +53,7 @@ public:
 
 	std::string name;
 
-	Enemy(std::string spriteName, Game* game, sf::Vector2i pos, int hp, int lvl, Ability* attack)
+	Enemy(std::string spriteName, Game* game, sf::Vector2i pos, int hp, int lvl, Ability* attack, std::string atkSound)
 	{ 
 		this->game = game;
 		this->hp = hp;
@@ -84,7 +84,7 @@ public:
 		/*ability = Ability(this->game, game->texmgr.getRef("poison"), "poison_icon",
 			{ 0,3,0.1f }, { 32,32 }, 0, 2, "Default Attack",
 			"Melee slash in an arc");*/
-		ability.setSound("enemyattack1");
+		ability.setSound(atkSound);
 		/* ability.addEffect(AbEffect(AbEffect::Effect({}, { AbEffect::DamageType::POIS,2,10 }, 1, AbEffect::EffType::INST)));
 		ability.setInfo(Ability::AbInfo(0, 1));*/
 	}
