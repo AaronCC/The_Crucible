@@ -114,6 +114,7 @@ public:
 		position.x = std::round(position.x);
 		position.y = std::round(position.y);
 		this->sprite.setPosition(position);
+		updateTilePos();
 	}
 	void updateAnim(sf::View view);
 

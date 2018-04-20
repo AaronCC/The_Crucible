@@ -91,6 +91,8 @@ bool Hud::hoverCon(sf::Vector2f mPos)
 		)
 	{
 		conAt = std::floor(((conPos.y + slotW) - mPos.y) / slotW);
+		conHoverText.setString(consumables[conAt].name);
+		conHoverText.setPosition({ conPos.x + slotW + 4.f,conPos.y - (slotW*conAt) });
 		return true;
 	}
 	return false;
@@ -145,10 +147,13 @@ void Hud::draw(float dt)
 	{
 		consumables[0].draw(this->game->window);
 		if (conHover)
+		{
 			for (int i = 1; i < consumables.size(); i++)
 			{
 				consumables[i].draw(this->game->window);
 			}
+			this->game->window.draw(conHoverText);
+		}
 	}
 	else
 		this->game->window.draw(conBack);

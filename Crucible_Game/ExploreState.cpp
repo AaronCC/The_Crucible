@@ -350,6 +350,8 @@ void ExploreState::handleInput()
 			//std::mt19937 gen(rd());
 			//std::uniform_int_distribution<> dist(0, 1);
 			//bool cave = dist(gen);
+			int aLvl = map->level;
+			delete map;
 			map = new Map(game, &camera);
 			map->loadDungeon();
 			pf = PathFinder(this->map->getTiles(), this->map->width, this->map->height);
@@ -357,7 +359,9 @@ void ExploreState::handleInput()
 			this->player.updateTilePos();
 			map->getTile(player.tilePos.x, player.tilePos.y)->occupied = true;
 			map->itemGenerator = &player.inventory.itemGenerator;
+			map->level = aLvl + 1;
 			map->populateDungeon();
+			player.setPos(sf::Vector2f{ map->spawnPos.x*(float)TILE_SIZE,map->spawnPos.y*(float)TILE_SIZE });
 			resolveFoW();
 		}
 	}

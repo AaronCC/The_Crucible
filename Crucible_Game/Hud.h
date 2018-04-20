@@ -755,6 +755,7 @@ public:
 
 	sf::RectangleShape conBack;
 	std::vector<Consumable> consumables;
+	sf::Text conHoverText;
 	bool conHover = false;
 	int conAt;
 
@@ -904,6 +905,11 @@ public:
 		consumables.push_back({ game,"ppot",{ 0,Consumable::ConType::S_POT },"Meager Stat Potion" ,1});
 		consumables[0].setSpritePos(conPos);
 		conAt = 0;
+
+		conHoverText.setFont(game->fonts["main_font"]);
+		conHoverText.setString("NaN");
+		conHoverText.setCharacterSize(12);
+		conHoverText.setOutlineThickness(1);
 	}
 
 	void addConsumable(Consumable* con);
