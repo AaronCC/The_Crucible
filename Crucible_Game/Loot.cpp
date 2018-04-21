@@ -2,7 +2,7 @@
 
 Loot::LootType Loot::chooseType(int roll)
 {
-	if (roll <= 25)
+	if (roll <= 15)
 		return NONE;
 	else if (roll <= 50)
 		return CONSUMABLE;

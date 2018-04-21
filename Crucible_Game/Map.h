@@ -57,6 +57,8 @@ public:
 
 	void drawL2(sf::RenderWindow & window, float dt);
 
+	void drawL3(sf::RenderWindow & window, float dt);
+
 	void draw(sf::RenderWindow & window, float dt);
 	sf::Vector2i globalToTilePos(sf::Vector2f global);
 	void update(float dt);

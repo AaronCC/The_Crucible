@@ -87,11 +87,13 @@ void Map::drawL2(sf::RenderWindow & window, float dt)
 		canSelect.draw(window, dt);
 	else
 		cantSelect.draw(window, dt);
-
 	for (auto text : hoverText)
 	{
 		window.draw(text);
 	}
+}
+void Map::drawL3(sf::RenderWindow & window, float dt)
+{
 }
 void Map::draw(sf::RenderWindow & window, float dt)
 {
@@ -508,7 +510,6 @@ void Map::resolveEntityAI(float tickCount)
 }
 void Map::loadCave()
 {
-	level++;
 	width = 50;
 	height = 50;
 	tEnemies.clear();
@@ -598,7 +599,6 @@ void Map::loadCave()
 }
 void Map::loadDungeon()
 {
-	level++;
 	//loadCave();
 	//return;
 	width = 79;

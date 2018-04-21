@@ -478,11 +478,14 @@ public:
 		//	{ 0,2,0,-10 },
 		//	Item::SlotType::OFH);
 		//itemSlots[4].setItem(item);
-		for (int i = 0; i < 25; i++)
+		/*for (int i = 0; i < 25; i++)
 		{
 			Item* item = itemGenerator.makeItem(1, 500);
 			itemSlots[i].setItem(item);
-		}
+		}*/
+		itemSlots[0].setItem(itemGenerator.makeItem(0, Item::Rarity::NORM, Item::SlotType::MAH));
+		if(!itemSlots[0].getItem()->twoHanded)
+			itemSlots[1].setItem(itemGenerator.makeItem(0, Item::Rarity::NORM, Item::SlotType::OFH));
 		std::vector<std::string> eqNames = { "Head","Body","Main-hand","Off-hand","Ring","Amulet","Cloak","Belt" };
 		for (int i = 0; i < 8; i++)
 		{
@@ -520,8 +523,9 @@ public:
 			5));
 		slash->addEffect(eff);
 		slash->addEffect(eff2);*/
+		/*
 		for (int i = 0; i < 25; i++)
-			scrollSlots[i].setItem(itemGenerator.makeScroll(1, 500));
+			scrollSlots[i].setItem(itemGenerator.makeScroll(1, 500));*/
 		std::vector<std::string> scEqNames = { "1","2","3","4","5","6","LMB","RMB" };
 		for (int i = 0; i < A_SLOT_COUNT; i++)
 		{
@@ -902,8 +906,8 @@ public:
 		conBack.setOutlineThickness(1);
 		conBack.setFillColor(sf::Color::Black);
 		conText.setPosition(conPos - sf::Vector2f{ 0,tSize+2 });
-		consumables.push_back({ game,"hpot",{ 10,Consumable::ConType::H_POT },"Meager Health Potion" ,1});
-		consumables.push_back({ game,"ppot",{ 0,Consumable::ConType::S_POT },"Meager Stat Potion" ,1});
+		consumables.push_back({ game,"hpot",{ 10,Consumable::ConType::H_POT },"Meager Health Potion" ,0});
+		//consumables.push_back({ game,"ppot",{ 0,Consumable::ConType::S_POT },"Meager Stat Potion" ,1});
 		consumables[0].setSpritePos(conPos);
 		conAt = 0;
 

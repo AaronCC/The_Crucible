@@ -362,6 +362,7 @@ void ExploreState::handleInput()
 			map->level = aLvl + 1;
 			map->populateDungeon();
 			player.setPos(sf::Vector2f{ map->spawnPos.x*(float)TILE_SIZE,map->spawnPos.y*(float)TILE_SIZE });
+			fowCache.clear();
 			resolveFoW();
 		}
 	}

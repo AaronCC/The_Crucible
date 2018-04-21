@@ -189,7 +189,7 @@ Consumable * ItemGenerator::makeConsumable(int aLvl)
 {
 	int roll = getRand_100();
 	std::string tiers[5] = { "Meager", "Lesser", "Medium", "Greater", "Mega" };
-	return new Consumable{ game,"hpot",{ 10*aLvl,Consumable::ConType::H_POT },tiers[aLvl - 1] + " Health Potion",aLvl };
+	return new Consumable{ game,"hpot",{ 10*aLvl,Consumable::ConType::H_POT },tiers[aLvl] + " Health Potion",aLvl };
 }
 
 Item * ItemGenerator::makeItem(int aLvl, float mf)
@@ -206,7 +206,7 @@ Item * ItemGenerator::makeItem(int aLvl, float mf)
 
 	for (auto base : bases[type])
 	{
-		if (base.first < aLvl)
+		if (base.first <= aLvl)
 			basePool.push_back(base.second);
 	}
 	if (basePool.size() < 1)
@@ -286,3 +286,184 @@ Item * ItemGenerator::makeItem(int aLvl, float mf)
 	Item* itm = new Item{ bi.id,itmAfvs,bi,bi.t,rarity };
 	return itm;
 }
+
+Item * ItemGenerator::makeItem(int aLvl, float mf, Item::SlotType sType)
+{
+	Helper helper;
+	int offset = 0;
+	std::random_device rd;
+	std::mt19937 gen(rd());
+	std::uniform_int_distribution<> dist;
+	std::vector<BaseItem> basePool;
+	for (auto base : bases[sType])
+	{
+		if (base.first <= aLvl)
+			basePool.push_back(base.second);
+	}
+	if (basePool.size() < 1)
+		return nullptr;
+
+	dist.reset();
+	dist = std::uniform_int_distribution<>(0, basePool.size() - 1);
+	int rb = dist(gen);
+	BaseItem bi = basePool[rb];
+
+	Item::Rarity rarity = getRarity(mf);
+
+	int numAffixes = (int)rarity;
+	std::pair<int, int> afRange = helper.pRange;
+	int numP = 0, numS = 0, rndNumAffixes = 0;
+	do
+	{
+		dist.reset();
+		dist = std::uniform_int_distribution<>(0, numAffixes);
+		numP = dist(gen);
+		numS = dist(gen);
+	} while (numP < (1 + numAffixes - 1) && numS < (1 + numAffixes - 1));
+	std::map<AF, AFV> itmAfvs;
+	rndNumAffixes = numP;
+
+	std::map<AF, std::vector<std::pair<AFV, int>>> sufpools;
+	std::map<AF, std::vector<std::pair<AFV, int>>> prepools;
+	std::vector<AF> sufchoices;
+	std::vector<AF> prechoices;
+
+	for (int i = 0; i <= helper.sRange.second; i++)
+	{
+		for (auto eff : suffixes[(AF)i])
+		{
+			if (eff.second <= aLvl && canRollAf(bi.t, (AF)i))
+				sufpools[(AF)i].push_back({ eff.first,eff.second });
+		}
+		if (sufpools[(AF)i].size() > 0)
+			sufchoices.push_back((AF)i);
+	}
+	for (int i = helper.pRange.first; i <= helper.pRange.second; i++)
+	{
+		for (auto eff : prefixes[(AF)i])
+		{
+			if (eff.second <= aLvl && canRollAf(bi.t, (AF)i))
+				prepools[(AF)i].push_back({ eff.first,eff.second });
+		}
+		if (prepools[(AF)i].size() > 0)
+			prechoices.push_back((AF)i);
+	}
+
+	std::vector<AF> choices = prechoices;
+	std::map<AF, std::vector<std::pair<AFV, int>>> affixes = prepools;
+	for (int c = 0; c < 2; c++)
+	{
+		for (int i = 0; i < rndNumAffixes; i++)
+		{
+			dist.reset();
+			dist = std::uniform_int_distribution<>(0, choices.size() - 1);
+			int choice = dist(gen);
+			AF af = (AF)choices[choice];
+			dist.reset();
+			dist = std::uniform_int_distribution<>(0, affixes[af].size() - 1);
+			int rndAfv = dist(gen);
+			itmAfvs[af] = affixes[af][rndAfv].first;
+			affixes[af].erase(affixes[af].begin() + rndAfv);
+			if (affixes[af].size() == 0)
+				choices.erase(choices.begin() + choice);
+			if (choices.size() <= 0)
+				break;
+		}
+		affixes = sufpools;
+		choices = sufchoices;
+		afRange = helper.sRange;
+		rndNumAffixes = numS;
+	}
+	Item* itm = new Item{ bi.id,itmAfvs,bi,bi.t,rarity };
+	return itm;
+}
+
+Item * ItemGenerator::makeItem(int aLvl, Item::Rarity rarity, Item::SlotType sType)
+{
+	Helper helper;
+	int offset = 0;
+	std::random_device rd;
+	std::mt19937 gen(rd());
+	std::uniform_int_distribution<> dist;
+	std::vector<BaseItem> basePool;
+	for (auto base : bases[sType])
+	{
+		if (base.first <= aLvl)
+			basePool.push_back(base.second);
+	}
+	if (basePool.size() < 1)
+		return nullptr;
+
+	dist.reset();
+	dist = std::uniform_int_distribution<>(0, basePool.size() - 1);
+	int rb = dist(gen);
+	BaseItem bi = basePool[rb];
+
+	int numAffixes = (int)rarity;
+	std::pair<int, int> afRange = helper.pRange;
+	int numP = 0, numS = 0, rndNumAffixes = 0;
+	do
+	{
+		dist.reset();
+		dist = std::uniform_int_distribution<>(0, numAffixes);
+		numP = dist(gen);
+		numS = dist(gen);
+	} while (numP < (1 + numAffixes - 1) && numS < (1 + numAffixes - 1));
+	std::map<AF, AFV> itmAfvs;
+	rndNumAffixes = numP;
+
+	std::map<AF, std::vector<std::pair<AFV, int>>> sufpools;
+	std::map<AF, std::vector<std::pair<AFV, int>>> prepools;
+	std::vector<AF> sufchoices;
+	std::vector<AF> prechoices;
+
+	for (int i = 0; i <= helper.sRange.second; i++)
+	{
+		for (auto eff : suffixes[(AF)i])
+		{
+			if (eff.second <= aLvl && canRollAf(bi.t, (AF)i))
+				sufpools[(AF)i].push_back({ eff.first,eff.second });
+		}
+		if (sufpools[(AF)i].size() > 0)
+			sufchoices.push_back((AF)i);
+	}
+	for (int i = helper.pRange.first; i <= helper.pRange.second; i++)
+	{
+		for (auto eff : prefixes[(AF)i])
+		{
+			if (eff.second <= aLvl && canRollAf(bi.t, (AF)i))
+				prepools[(AF)i].push_back({ eff.first,eff.second });
+		}
+		if (prepools[(AF)i].size() > 0)
+			prechoices.push_back((AF)i);
+	}
+
+	std::vector<AF> choices = prechoices;
+	std::map<AF, std::vector<std::pair<AFV, int>>> affixes = prepools;
+	for (int c = 0; c < 2; c++)
+	{
+		for (int i = 0; i < rndNumAffixes; i++)
+		{
+			dist.reset();
+			dist = std::uniform_int_distribution<>(0, choices.size() - 1);
+			int choice = dist(gen);
+			AF af = (AF)choices[choice];
+			dist.reset();
+			dist = std::uniform_int_distribution<>(0, affixes[af].size() - 1);
+			int rndAfv = dist(gen);
+			itmAfvs[af] = affixes[af][rndAfv].first;
+			affixes[af].erase(affixes[af].begin() + rndAfv);
+			if (affixes[af].size() == 0)
+				choices.erase(choices.begin() + choice);
+			if (choices.size() <= 0)
+				break;
+		}
+		affixes = sufpools;
+		choices = sufchoices;
+		afRange = helper.sRange;
+		rndNumAffixes = numS;
+	}
+	Item* itm = new Item{ bi.id,itmAfvs,bi,bi.t,rarity };
+	return itm;
+}
+

@@ -52,7 +52,7 @@ void Camera::resizeView(float windowW, float windowH)
 
 	if (horizontalSpacing) {
 		sizeX = viewRatio / windowRatio;
-		posX = (1 - sizeX);
+		posX = (1 - sizeX) / 2.f;
 	}
 	else {
 		sizeY = windowRatio / viewRatio;

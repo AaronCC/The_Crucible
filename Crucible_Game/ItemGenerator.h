@@ -355,6 +355,10 @@ public:
 
 	Item * makeItem(int aLvl, float mf);
 
+	Item * makeItem(int aLvl, float mf, Item::SlotType type);
+
+	Item * makeItem(int aLvl, Item::Rarity rarity, Item::SlotType sType);
+
 };
 
 #endif
