@@ -214,7 +214,7 @@ public:
 			for (int i = 0; i < Helper::numbuffs; i ++)
 			{
 				int v1 = stats.buffs[(Helper::Affix)i].v1;
-				if (v1 != 0)
+				if (v1 != 0 && v1 != -1)
 				{
 					str.push_back(helper.buffnames[i] + " " + std::to_string(v1));
 				}

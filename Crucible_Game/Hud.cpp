@@ -183,7 +183,6 @@ void Hud::updateCD(unsigned int slot, float ticks)
 void Hud::checkHover(sf::View view)
 {
 	sf::Vector2f mousePos = this->game->window.mapPixelToCoords(sf::Mouse::getPosition(this->game->window), view);
-
 	if (showState == Hud::ShowState::SHOW_NONE)
 	{
 		if (oldMousePos != mousePos)
@@ -452,6 +451,7 @@ void Inventory::draw()
 
 void Inventory::update(sf::Vector2f mousePos)
 {
+	mousePos.y = mousePos.y >= MSG_BACK_H - invSlotH ? MSG_BACK_H - invSlotH : mousePos.y;
 	showInfo = false;
 	float offset = 0.f;
 	int index = 0;

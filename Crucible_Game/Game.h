@@ -21,6 +21,8 @@ public:
 	const sf::Vector2u windowSize{ 800, 600 };
 	std::stack<GameState*> states;
 
+	float hudTop;
+
 	void pushState(GameState* state);
 	void popState();
 	void changeState(GameState* state);

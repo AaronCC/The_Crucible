@@ -18,6 +18,7 @@
 #define CAN_SELECT "can_select"
 #define CANT_SELECT "cant_select"
 #define A_SLOT_COUNT 8
+#define MSG_BACK_H 500.f
 
 class InvSlot {
 #define xOffset 192
@@ -881,7 +882,7 @@ public:
 
 		cdSprite.setTexture(this->game->texmgr.getRef("cooldown_icon"));
 		cdSprite.setOrigin(0, slotW);
-		msgBack.setSize({ 800.f-8.f, 500.f });
+		msgBack.setSize({ 800.f-8.f, MSG_BACK_H });
 		//sf::Vector2u diff = this->game->windowSize - sf::Vector2u{ 800, 600 };
 		msgBack.setOrigin(0, 0);
 		msgBack.setPosition(4, 4);

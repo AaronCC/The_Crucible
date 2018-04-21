@@ -99,6 +99,8 @@ public:
 	void updateTilePos();
 	void updateAbilities(float dt);
 	void updateAbilities();
+	float applyAR(float dmg);
+	float applyRES(float dmg, AbEffect::DamageType type);
 	bool pickup_ITM(Item* item);
 	bool pickup_SCR(Scroll* item);
 	bool pickup_CON(Consumable* item);

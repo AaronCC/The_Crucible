@@ -6,11 +6,12 @@
 #define MAGIC_COLOR { 85, 121, 255 }
 #define RARE_COLOR { 196, 166, 60 }
 #define ULTRA_COLOR { 147, 47, 173 }
+#define DEX_MOD 5
 
 class Helper
 {
 public:
-
+	
 	static const int numbuffs = 20;
 	std::string buffnames[numbuffs] = {
 		"fire damage",
@@ -34,6 +35,12 @@ public:
 		"knowledge",
 		"attack"
 	};
+
+	float linearEq(float m, int x, float b, int mod)
+	{
+		float result = (m * (x / mod)) + b;
+		return result;
+	}
 	static const int numpreprefixes = 10;
 	std::string inamePrePrefixes[10] = {
 		"Pain",
@@ -90,7 +97,14 @@ public:
 		AGI,
 		DEF,
 		KNO,
-		ATK
+		ATK // 19
+	};
+
+	Affix dmgTypeToAffix[4] = {
+		Affix::FIRE_RES,
+		Affix::COLD_RES,
+		Affix::LGHT_RES,
+		Affix::POIS_RES
 	};
 
 	struct AffVal {

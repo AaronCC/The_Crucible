@@ -10,6 +10,7 @@ Game::Game()
 	this->window.create(sf::VideoMode(windowSize.x, windowSize.y), "Game");
 	this->window.setFramerateLimit(60);
 	tileSize = sf::Vector2u(TILE_SIZE, TILE_SIZE);
+	hudTop = windowSize.y - (TILE_SIZE * 1.5f);
 	loadTextures();
 	loadMusic();
 	loadSounds();

@@ -12,7 +12,8 @@ void Player::resolveLineOfSight(sf::Vector2i los)
 		addQueuedPoint(tile);
 	queuedCooldown = queuedAbility->cooldown;
 	checkLineOfSight = true;
-	this->tickCount = queuedAbility->tickCost * stats.speed;
+	float agiMod = (bStats.buffs[Helper::Affix::AGI].v1 * helper.linearEq(-0.01, bStats.buffs[Helper::Affix::AGI].v1, 0.05, 5));
+	this->tickCount = queuedAbility->tickCost * (stats.speed - agiMod);
 }
 
 void Player::resolveMeleeLineOfSight(sf::Vector2i los)
@@ -27,7 +28,6 @@ void Player::resolveMeleeLineOfSight(sf::Vector2i los)
 void Player::resolveAbilityOnTile(sf::Vector2i pos)
 {
 	queuedAbility->pushPosition({ (float)pos.x*TILE_SIZE.x,(float)pos.y*TILE_SIZE.y });
-
 }
 void Player::lockActions()
 {
@@ -244,6 +244,7 @@ void Player::queueAbility(int slotIndex)
 		checkLineOfSight = true;
 	}
 }
+
 void Player::handleEvent(sf::Event event)
 {
 	switch (event.type)
@@ -403,6 +404,22 @@ void Player::updateAbilities()
 		for (auto eff : itm->getEffectFromMAH())
 			autoAttack.addEffect(eff);
 }
+float Player::applyAR(float dmg)
+{
+	int AR = bStats.buffs[Helper::Affix::ARM_RAT].v1;
+	if (AR == -1)
+		return dmg;
+	return dmg - (AR * helper.linearEq(-0.05, AR, 0.5, 5));
+}
+float Player::applyRES(float dmg, AbEffect::DamageType type)
+{
+	Helper::Affix aff = helper.dmgTypeToAffix[(int)type];
+	int res = bStats.buffs[aff].v1;
+	if (res == -1)
+		return dmg;
+	float mod = 1 - (res/100.f);
+	return dmg * mod;
+}
 bool Player::pickup_ITM(Item * item)
 {
 	if (inventory.pickupItem(item))
@@ -429,8 +446,12 @@ bool Player::pickup_CON(Consumable * con)
 }
 void Player::applyEff(AbEffect::Effect eff)
 {
+	this->eStats = this->eStats + eff.stats;
+	updatePlayerStats();
 	if (eff.dur > 0)
+	{
 		effs.push_back(eff);
+	}
 }
 void Player::updateAbilityBar()
 {

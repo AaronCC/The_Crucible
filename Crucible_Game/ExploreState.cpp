@@ -162,7 +162,7 @@ void ExploreState::handleInput()
 		}
 	}
 	sf::Vector2f mousePos = this->game->window.mapPixelToCoords(sf::Mouse::getPosition(this->game->window), this->view);
-
+	bool hudHover = mousePos.y >= game->hudTop ? true : false;
 	if (map->action == Map::Action::PICKUP && sf::Keyboard::isKeyPressed(sf::Keyboard::E))
 	{
 		map->resolveAction(&player);
@@ -184,7 +184,7 @@ void ExploreState::handleInput()
 		}
 		if (!player.engaged)
 		{
-			if (player.hud.showState == Hud::ShowState::SHOW_NONE)
+			if (player.hud.showState == Hud::ShowState::SHOW_NONE && !hudHover && !player.hud.conHover)
 			{
 				std::vector<std::pair<int, int>> path = pf.findPath(this->player.tilePos, this->map->mouseIndex);
 				this->player.clearWayPoints();
@@ -448,7 +448,12 @@ void ExploreState::resolveGameState(float ticks)
 	{
 		AbEffect::Effect& eff = player.effs[i];
 		eff.dur -= 1;
-		player.damage(eff.damage.getDamage());
+		float dmg = eff.damage.getDamage();
+		if (eff.damage.type == AbEffect::DamageType::PHYS)
+			dmg = player.applyAR(dmg);
+		else
+			dmg = player.applyRES(dmg, eff.damage.type);
+		player.damage(dmg);
 		if (eff.dur < 1)
 		{
 			player.eStats = player.eStats - eff.stats;
