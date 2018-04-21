@@ -401,10 +401,14 @@ void Player::updateAbilities(float dt)
 }
 void Player::updateAbilities()
 {
-	Item* itm = inventory.eqItems[2].first.getItem();
+	Item* itm_MAH = inventory.eqItems[(int)Item::MAH].first.getItem();
+	Item* itm_RNG = inventory.eqItems[(int)Item::RNG].first.getItem();
 	autoAttack.effs.clear();
-	if (itm != nullptr)
-		for (auto eff : itm->getEffectFromMAH())
+	if (itm_MAH != nullptr)
+		for (auto eff : itm_MAH->getEffectFromMAH())
+			autoAttack.addEffect(eff);
+	if (itm_RNG != nullptr)
+		for (auto eff : itm_RNG->getEffectFromMAH())
 			autoAttack.addEffect(eff);
 }
 float Player::applyAR(float dmg)

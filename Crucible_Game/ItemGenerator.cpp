@@ -175,6 +175,86 @@ Ability * ItemGenerator::makeEnemyAbility(int aLvl, Item::Rarity rarity, bool me
 		ab->addEffect(eff);
 	return ab;
 }
+Ability * ItemGenerator::makeEnemyAbility(int aLvl, Item::Rarity rarity, bool melee, AbEffect::DamageType dtype)
+{
+	bool has_dType = false;
+	std::random_device rd;
+	std::mt19937 gen(rd());
+	if (rarity == Item::Rarity::NORM)
+		rarity = Item::Rarity::MAGIC;
+	std::uniform_int_distribution<> dist(0, (int)rarity - 1);
+	Scroll* scroll;
+	int numaff = dist(gen) + 1;
+	dist.reset();
+	dist = std::uniform_int_distribution<>(0, abBases.size() - 1);
+	AbBase abBase = abBases[dist(gen)];
+	dist.reset();
+	dist = std::uniform_int_distribution<>(0, 2);
+	int tcPenalty = dist(gen) + 1;
+	Ability* ab = new Ability(game, game->texmgr.getRef(abBase.texName), abBase.iconName,
+		abBase.anim, { TILE_SIZE,TILE_SIZE }, abBase.cd, abBase.tc + tcPenalty,
+		abBase.name, abBase.description);
+	std::vector<AbEffect> effs;
+	std::map<EffType, std::vector<AbEffect>> pools;
+	std::vector<EffType> choices;
+	for (int i = 0; i < numEfType; i++)
+	{
+		if ((EffType)i == EffType::BUFF)
+			continue;
+		for (auto eff : abAffixes[(EffType)i])
+		{
+			if (eff.second <= aLvl)
+			{
+				if (eff.first.damage.type == dtype && !has_dType)
+				{
+					numaff--;
+					has_dType = true;
+					effs.push_back(eff.first);
+				}
+				else
+					pools[(EffType)i].push_back(eff.first);
+			}
+		}
+		if (pools[(EffType)i].size() > 0)
+			choices.push_back((EffType)i);
+	}
+	if (choices.size() > 0)
+		for (int i = 0; i < numaff; i++)
+		{
+			dist.reset();
+			dist = std::uniform_int_distribution<>(0, choices.size() - 1);
+			int choice = dist(gen);
+			EffType efType = choices[choice];
+			int poolsize = pools[efType].size();
+			dist.reset();
+			dist = std::uniform_int_distribution<>(0, poolsize - 1);
+			int poolat = dist(gen);
+			AbEffect eff = pools[efType][poolat];
+			effs.push_back(eff);
+			pools[efType].erase(pools[efType].begin() + poolat);
+			if (pools[efType].size() == 0)
+				choices.erase(choices.begin() + choice);
+			if (choices.size() <= 0)
+				break;
+		}
+	Ability::Area area;
+	int range;
+	dist.reset();
+	dist = std::uniform_int_distribution<>(0, Ability::numarea - 1);
+	area = Ability::Area::TARGET;
+	if (melee)
+		range = 1;
+	else {
+		dist.reset();
+		dist = std::uniform_int_distribution<>(0, 2);
+		range = dist(gen) + 2;
+	}
+	Ability::AbInfo info{ area,range };
+	ab->setInfo(info);
+	for (auto eff : effs)
+		ab->addEffect(eff);
+	return ab;
+}
 bool ItemGenerator::canRollAf(Item::SlotType type, AF af)
 {
 	for (auto st : afTypeExMap[af])
@@ -189,7 +269,7 @@ Consumable * ItemGenerator::makeConsumable(int aLvl)
 {
 	int roll = getRand_100();
 	std::string tiers[5] = { "Meager", "Lesser", "Medium", "Greater", "Mega" };
-	return new Consumable{ game,"hpot",{ 10*aLvl,Consumable::ConType::H_POT },tiers[aLvl] + " Health Potion",aLvl };
+	return new Consumable{ game,"hpot",{ 10 * aLvl,Consumable::ConType::H_POT },tiers[aLvl] + " Health Potion",aLvl };
 }
 
 Item * ItemGenerator::makeItem(int aLvl, float mf)

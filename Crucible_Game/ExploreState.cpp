@@ -28,8 +28,8 @@ ExploreState::ExploreState(Game* game)
 	resolveFoW();
 	rTime = 0.01f;
 	this->game->sndmgr.stopPlaying();
-	//this->themeName = "exploretheme";
-	//this->game->sndmgr.getMusicRef(this->themeName);
+	this->themeName = "exploretheme";
+	this->game->sndmgr.getMusicRef(this->themeName);
 }
 
 ExploreState::~ExploreState()
@@ -163,6 +163,8 @@ void ExploreState::handleInput()
 	}
 	sf::Vector2f mousePos = this->game->window.mapPixelToCoords(sf::Mouse::getPosition(this->game->window), this->view);
 	bool hudHover = mousePos.y >= game->hudTop ? true : false;
+	if (sf::Keyboard::isKeyPressed(sf::Keyboard::Escape))
+		exit(0);
 	if (map->action == Map::Action::PICKUP && sf::Keyboard::isKeyPressed(sf::Keyboard::E))
 	{
 		map->resolveAction(&player);

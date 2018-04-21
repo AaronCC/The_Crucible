@@ -63,23 +63,31 @@
 0 1 -1 0 16 0 5 Weak
 0 2 -1 1 15 0 5 Lean
 ;HED = 0,BDY = 1,MAH = 2,OFH = 3,RNG = 4,AMU = 5,CLK = 6,BLT = 7,SCR = 8
+;BASE type twoh? name; v1 v2 dType afType local? ilvl
 ;Head Bases
-2 0 0 Leather Cowl; 5 -1 5 15 0
+2 0 0 Leather Cowl; 5 -1 5 15 1 0
+2 0 0 Leather Helm; 8 -1 5 15 1 1
 ;body bases
-2 1 0 Leather Body; 10 -1 5 15 0
+2 1 0 Leather Body; 10 -1 5 15 1 0
+2 1 0 Studded Body; 14 -1 5 15 1 1
 ;Weapon Bases
-2 2 0 Elegant Sword; 1 5 0 4 1
-2 2 1 Zweihander; 2 10 0 4 1
+2 2 0 Rusted Gladius; 1 5 0 4 1 0
+2 2 0 Dull Rapier; 2 7 0 4 1 1
+2 2 1 Chipped Claymore; 2 10 0 4 1 0
+2 2 1 Dull Zweihander; 4 14 0 4 1 1
 ;Offhand bases
-2 3 0 Leather Shield; 4 -1 5 15 0
+2 3 0 Leather Shield; 4 -1 5 15 1 0
+2 3 0 Brittle Ancile; 8 -1 5 15 1 1
 ;Ring bases
-2 4 0 Ruby Ring; 10 -1 5 5 0
+2 4 0 Ruby Ring; 10 -1 5 5 0 0
+2 4 0 Iron Ring; 2 4 0 4 1 0
 ;Amulet bases
-2 5 0 Topaz Amulet; 5 -1 5 18 0
+2 5 0 Topaz Amulet; 5 -1 5 18 0 0
 ;Cloak bases
-2 6 0 Worn Cloak; 5 -1 5 15 0
+2 6 0 Worn Scarf; 5 -1 5 15 1 0
+2 6 0 Wool Cloak; 8 -1 5 15 1 1
 ;Belt bases
-2 7 0 Heavy Belt; 5 -1 5 19 0
+2 7 0 Heavy Belt; 5 -1 5 19 1 0
 ;type hasstats? buff? stats dmgtype a1 a2 dur ilvl
 3 0 0 2 9 1 0
 3 0 1 5 7 1 0

@@ -686,8 +686,8 @@ void Map::loadDungeon()
 void Map::populateDungeon()
 {
 	int roll;
-	Ability* ogreAbility = itemGenerator->makeEnemyAbility(level, Item::Rarity::MAGIC, true);
-	Ability* wraithAbility = itemGenerator->makeEnemyAbility(level, Item::Rarity::MAGIC, false);
+	Ability* ogreAbility = itemGenerator->makeEnemyAbility(level, Item::Rarity::MAGIC, true, AbEffect::DamageType::PHYS);
+	Ability* wraithAbility = itemGenerator->makeEnemyAbility(level, Item::Rarity::MAGIC, false, AbEffect::DamageType::POIS);
 	for (auto e : entities)
 	{
 		switch (e.id)

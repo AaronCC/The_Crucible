@@ -75,6 +75,8 @@ void Hud::addConsumable(Consumable * con)
 
 bool Hud::hoverCon(sf::Vector2f mPos)
 {
+	if (consumables.size() <= 0)
+		return false;
 	sf::Vector2f size = { slotW, slotW };
 	sf::Vector2f pos = conPos;
 	if (conHover)

@@ -68,6 +68,32 @@ public:
 			this->type = type;
 		}
 		Effect() {}
+		Effect& operator+(const Effect& other)
+		{
+			switch (type)
+			{
+			case INST:
+				this->damage.min += other.damage.min;
+				this->damage.max += other.damage.max;
+				break;
+			case DOT:
+				this->dur += other.dur;
+				break;
+			}
+			return *this;
+		}
+		bool operator==(const Effect& other)
+		{
+			switch (type)
+			{
+			case INST:
+				if (other.type == this->type
+					&& other.damage.type == this->damage.type)
+					return true;
+				return false;
+			}
+			return false;
+		}
 	};
 	Effect eff;
 
@@ -175,6 +201,14 @@ public:
 		return effEffs;
 	}
 	void addEffect(AbEffect effect) {
+		for (int i = 0; i < effs.size(); i++)
+		{
+			if (effect.eff == effs[i].eff)
+			{
+				effs[i].eff = effs[i].eff + effect.eff;
+				return;
+			}
+		}
 		effs.push_back(effect);
 	}
 

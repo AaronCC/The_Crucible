@@ -447,45 +447,17 @@ public:
 		invTitle.setPosition({ start.x,  start.y - 30 });
 		invTitle.setFillColor(sf::Color::White);
 		hovType = Hovering::NONE;
-		/* TEMP */
-#pragma region ITEMS
-
 		for (int i = 0; i < 25; i++)
 		{
 			itemSlots.push_back(InvSlot(i, false, this->game, 0));
 		}
-		//item = new Item("Helm of the All-Seeing God",
-		//	{ 0,0,0,12 },
-		//	Item::SlotType::HED);
-		//itemSlots[0].setItem(item);
-
-		//item = new Item("Ring of Power",
-		//	{ 1,1,1,1 },
-		//	Item::SlotType::RNG);
-		//itemSlots[1].setItem(item);
-		//item = new Item("Giant Fang",
-		//	{ 20,0,-2,0 },
-		//	Item::SlotType::MAH);
-		//item->setDamage(AbEffect::DamageType::POIS, 1, 100);
-		//itemSlots[2].setItem(item);
-		//itemSlots[2].getItem()->twoHanded = true;
-		//item = new Item("Sharpened Icicle",
-		//	{ 10,0,2,0 },
-		//	Item::SlotType::MAH);
-		//item->setDamage(AbEffect::DamageType::ICE, 5, 25);
-		//itemSlots[3].setItem(item);
-		//item = new Item("Cardboard Shield",
-		//	{ 0,2,0,-10 },
-		//	Item::SlotType::OFH);
-		//itemSlots[4].setItem(item);
-		/*for (int i = 0; i < 25; i++)
-		{
-			Item* item = itemGenerator.makeItem(1, 500);
-			itemSlots[i].setItem(item);
-		}*/
 		itemSlots[0].setItem(itemGenerator.makeItem(0, Item::Rarity::NORM, Item::SlotType::MAH));
 		if(!itemSlots[0].getItem()->twoHanded)
 			itemSlots[1].setItem(itemGenerator.makeItem(0, Item::Rarity::NORM, Item::SlotType::OFH));
+		itemSlots[2].setItem(itemGenerator.makeItem(0, Item::Rarity::NORM, Item::SlotType::RNG));
+		itemSlots[3].setItem(itemGenerator.makeItem(0, Item::Rarity::NORM, Item::SlotType::RNG));
+		//for (int i = 0; i < 25; i++)
+		//	itemSlots[i].setItem(itemGenerator.makeItem(1, 1000));
 		std::vector<std::string> eqNames = { "Head","Body","Main-hand","Off-hand","Ring","Amulet","Cloak","Belt" };
 		for (int i = 0; i < 8; i++)
 		{
@@ -494,38 +466,10 @@ public:
 			eqItems[i].second.setPosition(eqItems[i].first.position - sf::Vector2f(0, 4 + tSize));
 			eqItems[i].second.setFillColor({ 255, 220, 125 });
 		}
-#pragma endregion
-#pragma region SCROLLS
 		for (int i = 0; i < 25; i++)
 		{
 			scrollSlots.push_back(InvSlot(i, false, this->game, 2));
 		}
-		/*
-		abilityMap["slash"] = Ability(this->game, game->texmgr.getRef("slash"), "slash_icon",
-			{ 0,3,0.1f }, { 32,32 }, 10, 1, "slash",
-			"Melee slash in an arc");
-		abilityMap["slash"].setInfo(Ability::AbInfo(Ability::AbPrmType::MELEE, Ability::AbSecType::TARG, 1, 2));
-		abilityMap["move"] = Ability(this->game, game->texmgr.getRef("move_icon"), "move_icon",
-			{ 0,3,0.1f }, { 32,32 },  10, 2, "Move",
-			"Move to target location");
-		Ability* slash = new Ability(abilityMap["slash"]);
-		scroll = new Scroll("Slash",
-			Item::SlotType::SCR,
-			slash,
-			Item::Rarity::NORM);
-		AbEffect eff = AbEffect(AbEffect::Effect({ 0,0,0,0 },
-			AbEffect::Damage(
-				AbEffect::DamageType::COLD, 1, 10),
-			1));
-		AbEffect eff2 = AbEffect(AbEffect::Effect({ 0,0,0,0 },
-			AbEffect::Damage(
-				AbEffect::DamageType::PHYS, 1, 1),
-			5));
-		slash->addEffect(eff);
-		slash->addEffect(eff2);*/
-		/*
-		for (int i = 0; i < 25; i++)
-			scrollSlots[i].setItem(itemGenerator.makeScroll(1, 500));*/
 		std::vector<std::string> scEqNames = { "1","2","3","4","5","6","LMB","RMB" };
 		for (int i = 0; i < A_SLOT_COUNT; i++)
 		{
@@ -534,12 +478,6 @@ public:
 			eqScrolls[i].second.setPosition(eqScrolls[i].first.position - sf::Vector2f(0, 4 + tSize));
 			eqScrolls[i].second.setFillColor({ 255, 220, 125 });
 		}
-		//eqScrolls[6].first.setItem(scroll);
-		//autoSlot.first = InvSlot(A_SLOT_COUNT, true, this->game, 2);
-		//autoSlot.second = sf::Text("Default Attack", game->fonts["main_font"], tSize);
-		//autoSlot.second.setFillColor({ 255, 220, 125 });
-
-#pragma endregion
 		/* END */
 		slider.setSize({ 10, (invHeight + 10) / ((float)itemSlots.size() - maxScHeight + 2) });
 		slider.setFillColor(sf::Color::White);

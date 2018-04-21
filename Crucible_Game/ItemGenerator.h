@@ -123,7 +123,7 @@ public:
 		ss = std::stringstream(data[0]);
 		ss >> slot;
 		Item::SlotType type = (Item::SlotType)slot;
-		int i = 2, a1 = 0, a2 = 0, dtypeInt = 0, afInt = 0, twohInt = 0, lInt;
+		int i = 2, a1 = 0, a2 = 0, dtypeInt = 0, afInt = 0, twohInt = 0, lInt, ilvl;
 		bool twoh;
 		ss = std::stringstream(data[1]);
 		ss >> twohInt;
@@ -144,7 +144,9 @@ public:
 		ss = std::stringstream(data[i + 4]);
 		ss >> afInt;
 		ss = std::stringstream(data[i + 5]);
-		ss >> lInt;
+		ss >> lInt;		
+		ss = std::stringstream(data[i + 6]);
+		ss >> ilvl;
 		bool local = (bool)lInt;
 		DMG dtype = (DMG)dtypeInt;
 		sf::Color c = helper.damageColors[dtype];
@@ -152,7 +154,7 @@ public:
 		AF af = (AF)afInt;
 		BaseItem* bi = new BaseItem(type, name, twoh);
 		bi->addAff(af, afv);
-		bases[type].push_back({ 0,*bi });
+		bases[type].push_back({ ilvl,*bi });
 		return true;
 	}
 	bool parseAbBase(std::vector<std::string> data)
@@ -346,6 +348,8 @@ public:
 	Scroll * makeScroll(int aLvl, float mf);
 
 	Ability * makeEnemyAbility(int aLvl, Item::Rarity rarity, bool melee);
+
+	Ability * makeEnemyAbility(int aLvl, Item::Rarity rarity, bool melee, AbEffect::DamageType dtype);
 
 	bool canRollAf(Item::SlotType type, AF af);
 
