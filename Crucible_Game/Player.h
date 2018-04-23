@@ -52,6 +52,9 @@ public:
 
 	float testTimer = 0;
 
+	int level;
+	int exp, maxExp;
+
 	sf::View* view;
 	sf::Vector2i* mIndex;
 
@@ -86,6 +89,7 @@ public:
 	void resolveAbilityOnTile(sf::Vector2i pos);
 	void lockActions();
 	void updatePlayerStats();
+	void levelUp(std::pair<int, int> stat);
 	void handleInput();
 	void damage(int hVal);
 	void heal(int hVal);
@@ -201,6 +205,7 @@ public:
 		this->sprite.setOrigin(sf::Vector2f(size.x / 2, size.y / 2));
 		this->sprite.setTexture(texture);
 		this->animHandler.frameSize = sf::IntRect(0, 0, size.x, size.y);
+
 		for (auto animation : animations)
 		{
 			this->animHandler.addAnim(animation);
@@ -245,6 +250,39 @@ public:
 		autoAttack.setInfo(Ability::AbInfo(0, 1));
 
 		hud.updateHealth(maxHealth, maxHealth, 1.f);
+
+		exp = 0;
+		maxExp = 100;
+		level = 0;
+		hud.updateExpBar(exp, maxExp, level);
+	}
+
+	int calcNewMax_Exp_Health()
+	{
+		this->maxHealth = helper.linearEq(15, level, maxHealth, 1);
+		this->health = this->maxHealth;
+		this->effs.clear();
+		hud.updateHealth(health, maxHealth, 1);
+		return helper.linearEq(10, level, maxExp, 1);
+	}
+	
+	bool gainExp(int newExp) {
+		if (exp + newExp >= maxExp)
+		{
+			level++;
+			hud.levelUp();
+			exp += newExp;
+			exp -= maxExp;
+			maxExp = calcNewMax_Exp_Health();
+			hud.updateExpBar(exp, maxExp, level);
+			return true;
+		}
+		else
+		{
+			exp += newExp;
+			hud.updateExpBar(exp, maxExp, level);
+			return false;
+		}
 	}
 
 	void updateAbilityBar();

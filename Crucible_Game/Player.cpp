@@ -45,12 +45,20 @@ void Player::updatePlayerStats()
 		Item* itm = itm_text.first.getItem();
 		if (itm == nullptr)
 			continue;
-		Helper::Stats stats = itm->getStatBuffs();
-		bStats = bStats + stats;
+		Helper::Stats iStats = itm->getStatBuffs();
+		bStats = bStats + iStats;
 	}
 	bStats = bStats + eStats;
-
+	bStats = bStats + this->stats;
 	playerInfo.updateInfo(bStats);
+}
+void Player::levelUp(std::pair<int, int> stat)
+{
+	const int ATK_INDEX = helper.numbuffs - 1;
+	if (this->stats.buffs[(Helper::Affix)(ATK_INDEX - stat.first)].v1 == -1)
+		stat.second++;
+	this->stats.buffs[(Helper::Affix)(ATK_INDEX - stat.first)].v1 += stat.second;
+	updatePlayerStats();
 }
 void Player::handleInput()
 {

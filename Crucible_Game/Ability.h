@@ -193,9 +193,12 @@ public:
 			{
 				if (effect.damage.type == (AbEffect::DamageType)i)
 				{
-					effect.damage.modDamage(stats->buffs[damageAffixes[effect.damage.type]].v1);
+					int atk = stats->buffs[Helper::Affix::ATK].v1;
+					if (atk == -1)
+						atk = 0;
+					effect.damage.modDamage(stats->buffs[damageAffixes[effect.damage.type]].v1 + atk);
 				}
-			}
+			}s
 			effEffs.push_back(effect);
 		}
 		return effEffs;

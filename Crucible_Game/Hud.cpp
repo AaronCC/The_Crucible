@@ -1,5 +1,33 @@
 #include "Hud.h"
 
+std::pair<int, int> Hud::checkLevelClick()
+{
+	int stat = -1;
+	std::string msg = this->levelButtons.getEMsg(oldMousePos);
+	if (msg == "atk") stat = 0;
+	else if (msg == "kno") stat = 1;
+	else if (msg == "def") stat = 2;
+	else if (msg == "agi") stat = 3;
+	if (stat != -1)
+		levelCache--;
+	return { stat, 1 };
+}
+
+void Hud::updateExpBar(int exp, int maxExp, int level)
+{
+	float prc = exp / (float)maxExp;
+	levelText.setString("Player Level: " + std::to_string(level));
+	expText.setString(std::to_string(exp) + "/" + std::to_string(maxExp));
+	expBar.setSize({ prc * 100,TILE_SIZE / 4 });
+}
+
+void Hud::levelUp() { levelCache++; }
+
+void Hud::updateDLevelText(int level)
+{
+	dungeonLevelText.setString("Dungeon Level: " + std::to_string(level));
+}
+
 void Hud::setSlotSprites(std::vector<std::pair<sf::Keyboard::Key, std::string>> slotSpriteIDs, std::string lmbID, std::string rmbID)
 {
 	unsigned int idNum = 0;
@@ -159,6 +187,16 @@ void Hud::draw(float dt)
 	}
 	else
 		this->game->window.draw(conBack);
+
+	this->game->window.draw(expBack);
+	this->game->window.draw(expBar);
+	this->game->window.draw(expText);
+	this->game->window.draw(levelText);
+	this->game->window.draw(dungeonLevelText);
+
+	if (levelCache > 0)
+		this->levelButtons.draw(this->game->window, dt);
+
 	sf::Vector2f offset = { 0,0 };
 	if (showState != ShowState::SHOW_NONE)
 	{
@@ -185,6 +223,11 @@ void Hud::updateCD(unsigned int slot, float ticks)
 void Hud::checkHover(sf::View view)
 {
 	sf::Vector2f mousePos = this->game->window.mapPixelToCoords(sf::Mouse::getPosition(this->game->window), view);
+
+	if (levelCache > 0)
+	{
+		this->levelButtons.highlight(this->levelButtons.getElement(mousePos));
+	}
 	if (showState == Hud::ShowState::SHOW_NONE)
 	{
 		if (oldMousePos != mousePos)
@@ -199,7 +242,9 @@ void Hud::checkHover(sf::View view)
 }
 void Hud::update(float dt)
 {
-
+	if (levelCache > 0) {
+		levelButtons.update(dt);
+	}
 	for (int cd = 0; cd < A_SLOT_COUNT; cd++)
 	{
 		if (cooldowns[cd].active)

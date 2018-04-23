@@ -28,6 +28,7 @@ public:
 	std::vector<sf::Text> actionText;
 
 	int level = 0;
+	int expCache = 0;
 
 	enum Action {
 		PICKUP,
@@ -81,6 +82,10 @@ public:
 	void Map::loadDungeon();
 
 	void populateDungeon();
+
+	bool spawnBossGroupInRoom(Dungeon::Entity e);
+
+	bool spawnEnemyInRoom(Dungeon::Entity e);
 
 	Enemy * getEnemyAt(int x, int y);
 

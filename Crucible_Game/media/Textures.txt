@@ -33,3 +33,8 @@ poison_icon media/poison_icon.png
 spiral media/spiral.png
 spiral_icon media/spiral_icon.png
 mainmenu media/mainmenu.png
+elite_crown media/elite_crown.png
+atk_button media/atk_button.png
+def_button media/def_button.png
+kno_button media/kno_button.png
+agi_button media/agi_button.png

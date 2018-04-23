@@ -25,6 +25,7 @@ ExploreState::ExploreState(Game* game)
 	map->getTile(player.tilePos.x, player.tilePos.y)->occupied = true;
 	map->itemGenerator = &player.inventory.itemGenerator;
 	map->populateDungeon();
+	player.hud.updateDLevelText(map->level);
 	resolveFoW();
 	rTime = 0.01f;
 	this->game->sndmgr.stopPlaying();
@@ -130,6 +131,11 @@ void ExploreState::update(const float dt)
 	if (player.resolveActions || effs.size() > 0)
 		resolveGameState(player.tickCount);
 	this->map->update(dt);
+	if (map->expCache > 0)
+	{
+		player.gainExp(map->expCache);
+		map->expCache = 0;
+	}
 	if (shouldResolve)
 	{
 		map->updateActionText(player.tilePos);
@@ -176,6 +182,16 @@ void ExploreState::handleInput()
 
 	if (sf::Mouse::isButtonPressed(sf::Mouse::Left) && old_mLeftState == false)
 	{
+		if (player.hud.levelCache > 0)
+		{
+			std::pair<int,int> stat = player.hud.checkLevelClick();
+			if (stat.first != -1)
+			{
+				player.levelUp(stat);
+				old_mLeftState = true;
+				return;
+			}
+		}
 		if (player.hud.conHover)
 		{
 			player.hud.equipCon();
@@ -363,6 +379,7 @@ void ExploreState::handleInput()
 			map->itemGenerator = &player.inventory.itemGenerator;
 			map->level = aLvl + 1;
 			map->populateDungeon();
+			player.hud.updateDLevelText(map->level);
 			player.setPos(sf::Vector2f{ map->spawnPos.x*(float)TILE_SIZE,map->spawnPos.y*(float)TILE_SIZE });
 			fowCache.clear();
 			resolveFoW();

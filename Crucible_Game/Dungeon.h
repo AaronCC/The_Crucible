@@ -55,8 +55,8 @@ public:
 
 	struct Entity {
 		char id;
-		int x, y;
-		Entity(char id, int x, int y): id(id),x(x),y(y){}
+		int x, y, w, h;
+		Entity(char id, int x, int y, int w, int h): id(id),x(x),y(y),w(w),h(h){}
 	};
 
 	enum Direction
@@ -266,7 +266,7 @@ private:
 			if (dir != West || firstRoom) // east side
 				_exits.emplace_back(Rect{ room.x + room.width, room.y, 1, room.height });
 
-			entities.push_back({ 'd',room.x,room.y });
+			entities.push_back({ 'r',room.x,room.y,room.width,room.height });
 
 			return true;
 		}

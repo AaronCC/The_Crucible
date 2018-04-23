@@ -17,6 +17,9 @@ public:
 
 	Helper::Stats stats;
 
+	sf::Sprite crown;
+	bool elite;
+
 	bool active, dead;
 	int qDmg;
 	int hp;
@@ -53,10 +56,11 @@ public:
 
 	std::string name;
 
-	Enemy(std::string spriteName, Game* game, sf::Vector2i pos, int hp, int lvl, Ability* attack, std::string atkSound)
-	{ 
+	Enemy(std::string spriteName, Game* game, sf::Vector2i pos, int hp, int lvl, Ability* attack, std::string atkSound, bool elite)
+	{
 		this->game = game;
 		this->hp = hp;
+		this->elite = elite;
 		this->maxHp = hp;
 		this->tilePos = pos;
 		this->mf = 500;
@@ -78,7 +82,7 @@ public:
 		this->moveRange = 1;
 		this->qDmg = 0;
 		this->speed = 1;
-		this->name = "Ogre";
+		this->name = spriteName;
 		losToPlayer = false;
 		ability = Ability(*attack);
 		/*ability = Ability(this->game, game->texmgr.getRef("poison"), "poison_icon",
@@ -87,6 +91,13 @@ public:
 		ability.setSound(atkSound);
 		/* ability.addEffect(AbEffect(AbEffect::Effect({}, { AbEffect::DamageType::POIS,2,10 }, 1, AbEffect::EffType::INST)));
 		ability.setInfo(Ability::AbInfo(0, 1));*/
+		if (elite)
+		{
+			this->name = "Elite " + this->name;
+			crown.setTexture(this->game->texmgr.getRef("elite_crown"));
+			crown.setOrigin(TILE_SIZE / 2, TILE_SIZE / 2);
+			this->crown.setPosition(this->pos);
+		}
 	}
 
 	void dealDamage(int dmg);

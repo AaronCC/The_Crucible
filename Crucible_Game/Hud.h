@@ -2,6 +2,7 @@
 #define HUD_H
 #include "Game.h"
 #include "Item.h"
+#include "Gui.h"
 #include <queue>
 #include <string>
 #include <sstream>
@@ -452,7 +453,7 @@ public:
 			itemSlots.push_back(InvSlot(i, false, this->game, 0));
 		}
 		itemSlots[0].setItem(itemGenerator.makeItem(0, Item::Rarity::NORM, Item::SlotType::MAH));
-		if(!itemSlots[0].getItem()->twoHanded)
+		if (!itemSlots[0].getItem()->twoHanded)
 			itemSlots[1].setItem(itemGenerator.makeItem(0, Item::Rarity::NORM, Item::SlotType::OFH));
 		itemSlots[2].setItem(itemGenerator.makeItem(0, Item::Rarity::NORM, Item::SlotType::RNG));
 		itemSlots[3].setItem(itemGenerator.makeItem(0, Item::Rarity::NORM, Item::SlotType::RNG));
@@ -736,7 +737,24 @@ public:
 
 	std::vector<Cooldown> cooldowns;
 
+	std::pair<int, int> checkLevelClick();
+
 	std::map<sf::Keyboard::Key, bool> keys;
+
+	Gui levelButtons;
+
+	sf::RectangleShape expBar, expBack;
+	sf::Text expText, levelText;
+
+	sf::Text dungeonLevelText;
+
+	void updateExpBar(int exp, int maxExp, int level);
+
+	void levelUp();
+
+	void updateDLevelText(int level);
+
+	int levelCache;
 
 	std::map<sf::Keyboard::Key, std::pair<sf::Sprite, bool>> aSlotSprites;
 	std::pair<sf::Sprite, bool> lmbSprite;
@@ -809,7 +827,7 @@ public:
 			elements[slotID].setTexture(game->texmgr.getRef(eData[eCount]));
 			elements[slotID].setPosition(slotPos);
 			elements[slotID].setOrigin(0, elements[slotID].getTexture()->getSize().y);
-			slotText[i].setPosition(slotPos.x + (slotW / 2) - (slotText[i].getString().getSize() * 4.f), slotPos.y - slotW - tSize-2);
+			slotText[i].setPosition(slotPos.x + (slotW / 2) - (slotText[i].getString().getSize() * 4.f), slotPos.y - slotW - tSize - 2);
 			slotText[i].setCharacterSize(tSize);
 		}
 		eCount++;
@@ -824,7 +842,7 @@ public:
 
 		cdSprite.setTexture(this->game->texmgr.getRef("cooldown_icon"));
 		cdSprite.setOrigin(0, slotW);
-		msgBack.setSize({ 800.f-8.f, MSG_BACK_H });
+		msgBack.setSize({ 800.f - 8.f, MSG_BACK_H });
 		//sf::Vector2u diff = this->game->windowSize - sf::Vector2u{ 800, 600 };
 		msgBack.setOrigin(0, 0);
 		msgBack.setPosition(4, 4);
@@ -843,16 +861,69 @@ public:
 		conBack.setPosition(conPos);
 		conBack.setOutlineThickness(1);
 		conBack.setFillColor(sf::Color::Black);
-		conText.setPosition(conPos - sf::Vector2f{ 0,tSize+2 });
-		consumables.push_back({ game,"hpot",{ 10,Consumable::ConType::H_POT },"Meager Health Potion" ,0});
-		//consumables.push_back({ game,"ppot",{ 0,Consumable::ConType::S_POT },"Meager Stat Potion" ,1});
+		conText.setPosition(conPos - sf::Vector2f{ 0,tSize + 2 });
+		consumables.push_back({ game,"hpot",{ 10,Consumable::ConType::H_POT },"Meager Health Potion" ,0 });
 		consumables[0].setSpritePos(conPos);
 		conAt = 0;
 
 		conHoverText.setFont(game->fonts["main_font"]);
 		conHoverText.setString("NaN");
-		conHoverText.setCharacterSize(12);
+		conHoverText.setCharacterSize(tSize);
 		conHoverText.setOutlineThickness(1);
+
+		sf::Vector2f expStart = { slotStart.x, slotStart.y - (TILE_SIZE * 1.5f) };
+		sf::Color expColor = { 255, 207, 86 };
+		sf::Color expBackColor = { 76, 49, 33 };
+
+		dungeonLevelText.setPosition(expStart - sf::Vector2f{ 0, tSize * 3 });
+		dungeonLevelText.setFont(game->fonts["main_font"]);
+		dungeonLevelText.setString("NaN");
+		dungeonLevelText.setCharacterSize(tSize);
+		dungeonLevelText.setOutlineThickness(1);
+
+		levelText.setPosition(expStart - sf::Vector2f{ 0, tSize * 2 });
+		levelText.setFont(game->fonts["main_font"]);
+		levelText.setString("NaN");
+		levelText.setCharacterSize(tSize);
+		levelText.setOutlineThickness(1);
+
+		expText.setPosition(expStart - sf::Vector2f{ 0, tSize - 2 } +sf::Vector2f{ 104, 0 });
+		expText.setFont(game->fonts["main_font"]);
+		expText.setString("0/0");
+		expText.setCharacterSize(tSize - 2);
+		expText.setOutlineThickness(1);
+
+		expBar.setPosition(expStart);
+		expBar.setOrigin(0, TILE_SIZE / 4);
+		expBar.setFillColor(expColor);
+		expBar.setOutlineThickness(1);
+		expBar.setOutlineColor(sf::Color::Black);
+		expBar.setSize({ 100,TILE_SIZE / 4 });
+		levelCache = 0;
+		expBack.setPosition(expStart);
+		expBack.setOrigin(0, TILE_SIZE / 4);
+		expBack.setFillColor(expBackColor);
+		expBack.setSize({ 100,TILE_SIZE / 4 });
+		std::vector<sf::Vector2f> levelBtnPositions = {
+			{ expStart.x + TILE_SIZE, expStart.y - (TILE_SIZE*1.5f) - 8 },
+			{ expStart.x + ((TILE_SIZE) * 3) + 4,expStart.y - (TILE_SIZE*1.5f) - 8 },
+			{ expStart.x + ((TILE_SIZE) * 5) + 8,expStart.y - (TILE_SIZE*1.5f) - 8 },
+			{ expStart.x + ((TILE_SIZE) * 7) + 12,expStart.y - (TILE_SIZE*1.5f) - 8 }
+		};
+		levelButtons = Gui(
+			GuiStyle(sf::Color::Black, sf::Color::White, &this->game->fonts["main_font"], false),
+			true,
+			{ "atk_button","def_button","kno_button","agi_button" },
+			{ { {0,0,1} }, { {0,0,1} },{ {0,0,1} },{ { 0,0,1 } } },
+			{ {"atk","atk"},{"def","def"},{"kno","kno"},{ "agi","agi" } },
+			{ 64, 32 },
+			{
+				levelBtnPositions[0],
+				levelBtnPositions[1],
+				levelBtnPositions[2],
+				levelBtnPositions[3]
+			},
+			EType::BUTTON, 0, game);
 	}
 
 	void addConsumable(Consumable* con);

@@ -166,6 +166,7 @@ void Map::update(float dt)
 				loot.push_back(newloot);
 			}
 			enemy.tilePos = { 0,0 };
+			expCache += 100;
 		}
 	}
 	for (auto pos : oldPosBuffer)
@@ -619,7 +620,10 @@ void Map::loadDungeon()
 	entities = dungeon.getEntities();
 	tiles.reserve(width * height);
 	sf::Vector2i pos = { 0,0 };
-	this->spawnPos = { width / 2, (height / 2) + 1 };
+
+	Dungeon::Entity pRoom = entities[itemGenerator->getRand_0X(entities.size() - 1)];
+	this->spawnPos = { pRoom.x, pRoom.y };
+
 	for (int y = 0; y < height; ++y)
 	{
 		for (int x = 0; x < width; x++)
@@ -665,7 +669,6 @@ void Map::loadDungeon()
 			}
 			case Dungeon::Tile::DownStairs:
 			{
-				spawnPos = { x + 1, y };
 				this->tiles[y*this->width + x].tileVariant = 6;
 				break;
 			}
@@ -685,30 +688,90 @@ void Map::loadDungeon()
 
 void Map::populateDungeon()
 {
-	int roll;
-	Ability* ogreAbility = itemGenerator->makeEnemyAbility(level, Item::Rarity::MAGIC, true, AbEffect::DamageType::PHYS);
-	Ability* wraithAbility = itemGenerator->makeEnemyAbility(level, Item::Rarity::MAGIC, false, AbEffect::DamageType::POIS);
+	int roll, bossChance = 20;
 	for (auto e : entities)
 	{
+		if (e.x == spawnPos.x && e.y == spawnPos.y)
+			continue;
 		switch (e.id)
 		{
-		case 'd':
+		case 'r':
+			
 			roll = itemGenerator->getRand_100();
-			if (roll <= 50)
-			{
-				enemies.push_back(new Enemy("ogre", game, { e.x,e.y }, 10, level, ogreAbility,
-					"enemyattack1"));
-			}
+			if (roll <= bossChance)
+				do {} while (!spawnBossGroupInRoom(e));
 			else
-				enemies.push_back(new Enemy("wraith", game, { e.x,e.y }, 10, level, wraithAbility,
-					"enemyattack2"));
-			tEnemies[e.y*this->width + e.x] = enemies[enemies.size() - 1];
-			getTile(e.x, e.y)->occupied = true;
+				do {} while (!spawnEnemyInRoom(e));
 			break;
 		default:
 			break;
 		}
 	}
+}
+
+bool Map::spawnBossGroupInRoom(Dungeon::Entity e)
+{
+	float wMod = (itemGenerator->getRand_100() / 100.f), hMod = (itemGenerator->getRand_100() / 100.f);
+	sf::Vector2i eSpawnStart = { e.x + (int)((e.w)*wMod), e.y + (int)((e.h)*hMod) };
+	if (getTile(eSpawnStart.x, eSpawnStart.y)->occupied)
+		return false;
+
+	Ability* e_a = itemGenerator->makeEnemyAbility(level, Item::Rarity::RARE, true, AbEffect::DamageType::PHYS);
+	enemies.push_back(new Enemy("ogre", game, eSpawnStart, 10, level, e_a,
+		"enemyattack1", true));
+	tEnemies[eSpawnStart.y*this->width + eSpawnStart.x] = enemies[enemies.size() - 1];
+	getTile(eSpawnStart.x, eSpawnStart.y)->occupied = true;
+
+	int followerCount = 4 * (itemGenerator->getRand_100() / 100.f);
+	for (int i = 0; i < followerCount; i++)
+	{
+		do {
+			wMod = (itemGenerator->getRand_100() / 100.f);
+			hMod = (itemGenerator->getRand_100() / 100.f);
+			eSpawnStart = { e.x + (int)((e.w)*wMod), e.y + (int)((e.h)*hMod) };
+		} while (getTile(eSpawnStart.x, eSpawnStart.y)->occupied);
+
+		int roll = itemGenerator->getRand_100();
+		if (roll <= 50)
+		{
+			Ability* a = itemGenerator->makeEnemyAbility(level, Item::Rarity::MAGIC, true, AbEffect::DamageType::PHYS);
+			enemies.push_back(new Enemy("ogre", game, eSpawnStart, 10, level, a,
+				"enemyattack1", false));
+		}
+		else
+		{
+			Ability* a = itemGenerator->makeEnemyAbility(level, Item::Rarity::MAGIC, false, AbEffect::DamageType::POIS);
+			enemies.push_back(new Enemy("wraith", game, eSpawnStart, 10, level, a,
+				"enemyattack2", false));
+		}
+		tEnemies[eSpawnStart.y*this->width + eSpawnStart.x] = enemies[enemies.size() - 1];
+		getTile(eSpawnStart.x, eSpawnStart.y)->occupied = true;
+	}
+	return true;
+}
+
+bool Map::spawnEnemyInRoom(Dungeon::Entity e)
+{
+	float wMod = (itemGenerator->getRand_100() / 100.f), hMod = (itemGenerator->getRand_100() / 100.f);
+	sf::Vector2i eSpawnStart = { e.x + (int)((e.w)*wMod), e.y + (int)((e.h)*hMod) };
+	if (getTile(eSpawnStart.x, eSpawnStart.y)->occupied)
+		return false;
+	int roll = itemGenerator->getRand_100();
+	if (roll <= 50)
+	{
+		Ability* a = itemGenerator->makeEnemyAbility(level, Item::Rarity::MAGIC, true, AbEffect::DamageType::PHYS);
+		enemies.push_back(new Enemy("ogre", game, eSpawnStart, 10, level, a,
+			"enemyattack1", false));
+	}
+	else
+	{
+		Ability* a = itemGenerator->makeEnemyAbility(level, Item::Rarity::MAGIC, false, AbEffect::DamageType::POIS);
+		enemies.push_back(new Enemy("wraith", game, eSpawnStart, 10, level, a,
+			"enemyattack2", false));
+	}
+	tEnemies[eSpawnStart.y*this->width + eSpawnStart.x] = enemies[enemies.size() - 1];
+	getTile(eSpawnStart.x, eSpawnStart.y)->occupied = true;
+	return true;
 }
 
 Enemy* Map::getEnemyAt(int x, int y)

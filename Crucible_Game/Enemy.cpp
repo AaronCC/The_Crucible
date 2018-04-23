@@ -37,6 +37,8 @@ void Enemy::move(sf::Vector2i pos)
 	this->tilePos = pos;
 	this->pos = { (float)pos.x*TILE_SIZE,(float)pos.y*TILE_SIZE };
 	this->sprite.setPosition(this->pos);
+	if (elite)
+		this->crown.setPosition(this->pos);
 }
 
 void Enemy::deactivate()
@@ -155,6 +157,8 @@ void Enemy::draw(float dt)
 		this->waySprite.setPosition({ (float)point.x * TILE_SIZE,(float)point.y * TILE_SIZE });
 		this->game->window.draw(waySprite);
 	}
+	if (elite)
+		this->game->window.draw(crown);
 }
 void Enemy::drawAbility(float dt)
 {
