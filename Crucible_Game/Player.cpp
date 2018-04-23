@@ -10,10 +10,10 @@ void Player::resolveLineOfSight(sf::Vector2i los)
 	queuedPoints.clear();
 	for (auto tile : queuedAbility->getActiveTiles(tilePos, los))
 		addQueuedPoint(tile);
-	float knoMod = (bStats.buffs[Helper::Affix::KNO].v1 * helper.linearEq(-0.01, bStats.buffs[Helper::Affix::KNO].v1, 0.05, 5));
+	float knoMod = helper.getKnoMod(bStats.buffs[Helper::Affix::KNO].v1);
 	queuedCooldown = queuedAbility->cooldown * (1 - knoMod);
 	checkLineOfSight = true;
-	float agiMod = (bStats.buffs[Helper::Affix::AGI].v1 * helper.linearEq(-0.01, bStats.buffs[Helper::Affix::AGI].v1, 0.05, 5));
+	float agiMod = helper.getAgiMod(bStats.buffs[Helper::Affix::AGI].v1);
 	this->tickCount = queuedAbility->tickCost * (stats.speed - agiMod);
 }
 
@@ -427,7 +427,7 @@ float Player::applyAR(float dmg)
 	int def = bStats.buffs[Helper::Affix::DEF].v1;
 	if (def == -1)
 		def = 0;
-	return dmg - ((AR+(def*2)) * helper.linearEq(-0.05, AR, 0.5, 5));
+	return dmg - ((AR + (def * 2)) * helper.linearEq(-0.05, AR, 0.5, 5));
 }
 float Player::applyRES(float dmg, AbEffect::DamageType type)
 {
@@ -438,7 +438,7 @@ float Player::applyRES(float dmg, AbEffect::DamageType type)
 	int res = bStats.buffs[aff].v1 + def;
 	if (res == -1)
 		return dmg;
-	float mod = 1 - (res/100.f);
+	float mod = 1 - (res / 100.f);
 	return dmg * mod;
 }
 bool Player::pickup_ITM(Item * item)

@@ -69,8 +69,6 @@ void Map::drawL2(sf::RenderWindow & window, float dt)
 	// Clamp
 	drawEnd.x = drawEnd.x > width ? width : drawEnd.x;
 	drawEnd.y = drawEnd.y > height ? height : drawEnd.y;
-	for (auto t : actionText)
-		window.draw(t);
 	for (auto enemy : enemies)
 	{
 		if (!enemy->dead)
@@ -91,6 +89,8 @@ void Map::drawL2(sf::RenderWindow & window, float dt)
 	{
 		window.draw(text);
 	}
+	for (auto t : actionText)
+		window.draw(t);
 }
 void Map::drawL3(sf::RenderWindow & window, float dt)
 {
@@ -118,14 +118,14 @@ void Map::draw(sf::RenderWindow & window, float dt)
 			this->tiles[y*this->width + x].draw(window, dt);
 		}
 	}
+	for (auto l : loot)
+	{
+		l->draw(this->game->window);
+	}
 	for (auto enemy : enemies)
 	{
 		if (!enemy->dead)
 			enemy->draw(dt);
-	}
-	for (auto l : loot)
-	{
-		l->draw(this->game->window);
 	}
 	return;
 }
@@ -166,7 +166,7 @@ void Map::update(float dt)
 				loot.push_back(newloot);
 			}
 			enemy.tilePos = { 0,0 };
-			expCache += 100;
+			expCache += 10 + (10 * enemy.lvl);
 		}
 	}
 	for (auto pos : oldPosBuffer)
@@ -375,32 +375,37 @@ void Map::updateActionText(sf::Vector2i playerPos)
 {
 	actionText.clear();
 	this->action = Action::NONE;
-	Loot* newLoot = tLoot[playerPos.y *this->width + playerPos.x][0];
-	if (newLoot != nullptr)
+	std::vector<Loot*> newLoot = tLoot[playerPos.y *this->width + playerPos.x];
+	if (newLoot[0] != nullptr)
 	{
 		actionText.push_back(sf::Text("[e] pickup", game->fonts["main_font"], tSize));
 		actionText[0].setFillColor(sf::Color::White);
 		actionText[0].setOutlineThickness(1);
-		actionText[0].setPosition((playerPos.x * tileSize.x) - (TILE_SIZE / 2), (playerPos.y * tileSize.y) - (tSize * 3.5));
-		std::string name = newLoot->getName();
-		actionText.push_back(sf::Text(name, game->fonts["main_font"], tSize));
-		actionText[1].setPosition((playerPos.x * tileSize.x) - (TILE_SIZE / 2), (playerPos.y * tileSize.y) - (tSize * 2.5));
-		switch (newLoot->getRarity())
+		actionText[0].setPosition((playerPos.x * tileSize.x) - (TILE_SIZE / 2), (playerPos.y * tileSize.y) - (tSize * (3.5 + (1*(newLoot.size()-1)))));
+		int i = 1;
+		for (auto loot : newLoot)
 		{
-		case Item::Rarity::NORM:
-			actionText[1].setFillColor(NORM_COLOR);
-			break;
-		case Item::Rarity::MAGIC:
-			actionText[1].setFillColor(MAGIC_COLOR);
-			break;
-		case Item::Rarity::RARE:
-			actionText[1].setFillColor(RARE_COLOR);
-			break;
-		case Item::Rarity::ULTRA:
-			actionText[1].setFillColor(ULTRA_COLOR);
-			break;
+			std::string name = loot->getName();
+			actionText.push_back(sf::Text(name, game->fonts["main_font"], tSize));
+			actionText[i].setPosition((playerPos.x * tileSize.x) - (TILE_SIZE / 2), (playerPos.y * tileSize.y) - (tSize * (2.5 + (1 * (i-1)))));
+			switch (loot->getRarity())
+			{
+			case Item::Rarity::NORM:
+				actionText[i].setFillColor(NORM_COLOR);
+				break;
+			case Item::Rarity::MAGIC:
+				actionText[i].setFillColor(MAGIC_COLOR);
+				break;
+			case Item::Rarity::RARE:
+				actionText[i].setFillColor(RARE_COLOR);
+				break;
+			case Item::Rarity::ULTRA:
+				actionText[i].setFillColor(ULTRA_COLOR);
+				break;
+			}
+			actionText[i].setOutlineThickness(1);
+			i++;
 		}
-		actionText[1].setOutlineThickness(1);
 		this->action = Action::PICKUP;
 	}
 	else if (getTile(playerPos.x, playerPos.y)->tileVariant == 5)
@@ -696,7 +701,7 @@ void Map::populateDungeon()
 		switch (e.id)
 		{
 		case 'r':
-			
+
 			roll = itemGenerator->getRand_100();
 			if (roll <= bossChance)
 				do {} while (!spawnBossGroupInRoom(e));
@@ -712,13 +717,24 @@ void Map::populateDungeon()
 bool Map::spawnBossGroupInRoom(Dungeon::Entity e)
 {
 	float wMod = (itemGenerator->getRand_100() / 100.f), hMod = (itemGenerator->getRand_100() / 100.f);
-	sf::Vector2i eSpawnStart = { e.x + (int)((e.w)*wMod), e.y + (int)((e.h)*hMod) };
+	sf::Vector2i eSpawnStart = { e.x + (int)((e.w-1)*wMod), e.y + (int)((e.h-1)*hMod) };
 	if (getTile(eSpawnStart.x, eSpawnStart.y)->occupied)
 		return false;
 
-	Ability* e_a = itemGenerator->makeEnemyAbility(level, Item::Rarity::RARE, true, AbEffect::DamageType::PHYS);
-	enemies.push_back(new Enemy("ogre", game, eSpawnStart, 10, level, e_a,
-		"enemyattack1", true));
+	int roll = itemGenerator->getRand_100();
+	if (roll <= 50)
+	{
+		Ability* e_a = itemGenerator->makeEnemyAbility(level, Item::Rarity::RARE, true, AbEffect::DamageType::PHYS);
+		enemies.push_back(new Enemy("ogre", game, eSpawnStart, 20, level + 1, e_a,
+			"enemyattack1", true));
+	}
+	else
+	{
+		Ability* e_a = itemGenerator->makeEnemyAbility(level, Item::Rarity::RARE, true, AbEffect::DamageType::FIRE);
+		enemies.push_back(new Enemy("wraith", game, eSpawnStart, 20, level + 1, e_a,
+			"enemyattack1", true));
+	}
+
 	tEnemies[eSpawnStart.y*this->width + eSpawnStart.x] = enemies[enemies.size() - 1];
 	getTile(eSpawnStart.x, eSpawnStart.y)->occupied = true;
 
@@ -728,10 +744,10 @@ bool Map::spawnBossGroupInRoom(Dungeon::Entity e)
 		do {
 			wMod = (itemGenerator->getRand_100() / 100.f);
 			hMod = (itemGenerator->getRand_100() / 100.f);
-			eSpawnStart = { e.x + (int)((e.w)*wMod), e.y + (int)((e.h)*hMod) };
+			eSpawnStart = { e.x + (int)((e.w-1)*wMod), e.y + (int)((e.h-1)*hMod) };
 		} while (getTile(eSpawnStart.x, eSpawnStart.y)->occupied);
 
-		int roll = itemGenerator->getRand_100();
+		roll = itemGenerator->getRand_100();
 		if (roll <= 50)
 		{
 			Ability* a = itemGenerator->makeEnemyAbility(level, Item::Rarity::MAGIC, true, AbEffect::DamageType::PHYS);
@@ -740,7 +756,7 @@ bool Map::spawnBossGroupInRoom(Dungeon::Entity e)
 		}
 		else
 		{
-			Ability* a = itemGenerator->makeEnemyAbility(level, Item::Rarity::MAGIC, false, AbEffect::DamageType::POIS);
+			Ability* a = itemGenerator->makeEnemyAbility(level, Item::Rarity::MAGIC, false, AbEffect::DamageType::FIRE);
 			enemies.push_back(new Enemy("wraith", game, eSpawnStart, 10, level, a,
 				"enemyattack2", false));
 		}
@@ -753,7 +769,7 @@ bool Map::spawnBossGroupInRoom(Dungeon::Entity e)
 bool Map::spawnEnemyInRoom(Dungeon::Entity e)
 {
 	float wMod = (itemGenerator->getRand_100() / 100.f), hMod = (itemGenerator->getRand_100() / 100.f);
-	sf::Vector2i eSpawnStart = { e.x + (int)((e.w)*wMod), e.y + (int)((e.h)*hMod) };
+	sf::Vector2i eSpawnStart = { e.x + (int)((e.w-1)*wMod), e.y + (int)((e.h-1)*hMod) };
 	if (getTile(eSpawnStart.x, eSpawnStart.y)->occupied)
 		return false;
 	int roll = itemGenerator->getRand_100();

@@ -452,11 +452,11 @@ public:
 		{
 			itemSlots.push_back(InvSlot(i, false, this->game, 0));
 		}
+
 		itemSlots[0].setItem(itemGenerator.makeItem(0, Item::Rarity::NORM, Item::SlotType::MAH));
 		if (!itemSlots[0].getItem()->twoHanded)
 			itemSlots[1].setItem(itemGenerator.makeItem(0, Item::Rarity::NORM, Item::SlotType::OFH));
-		itemSlots[2].setItem(itemGenerator.makeItem(0, Item::Rarity::NORM, Item::SlotType::RNG));
-		itemSlots[3].setItem(itemGenerator.makeItem(0, Item::Rarity::NORM, Item::SlotType::RNG));
+
 		//for (int i = 0; i < 25; i++)
 		//	itemSlots[i].setItem(itemGenerator.makeItem(1, 1000));
 		std::vector<std::string> eqNames = { "Head","Body","Main-hand","Off-hand","Ring","Amulet","Cloak","Belt" };

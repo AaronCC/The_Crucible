@@ -73,9 +73,13 @@ Scroll* ItemGenerator::makeScroll(int aLvl, float mf)
 			dist = std::uniform_int_distribution<>(0, poolsize - 1);
 			int poolat = dist(gen);
 			AbEffect eff = pools[efType][poolat];
-			effs.push_back(eff);
 			if (efType != EffType::BUFF)
+			{
+				eff.eff.damage.min *= abBase.mult;
+				eff.eff.damage.max *= abBase.mult;
 				justbuff = false;
+			}
+			effs.push_back(eff);
 			pools[efType].erase(pools[efType].begin() + poolat);
 			if (pools[efType].size() == 0)
 				choices.erase(choices.begin() + choice);
@@ -84,7 +88,19 @@ Scroll* ItemGenerator::makeScroll(int aLvl, float mf)
 		}
 	Ability::Area area;
 	int range;
-	if (!justbuff)
+	if (justbuff)
+	{
+		area = Ability::Area::TARGET;
+		range = 0;
+	}
+	else if (abBase.area != -1 && abBase.area < Ability::numarea)
+	{
+		area = (Ability::Area)abBase.area;
+		dist.reset();
+		dist = std::uniform_int_distribution<>(0, 3);
+		range = dist(gen) + 1;
+	}
+	else
 	{
 		dist.reset();
 		dist = std::uniform_int_distribution<>(0, Ability::numarea - 1);
@@ -92,11 +108,6 @@ Scroll* ItemGenerator::makeScroll(int aLvl, float mf)
 		dist.reset();
 		dist = std::uniform_int_distribution<>(0, 3);
 		range = dist(gen) + 1;
-	}
-	else
-	{
-		area = Ability::Area::TARGET;
-		range = 0;
 	}
 	Ability::AbInfo info{ area,range };
 	ab->setInfo(info);
@@ -121,7 +132,7 @@ Ability * ItemGenerator::makeEnemyAbility(int aLvl, Item::Rarity rarity, bool me
 	dist = std::uniform_int_distribution<>(0, 2);
 	int tcPenalty = dist(gen) + 1;
 	Ability* ab = new Ability(game, game->texmgr.getRef(abBase.texName), abBase.iconName,
-		abBase.anim, { TILE_SIZE,TILE_SIZE }, abBase.cd, abBase.tc + tcPenalty,
+		abBase.anim, { TILE_SIZE,TILE_SIZE }, abBase.cd, abBase.tc,
 		abBase.name, abBase.description);
 	std::vector<AbEffect> effs;
 	std::map<EffType, std::vector<AbEffect>> pools;
@@ -186,13 +197,10 @@ Ability * ItemGenerator::makeEnemyAbility(int aLvl, Item::Rarity rarity, bool me
 	Scroll* scroll;
 	int numaff = dist(gen) + 1;
 	dist.reset();
-	dist = std::uniform_int_distribution<>(0, abBases.size() - 1);
-	AbBase abBase = abBases[dist(gen)];
-	dist.reset();
-	dist = std::uniform_int_distribution<>(0, 2);
-	int tcPenalty = dist(gen) + 1;
+	dist = std::uniform_int_distribution<>(0, e_abBases.size() - 1);
+	AbBase abBase = e_abBases[dist(gen)];
 	Ability* ab = new Ability(game, game->texmgr.getRef(abBase.texName), abBase.iconName,
-		abBase.anim, { TILE_SIZE,TILE_SIZE }, abBase.cd, abBase.tc + tcPenalty,
+		abBase.anim, { TILE_SIZE,TILE_SIZE }, abBase.cd, abBase.tc,
 		abBase.name, abBase.description);
 	std::vector<AbEffect> effs;
 	std::map<EffType, std::vector<AbEffect>> pools;
@@ -209,6 +217,8 @@ Ability * ItemGenerator::makeEnemyAbility(int aLvl, Item::Rarity rarity, bool me
 				{
 					numaff--;
 					has_dType = true;
+					eff.first.damage.min *= abBase.mult;
+					eff.first.damage.max *= abBase.mult;
 					effs.push_back(eff.first);
 				}
 				else
@@ -230,6 +240,8 @@ Ability * ItemGenerator::makeEnemyAbility(int aLvl, Item::Rarity rarity, bool me
 			dist = std::uniform_int_distribution<>(0, poolsize - 1);
 			int poolat = dist(gen);
 			AbEffect eff = pools[efType][poolat];
+			eff.eff.damage.min *= abBase.mult;
+			eff.eff.damage.max *= abBase.mult;
 			effs.push_back(eff);
 			pools[efType].erase(pools[efType].begin() + poolat);
 			if (pools[efType].size() == 0)

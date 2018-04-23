@@ -1,5 +1,17 @@
 #include "Helper.h"
 
+float Helper::getAgiMod(int agi)
+{
+	float mod = linearEq(0.02, agi, 0, 1);
+	return mod;
+}
+
+float Helper::getKnoMod(int kno)
+{
+	float mod = linearEq(0.02, kno, 0, 1);
+	return mod;
+}
+
 float Helper::dotProduct(sf::Vector2f v1, sf::Vector2f v2)
 {
 	return (v1.x * v2.x + v1.y * v2.y);

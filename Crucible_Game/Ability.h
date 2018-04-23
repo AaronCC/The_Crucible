@@ -198,7 +198,7 @@ public:
 						atk = 0;
 					effect.damage.modDamage(stats->buffs[damageAffixes[effect.damage.type]].v1 + atk);
 				}
-			}s
+			}
 			effEffs.push_back(effect);
 		}
 		return effEffs;
@@ -226,8 +226,12 @@ public:
 		else
 			str.push_back("Ranged" + areadesc[(int)info.area]);
 		str.push_back("Range: " + std::to_string(info.range));
-		str.push_back("Cooldown: " + std::to_string(cooldown).substr(0, 4));
-		str.push_back("Cast Time: " + std::to_string((float)tickCost*stats->speed).substr(0, 4));
+		int KNO = stats->buffs[Helper::Affix::KNO].v1;
+		int AGI = stats->buffs[Helper::Affix::AGI].v1;
+		if (KNO == -1) KNO = 0;
+		if (AGI == -1) AGI = 0;
+		str.push_back("Cooldown: " + std::to_string(cooldown * (1-helper.getKnoMod(KNO))).substr(0, 4));
+		str.push_back("Cast Time: " + std::to_string((float)tickCost*(stats->speed-helper.getAgiMod(AGI))).substr(0, 4));
 		for (auto e : effs)
 		{
 			AbEffect::Damage damage = e.getEffects().damage;

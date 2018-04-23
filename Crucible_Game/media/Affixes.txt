@@ -80,26 +80,37 @@
 2 3 0 Brittle Ancile; 8 -1 5 15 1 1
 ;Ring bases
 2 4 0 Ruby Ring; 10 -1 5 5 0 0
+2 4 0 Topaz Ring; 10 -1 5 6 0 0
+2 4 0 Sapphire Ring; 10 -1 5 7 0 0
+2 4 0 Emerald Ring; 10 -1 5 8 0 0
 2 4 0 Iron Ring; 2 4 0 4 1 0
 ;Amulet bases
-2 5 0 Topaz Amulet; 5 -1 5 18 0 0
+2 5 0 Collar; 5 -1 5 16 0 0
+2 5 0 Chocker; 5 -1 5 17 0 0
+2 5 0 Locket; 5 -1 5 18 0 0
+2 5 0 Chain; 5 -1 5 19 0 0
 ;Cloak bases
 2 6 0 Worn Scarf; 5 -1 5 15 1 0
 2 6 0 Wool Cloak; 8 -1 5 15 1 1
 ;Belt bases
-2 7 0 Heavy Belt; 5 -1 5 19 1 0
-;type hasstats? buff? stats dmgtype a1 a2 dur ilvl
-3 0 0 2 9 1 0
-3 0 1 5 7 1 0
-3 0 2 6 8 1 0
-3 0 3 1 10 1 0
-3 0 4 1 4 4 0
+2 7 0 Leather Cord; 2 -1 5 19 1 0
+2 7 0 Heavy Belt; 5 -1 5 19 1 1
+;Ability Affixes
+;type hasstats? buff? stats{aff afv}; dmgtype a1 a2 dur ilvl
+3 0 0 5 15 1 0
+3 0 1 8 12 1 0
+3 0 2 9 11 1 0
+3 0 3 1 20 1 0
+3 0 4 2 4 4 0
 3 1 1 16 5; 5 0 0 10 0
 3 1 1 17 5; 5 0 0 10 0
 3 1 1 18 5; 5 0 0 10 0
 3 1 1 19 5; 5 0 0 10 0
-;texname iconname description name animstart animend cd ct
-4 slash slash_icon slash; Blue Slash; 0 3 5 1
-4 slash2 slash_icon2 slash; Red Slash; 0 3 5 1
-4 poison poison_icon slash; Cloud; 0 3 5 1
-4 spiral spiral_icon slash; Spiral; 0 3 5 1
+;texname iconname description name animstart animend cd ct area|-1 multiplier.f
+4 slash slash_icon Targeted quick attack; Blue Slash; 0 3 4 1 0 1
+4 slash2 slash_icon2 Targeted heavy attack; Red Slash; 0 3 10 1 0 1.5
+4 poison poison_icon Weak area attack; Cloud; 0 3 6 1 3 1
+4 spiral spiral_icon Weak line attack; Spiral; 0 3 6 1 1 1
+;ENEMY AB BASES
+5 poison poison_icon Weak area attack; Cloud; 0 3 1 3 1 0.8
+5 spiral spiral_icon Weak line attack; Spiral; 0 3 1 2 1 0.5

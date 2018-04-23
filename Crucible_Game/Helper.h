@@ -99,7 +99,8 @@ public:
 		KNO,
 		ATK // 19
 	};
-
+	float getAgiMod(int agi);
+	float getKnoMod(int kno);
 	Affix dmgTypeToAffix[4] = {
 		Affix::FIRE_RES,
 		Affix::COLD_RES,

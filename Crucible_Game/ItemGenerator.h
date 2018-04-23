@@ -27,9 +27,10 @@ public:
 		std::string description;
 		std::string name;
 		Animation anim;
-		int cd, tc;
-		AbBase(std::string tn, std::string in, std::string desc, std::string n, Animation anim, int cd, int tc) :
-			texName(tn), iconName(in), description(desc), name(n), anim(anim), cd(cd), tc(tc) {}
+		int cd, tc, area;
+		float mult;
+		AbBase(std::string tn, std::string in, std::string desc, std::string n, Animation anim, int cd, int tc, int area, float mult) :
+			texName(tn), iconName(in), description(desc), name(n), anim(anim), cd(cd), tc(tc), area(area), mult(mult) {}
 	};
 
 	int getRand_100() {
@@ -47,6 +48,7 @@ public:
 	}
 
 	std::vector<AbBase> abBases;
+	std::vector<AbBase> e_abBases;
 
 	std::map<ST, std::vector<std::pair<int, BaseItem>>> bases;
 	std::map<EffType, std::vector<std::pair<AbEffect::Effect, int>>> abAffixes;
@@ -164,9 +166,48 @@ public:
 		bases[type].push_back({ ilvl,*bi });
 		return true;
 	}
+	bool parseEAbBase(std::vector<std::string> data)
+	{
+		int i = 2, cd, ct, area;
+		float mult;
+		unsigned int aStart, aEnd;
+		std::string texname = data[0];
+		std::string iconname = data[1];
+		std::string desc = "";
+		while (data[i][data[i].size() - 1] != ';')
+		{
+			desc += data[i] + " ";
+			i++;
+		}
+		desc += data[i].substr(0, data[i].size() - 1);
+		i++;
+		std::string name;
+		while (data[i][data[i].size() - 1] != ';')
+		{
+			name += data[i] + " ";
+			i++;
+		}
+		name += data[i].substr(0, data[i].size() - 1);
+		std::stringstream ss(data[i + 1]);
+		ss >> aStart;
+		ss = std::stringstream(data[i + 2]);
+		ss >> aEnd;
+		ss = std::stringstream(data[i + 3]);
+		ss >> cd;
+		ss = std::stringstream(data[i + 4]);
+		ss >> ct;
+		ss = std::stringstream(data[i + 5]);
+		ss >> area;
+		ss = std::stringstream(data[i + 6]);
+		ss >> mult;
+		e_abBases.push_back(AbBase(texname, iconname, desc, name,
+			{ aStart,aEnd,0.1f }, cd, ct, area, mult));
+		return false;
+	}
 	bool parseAbBase(std::vector<std::string> data)
 	{
-		int i = 0, cd, ct;
+		int i = 2, cd, ct, area;
+		float mult;
 		unsigned int aStart, aEnd;
 		std::string texname = data[0];
 		std::string iconname = data[1];
@@ -193,8 +234,12 @@ public:
 		ss >> cd;
 		ss = std::stringstream(data[i + 4]);
 		ss >> ct;
+		ss = std::stringstream(data[i + 5]);
+		ss >> area; 
+		ss = std::stringstream(data[i + 6]);
+		ss >> mult;
 		abBases.push_back(AbBase(texname, iconname, desc, name,
-			{ aStart,aEnd,0.1f }, cd, ct));
+			{ aStart,aEnd,0.1f }, cd, ct, area, mult));
 		return false;
 	}
 	
@@ -260,6 +305,7 @@ public:
 			BAS,
 			AB_AF,
 			AB_BAS,
+			E_AB_BAS,
 			NA
 		};
 		Helper helper;
@@ -311,6 +357,10 @@ public:
 				case Parsing::AB_BAS:
 					parseAbBase(results);
 					std::cout << "\nadded ab base";
+					break;
+				case Parsing::E_AB_BAS:
+					parseEAbBase(results);
+					std::cout << "\nadded enemy ab base";
 					break;
 				default:
 					break;

@@ -113,6 +113,7 @@ public:
 		const TileType tileType)
 	{
 		this->fow = true;
+		this->dark_fow = true;
 		this->passable = true;
 		sf::Vector2u size = texture.getSize();
 		this->tileType = tileType;

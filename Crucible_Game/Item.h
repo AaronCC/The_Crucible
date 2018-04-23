@@ -66,6 +66,7 @@ public:
 			str = "2H " + str;
 		return str;
 	}
+
 	virtual std::string getName()
 	{
 		return this->name;
@@ -155,6 +156,7 @@ public:
 	Scroll(std::string name, SlotType type, Ability* ability, Rarity rarity)
 		: Item(name, {}, BaseItem(), type, rarity) {
 		this->ability = ability;
+		this->twoHanded = false;
 	}
 	std::string getDesc() {
 		return ability->description;
@@ -176,12 +178,13 @@ public:
 		damageColors[AbEffect::DamageType::POIS] = sf::Color({ 131, 211, 69 });
 
 		std::vector<std::pair<sf::Color, std::string>> buffStr;
-		if (ability->info.range == 0)
+		buffStr.push_back({ sf::Color::White, getDesc() });
+	/*	if (ability->info.range == 0)
 			buffStr.push_back({ sf::Color::White, "Buff" });
 		else if (ability->info.range == 1)
-			buffStr.push_back({ sf::Color::White, "Melee" + ability->areadesc[(int)ability->info.area] });
+			buffStr.push_back({ sf::Color::White, "Melee" });
 		else
-			buffStr.push_back({ sf::Color::White, "Ranged" + ability->areadesc[(int)ability->info.area] });
+			buffStr.push_back({ sf::Color::White, "Ranged" });*/
 		std::vector<AbEffect::Effect> effs = ability->getEffects();
 		buffStr.push_back({ sf::Color::White, "Range: " + std::to_string(ability->info.range) });
 		buffStr.push_back({ sf::Color::White, "Cooldown: " + std::to_string(ability->cooldown).substr(0,4) });
