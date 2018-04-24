@@ -69,16 +69,6 @@ void Hud::setSlotSprites(std::vector<std::pair<sf::Keyboard::Key, std::string>> 
 		this->rmbSprite.first.setPosition(elements[A_SLOT + std::to_string(A_SLOT_COUNT - 1)].getPosition());
 	}
 }
-
-void Hud::queueMsg(std::string msg)
-{
-	sf::Text text;
-	text.setFont(this->game->fonts["main_font"]);
-	text.setString(msg);
-	text.setCharacterSize(12);
-	gameMsgs.push_back(text);
-}
-
 void Hud::equipCon() {
 	Consumable temp = consumables[0];
 	consumables[0] = consumables[conAt];
@@ -203,11 +193,11 @@ void Hud::draw(float dt)
 		this->game->window.draw(msgBack);
 		if (showState == Hud::ShowState::SHOW_MSG)
 		{
-			for (int i = 0; i < gameMsgs.size(); i++)
+			for (int i = this->game->gameMsgs.size()-1; i >= 0; i--)
 			{
-				gameMsgs[i].setPosition(msgStart + offset);
-				this->game->window.draw(gameMsgs[i]);
-				offset.y -= 10;
+				this->game->gameMsgs[i].setPosition(msgStart + offset);
+				this->game->window.draw(this->game->gameMsgs[i]);
+				offset.y -= tSize;
 			}
 			this->game->window.draw(msgTitle);
 		}

@@ -90,6 +90,7 @@ Scroll* ItemGenerator::makeScroll(int aLvl, float mf)
 	int range;
 	if (justbuff)
 	{
+		ab->description = "Buff";
 		area = Ability::Area::TARGET;
 		range = 0;
 	}
@@ -217,8 +218,8 @@ Ability * ItemGenerator::makeEnemyAbility(int aLvl, Item::Rarity rarity, bool me
 				{
 					numaff--;
 					has_dType = true;
-					eff.first.damage.min *= abBase.mult;
-					eff.first.damage.max *= abBase.mult;
+					eff.first.damage.min *= (abBase.mult + (aLvl * 0.02));
+					eff.first.damage.max *= (abBase.mult + (aLvl * 0.02));
 					effs.push_back(eff.first);
 				}
 				else
@@ -281,6 +282,8 @@ Consumable * ItemGenerator::makeConsumable(int aLvl)
 {
 	int roll = getRand_100();
 	std::string tiers[5] = { "Meager", "Lesser", "Medium", "Greater", "Mega" };
+	if (aLvl > 5)
+		aLvl = 4;
 	return new Consumable{ game,"hpot",{ 10 * aLvl,Consumable::ConType::H_POT },tiers[aLvl] + " Health Potion",aLvl };
 }
 

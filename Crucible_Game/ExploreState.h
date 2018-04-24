@@ -47,6 +47,11 @@ private:
 	bool old_sState = false;
 	bool old_aState = false;
 	bool old_dState = false;
+	bool old_zState = false;
+	bool old_xState = false;
+	bool old_cState = false;
+	bool old_vState = false;
+	bool moveQueued = false;
 	sf::Font testFont;
 	sf::Text testText;
 	PathFinder pf;

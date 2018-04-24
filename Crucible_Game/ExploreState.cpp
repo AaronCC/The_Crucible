@@ -94,7 +94,9 @@ void ExploreState::update(const float dt)
 			player.resolveAbilityCDs(resolving.second);
 			effs = map->updateEntityAI(player.tickCount, player.tilePos, &pf);
 			for (auto eff : effs)
+			{
 				player.applyEff(eff);
+			}
 			map->resolveEntityAI(resolving.second);
 			resolving = { false,0 };
 			shouldResolve = true;
@@ -149,12 +151,14 @@ void ExploreState::handleInput()
 {
 	sf::Event event;
 	std::queue<std::string> msgs;
-	bool act = false;
+	bool act = false, moveQueued = false;
 	while (this->game->window.pollEvent(event))
 	{
 		player.handleEvent(event);
 		switch (event.type)
 		{
+		case sf::Event::Closed:
+			exit(0);
 		case sf::Event::Resized:
 		{
 			this->camera.resizeView(event.size.width, event.size.height);
@@ -169,8 +173,6 @@ void ExploreState::handleInput()
 	}
 	sf::Vector2f mousePos = this->game->window.mapPixelToCoords(sf::Mouse::getPosition(this->game->window), this->view);
 	bool hudHover = mousePos.y >= game->hudTop ? true : false;
-	if (sf::Keyboard::isKeyPressed(sf::Keyboard::Escape))
-		exit(0);
 	if (map->action == Map::Action::PICKUP && sf::Keyboard::isKeyPressed(sf::Keyboard::E))
 	{
 		map->resolveAction(&player);
@@ -222,9 +224,117 @@ void ExploreState::handleInput()
 	}
 	else if (!sf::Mouse::isButtonPressed(sf::Mouse::Left))
 		old_mLeftState = false;
+	std::pair<int, int> point;
+
+	if (sf::Keyboard::isKeyPressed(sf::Keyboard::Z) && old_zState == false)
+	{
+		point = { player.tilePos.x-1,player.tilePos.y - 1 };
+		moveQueued = true;
+		old_zState = true;
+	}
+	else if (!sf::Keyboard::isKeyPressed(sf::Keyboard::Z))
+		old_zState = false;
+
+	if (sf::Keyboard::isKeyPressed(sf::Keyboard::X) && old_xState == false)
+	{
+		point = { player.tilePos.x + 1,player.tilePos.y - 1 };
+		moveQueued = true;
+		old_xState = true;
+	}
+	else if (!sf::Keyboard::isKeyPressed(sf::Keyboard::X))
+		old_xState = false;
+
+	if (sf::Keyboard::isKeyPressed(sf::Keyboard::C) && old_cState == false)
+	{
+		point = { player.tilePos.x - 1,player.tilePos.y + 1 };
+		moveQueued = true;
+		old_cState = true;
+	}
+	else if (!sf::Keyboard::isKeyPressed(sf::Keyboard::C))
+		old_cState = false;
+
+	if (sf::Keyboard::isKeyPressed(sf::Keyboard::V) && old_vState == false)
+	{
+		point = { player.tilePos.x + 1,player.tilePos.y + 1 };
+		moveQueued = true;
+		old_vState = true;
+	}
+	else if (!sf::Keyboard::isKeyPressed(sf::Keyboard::V))
+		old_vState = false;
+
 	if (sf::Keyboard::isKeyPressed(sf::Keyboard::W) && old_wState == false)
 	{
-		std::pair<int, int> point = { player.tilePos.x,player.tilePos.y - 1 };
+		point = { player.tilePos.x,player.tilePos.y - 1 };
+		moveQueued = true;
+		old_wState = true;
+	}
+	else if (!sf::Keyboard::isKeyPressed(sf::Keyboard::W))
+		old_wState = false;
+	if (sf::Keyboard::isKeyPressed(sf::Keyboard::S) && old_sState == false)
+	{
+		point = { player.tilePos.x,player.tilePos.y + 1 };
+		moveQueued = true;
+		old_sState = true;
+	}
+	else if (!sf::Keyboard::isKeyPressed(sf::Keyboard::S))
+		old_sState = false;
+	if (sf::Keyboard::isKeyPressed(sf::Keyboard::A) && old_aState == false)
+	{
+		point = { player.tilePos.x - 1,player.tilePos.y };
+		moveQueued = true;
+		old_aState = true;
+	}
+	else if (!sf::Keyboard::isKeyPressed(sf::Keyboard::A))
+		old_aState = false;
+	if (sf::Keyboard::isKeyPressed(sf::Keyboard::D) && old_dState == false)
+	{
+		point = { player.tilePos.x + 1,player.tilePos.y };
+		moveQueued = true;
+		old_dState = true;
+	}
+	else if (!sf::Keyboard::isKeyPressed(sf::Keyboard::D))
+		old_dState = false;
+	if (sf::Keyboard::isKeyPressed(sf::Keyboard::F))
+	{
+		if (this->map->getTile(player.tilePos.x, player.tilePos.y)->tileVariant == 6)
+		{
+			std::random_device rd;
+			std::mt19937 gen(rd());
+			std::uniform_int_distribution<> dist(0, 1);
+			bool cave = dist(gen);
+			int aLvl = map->level;
+			delete map;
+			map = new Map(game, &camera);
+			if (cave)
+			{
+				map->loadCave();
+				pf = PathFinder(this->map->getTiles(), this->map->width, this->map->height);
+				this->old_mLeftState = true;
+				this->player.updateTilePos();
+				map->getTile(player.tilePos.x, player.tilePos.y)->occupied = true;
+				map->itemGenerator = &player.inventory.itemGenerator;
+				map->level = aLvl + 1;
+				map->populateDungeon();
+			}
+			else
+			{
+				map->loadDungeon();
+				pf = PathFinder(this->map->getTiles(), this->map->width, this->map->height);
+				this->old_mLeftState = true;
+				this->player.updateTilePos();
+				map->getTile(player.tilePos.x, player.tilePos.y)->occupied = true;
+				map->itemGenerator = &player.inventory.itemGenerator;
+				map->level = aLvl + 1;
+				map->populateDungeon();
+			}
+			player.hud.updateDLevelText(map->level);
+			player.setPos(sf::Vector2f{ map->spawnPos.x*(float)TILE_SIZE,map->spawnPos.y*(float)TILE_SIZE });
+			fowCache.clear();
+			resolveFoW();
+		}
+	}
+	if (moveQueued)
+	{
 		Tile* tile = map->getTile(point.first, point.second);
 		if (tile->passable)
 		{
@@ -248,141 +358,6 @@ void ExploreState::handleInput()
 				map->getTile(point.first, point.second)->occupied = true;
 				playerOccToClear = { point.first,point.second };
 			}
-			/*if (oldMoveKey == sf::Keyboard::W)
-				player.lockActions();
-			oldMoveKey = sf::Keyboard::W;*/
-		}
-		old_wState = true;
-	}
-	else if (!sf::Keyboard::isKeyPressed(sf::Keyboard::W))
-		old_wState = false;
-	if (sf::Keyboard::isKeyPressed(sf::Keyboard::S) && old_sState == false)
-	{
-		std::pair<int, int> point = { player.tilePos.x,player.tilePos.y + 1 };
-		Tile* tile = map->getTile(point.first, point.second);
-		if (tile->passable)
-		{
-			act = true;
-			if (map->getEnemyAt(point.first, point.second) != nullptr)
-			{
-				player.queueAutoAttack();
-				player.resolveMeleeLineOfSight({ point.first,point.second });
-			}
-			else
-			{
-				if (playerOccToClear != sf::Vector2i{ -1, -1 })
-				{
-					map->getTile(playerOccToClear.x, playerOccToClear.y)->occupied = false;
-					playerOccToClear = { -1, -1 };
-				}
-				this->player.clearWayPoints();
-				this->player.addWayPoint(point);
-				this->player.queuedAction = Player::Action::MOVE;
-				map->getTile(player.tilePos.x, player.tilePos.y)->occupied = false;
-				map->getTile(point.first, point.second)->occupied = true;
-				playerOccToClear = { point.first,point.second };
-			}
-			/*
-						if (oldMoveKey == sf::Keyboard::S)
-							player.lockActions();
-						oldMoveKey = sf::Keyboard::S;*/
-
-		}
-		old_sState = true;
-	}
-	else if (!sf::Keyboard::isKeyPressed(sf::Keyboard::S))
-		old_sState = false;
-	if (sf::Keyboard::isKeyPressed(sf::Keyboard::A) && old_aState == false)
-	{
-		std::pair<int, int> point = { player.tilePos.x - 1,player.tilePos.y };
-		Tile* tile = map->getTile(point.first, point.second);
-		if (tile->passable)
-		{
-			act = true;
-			if (map->getEnemyAt(point.first, point.second) != nullptr)
-			{
-				player.queueAutoAttack();
-				player.resolveMeleeLineOfSight({ point.first,point.second });
-			}
-			else
-			{
-				if (playerOccToClear != sf::Vector2i{ -1, -1 })
-				{
-					map->getTile(playerOccToClear.x, playerOccToClear.y)->occupied = false;
-					playerOccToClear = { -1, -1 };
-				}
-				this->player.clearWayPoints();
-				this->player.addWayPoint(point);
-				this->player.queuedAction = Player::Action::MOVE;
-				map->getTile(player.tilePos.x, player.tilePos.y)->occupied = false;
-				map->getTile(point.first, point.second)->occupied = true;
-				playerOccToClear = { point.first,point.second };
-			}
-			/*if (oldMoveKey == sf::Keyboard::A)
-				player.lockActions();
-			oldMoveKey = sf::Keyboard::A;*/
-		}
-		old_aState = true;
-	}
-	else if (!sf::Keyboard::isKeyPressed(sf::Keyboard::A))
-		old_aState = false;
-	if (sf::Keyboard::isKeyPressed(sf::Keyboard::D) && old_dState == false)
-	{
-		std::pair<int, int> point = { player.tilePos.x + 1,player.tilePos.y };
-		Tile* tile = map->getTile(point.first, point.second);
-		if (tile->passable)
-		{
-			act = true;
-			if (map->getEnemyAt(point.first, point.second) != nullptr)
-			{
-				player.queueAutoAttack();
-				player.resolveMeleeLineOfSight({ point.first,point.second });
-			}
-			else
-			{
-				if (playerOccToClear != sf::Vector2i{ -1, -1 })
-				{
-					map->getTile(playerOccToClear.x, playerOccToClear.y)->occupied = false;
-					playerOccToClear = { -1, -1 };
-				}
-				this->player.clearWayPoints();
-				this->player.addWayPoint(point);
-				this->player.queuedAction = Player::Action::MOVE;
-				map->getTile(player.tilePos.x, player.tilePos.y)->occupied = false;
-				map->getTile(point.first, point.second)->occupied = true;
-				playerOccToClear = { point.first,point.second };
-			}
-			/*	if (oldMoveKey == sf::Keyboard::D)
-					player.lockActions();
-				oldMoveKey = sf::Keyboard::D;*/
-		}
-		old_dState = true;
-	}
-	else if (!sf::Keyboard::isKeyPressed(sf::Keyboard::D))
-		old_dState = false;
-	if (sf::Keyboard::isKeyPressed(sf::Keyboard::F))
-	{
-		if (this->map->getTile(player.tilePos.x, player.tilePos.y)->tileVariant == 6)
-		{
-			//std::random_device rd;
-			//std::mt19937 gen(rd());
-			//std::uniform_int_distribution<> dist(0, 1);
-			//bool cave = dist(gen);
-			int aLvl = map->level;
-			delete map;
-			map = new Map(game, &camera);
-			map->loadDungeon();
-			pf = PathFinder(this->map->getTiles(), this->map->width, this->map->height);
-			this->old_mLeftState = true;
-			this->player.updateTilePos();
-			map->getTile(player.tilePos.x, player.tilePos.y)->occupied = true;
-			map->itemGenerator = &player.inventory.itemGenerator;
-			map->level = aLvl + 1;
-			map->populateDungeon();
-			player.hud.updateDLevelText(map->level);
-			player.setPos(sf::Vector2f{ map->spawnPos.x*(float)TILE_SIZE,map->spawnPos.y*(float)TILE_SIZE });
-			fowCache.clear();
-			resolveFoW();
 		}
 	}
 	this->player.handleInput();
@@ -472,7 +447,8 @@ void ExploreState::resolveGameState(float ticks)
 		if (eff.damage.type == AbEffect::DamageType::PHYS)
 			dmg = player.applyAR(dmg);
 		else
-			dmg = player.applyRES(dmg, eff.damage.type);
+			dmg = player.applyRES(dmg, eff.damage.type); 
+		this->game->appendMsg(" dealt " + std::to_string((int)dmg) + " " + player.helper.damagenames[(int)eff.damage.type] + " damage.");
 		player.damage(dmg);
 		if (eff.dur < 1)
 		{

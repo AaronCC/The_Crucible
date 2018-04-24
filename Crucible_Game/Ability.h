@@ -221,10 +221,11 @@ public:
 	{
 		std::vector<std::string> str;
 		str.push_back(this->name);
-		if (info.range == 1)
-			str.push_back("Melee" + areadesc[(int)info.area]);
-		else
-			str.push_back("Ranged" + areadesc[(int)info.area]);
+		//if (info.range == 1)
+		//	str.push_back("Melee" + areadesc[(int)info.area]);
+		//else
+		//	str.push_back("Ranged" + areadesc[(int)info.area]);
+		str.push_back(description);
 		str.push_back("Range: " + std::to_string(info.range));
 		int KNO = stats->buffs[Helper::Affix::KNO].v1;
 		int AGI = stats->buffs[Helper::Affix::AGI].v1;

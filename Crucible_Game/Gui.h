@@ -44,7 +44,7 @@ public:
 		this->size = size;
 
 		highlighted = false;
-		outline.setSize({ size.x + 8,size.y + 8 });
+		outline.setSize({ size.x + 4,size.y + 4 });
 		outline.setFillColor(sf::Color::White);
 		outline.setOrigin(outline.getSize().x / 2, outline.getSize().y / 2);
 		outline.setPosition(pos);

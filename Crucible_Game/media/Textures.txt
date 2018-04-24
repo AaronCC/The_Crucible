@@ -38,3 +38,4 @@ atk_button media/atk_button.png
 def_button media/def_button.png
 kno_button media/kno_button.png
 agi_button media/agi_button.png
+rat media/rat.png

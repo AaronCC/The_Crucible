@@ -38,10 +38,16 @@ public:
 		//print();
 	}
 	CaveGen() {}
+	void setStair(int c, int r)
+	{
+		map[r*width + c] = 62;
+	}
 	char getTile(int c, int r) // Get tile at
 	{
 		if (map[r*width + c] != 1)
 			return ' ';
+		else if (map[r*width + c] == 62)
+			return '>';
 		else
 			return '#';
 	}
@@ -141,15 +147,18 @@ public:
 			for (int c = 0; c < width; c++)
 				if (map[r*width + c] == 0)
 				{
-					caves[fcount] = floodfill(c, r, fcount);
+					caves[fcount] = floodfill(c, r, fcount, 0);
 					fcount++;
 				}
 		return caves;
 	}
 	// Recursively floods caves
-	std::vector<sf::Vector2i> floodfill(int c, int r, int fill)
+	std::vector<sf::Vector2i> floodfill(int c, int r, int fill, int fCount)
 	{
 		std::vector<sf::Vector2i> caves = {};
+		fCount++;
+		if (fCount > 9999)
+			return caves;
 		if (c < 0 || r < 0 || c >= width || r >= height) // Check bounds
 			return caves;
 		int target = map[r*width + c];
@@ -161,13 +170,13 @@ public:
 			caves.push_back({ c,r }); // Add tile to current cave
 			
 			// Check surrounding tiles
-			for (auto cave : floodfill(c - 1, r, fill))
+			for (auto cave : floodfill(c - 1, r, fill, fCount))
 				caves.push_back(cave);
-			for (auto cave : floodfill(c + 1, r, fill))
+			for (auto cave : floodfill(c + 1, r, fill, fCount))
 				caves.push_back(cave);
-			for (auto cave : floodfill(c, r - 1, fill))
+			for (auto cave : floodfill(c, r - 1, fill, fCount))
 				caves.push_back(cave);
-			for (auto cave : floodfill(c, r + 1, fill))
+			for (auto cave : floodfill(c, r + 1, fill, fCount))
 				caves.push_back(cave);
 		}
 		return caves;

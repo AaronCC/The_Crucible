@@ -23,8 +23,10 @@ void Player::resolveMeleeLineOfSight(sf::Vector2i los)
 	queuedPoints.clear();
 	for (auto tile : queuedAbility->getActiveTiles(tilePos, los))
 		addQueuedPoint(tile);
-	queuedCooldown = queuedAbility->cooldown;
-	this->tickCount = stats.speed;
+	float knoMod = helper.getKnoMod(bStats.buffs[Helper::Affix::KNO].v1);
+	queuedCooldown = queuedAbility->cooldown * (1 - knoMod);
+	float agiMod = helper.getAgiMod(bStats.buffs[Helper::Affix::AGI].v1);
+	this->tickCount = queuedAbility->tickCost * (stats.speed - agiMod);
 }
 void Player::resolveAbilityOnTile(sf::Vector2i pos)
 {
@@ -33,7 +35,7 @@ void Player::resolveAbilityOnTile(sf::Vector2i pos)
 void Player::lockActions()
 {
 	this->resolveActions = true;
-	this->hud.gameMsgs.clear();
+	//this->hud.gameMsgs.clear();
 	keys[sf::Keyboard::Space] = true;
 }
 
@@ -54,6 +56,7 @@ void Player::updatePlayerStats()
 }
 void Player::levelUp(std::pair<int, int> stat)
 {
+	this->game->queueMsg("Level Up!");
 	const int ATK_INDEX = helper.numbuffs - 1;
 	if (this->stats.buffs[(Helper::Affix)(ATK_INDEX - stat.first)].v1 == -1)
 		stat.second++;
@@ -117,7 +120,7 @@ void Player::handleInput()
 	{
 		keys[sf::Keyboard::Tilde] = false;
 	}
-	if (sf::Keyboard::isKeyPressed(sf::Keyboard::C) && keys[sf::Keyboard::C] == false)
+	if (sf::Keyboard::isKeyPressed(sf::Keyboard::Q) && keys[sf::Keyboard::Q] == false)
 	{
 		updateAbilityBar();
 		updatePlayerStats();
@@ -129,11 +132,11 @@ void Player::handleInput()
 		}
 		else
 			this->hud.showState = Hud::ShowState::SHOW_INFO;
-		keys[sf::Keyboard::C] = true;
+		keys[sf::Keyboard::Q] = true;
 	}
-	else if (!sf::Keyboard::isKeyPressed(sf::Keyboard::C))
+	else if (!sf::Keyboard::isKeyPressed(sf::Keyboard::Q))
 	{
-		keys[sf::Keyboard::C] = false;
+		keys[sf::Keyboard::Q] = false;
 	}
 	if (sf::Keyboard::isKeyPressed(sf::Keyboard::J))
 	{
@@ -350,7 +353,7 @@ void Player::queueHudMsg(std::queue<std::string> msgs)
 {
 	while (msgs.size() > 0)
 	{
-		hud.queueMsg(msgs.front());
+		//hud.queueMsg(msgs.front());
 		msgs.pop();
 	}
 }

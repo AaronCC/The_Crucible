@@ -27,6 +27,17 @@ public:
 	std::vector<sf::Text> hoverText;
 	std::vector<sf::Text> actionText;
 
+	struct EnemyBase {
+		bool melee;
+		int hp;
+		std::string name;
+		std::pair<bool, int> group;
+		AbEffect::DamageType dtype;
+		EnemyBase(bool melee, int hp, std::string name, AbEffect::DamageType dtype, std::pair<bool,int> group) :
+			melee(melee), hp(hp), name(name), dtype(dtype), group(group) {};
+	};
+	std::vector<EnemyBase> ebases;
+
 	int level = 0;
 	int expCache = 0;
 
@@ -79,7 +90,12 @@ public:
 
 	void loadCave();
 
+	void genCaveEntities(int eCount, std::vector<sf::Vector2i> locs, std::vector<sf::Vector2i> oldLocs);
+
+
 	void Map::loadDungeon();
+
+	void populateCave();
 
 	void populateDungeon();
 

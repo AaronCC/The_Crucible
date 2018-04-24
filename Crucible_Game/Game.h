@@ -21,6 +21,10 @@ public:
 	const sf::Vector2u windowSize{ 800, 600 };
 	std::stack<GameState*> states;
 
+	std::vector<sf::Text> gameMsgs;
+	void queueMsg(std::string msg);
+	void appendMsg(std::string msg);
+
 	float hudTop;
 
 	void pushState(GameState* state);

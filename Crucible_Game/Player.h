@@ -142,7 +142,8 @@ public:
 	void addWayPoint(std::pair<int, int> point) {
 		queuedPoints.push_back({ point.first, point.second });
 		wayPoints.push({ point.first,point.second });
-		this->tickCount += stats.speed * 1;
+		float agi = helper.getAgiMod(bStats.buffs[Helper::Affix::AGI].v1);
+		this->tickCount += stats.speed * (1 - agi);
 	}
 	void clearWayPoints() {
 		this->tickCount = 0;
@@ -265,7 +266,7 @@ public:
 		hud.updateHealth(health, maxHealth, 1);
 		return helper.linearEq(10, level, maxExp, 1);
 	}
-	
+
 	bool gainExp(int newExp) {
 		if (exp + newExp >= maxExp)
 		{

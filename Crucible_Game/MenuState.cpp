@@ -51,6 +51,8 @@ void MenuState::handleInput()
 	{
 		switch (event.type)
 		{
+		case sf::Event::Closed:
+			exit(0);
 		case sf::Event::Resized:
 		{
 			resizeView(event.size.width, event.size.height);

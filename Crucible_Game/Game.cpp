@@ -24,6 +24,26 @@ Game::~Game()
 }
 
 
+void Game::queueMsg(std::string msg)
+{
+	sf::Text text;
+	text.setFont(fonts["main_font"]);
+	text.setString(msg);
+	text.setCharacterSize(12);
+	gameMsgs.push_back(text);
+	if (gameMsgs.size() > 50)
+		gameMsgs.erase(gameMsgs.begin());
+}
+void Game::appendMsg(std::string msg)
+{
+	if (gameMsgs.size() == 0)
+		queueMsg("");
+	int end = gameMsgs.size() - 1;
+	std::string current = gameMsgs[end].getString();
+	current += msg;
+	gameMsgs[end].setString(current);
+}
+
 void Game::pushState(GameState* state)
 {
 	this->states.push(state);

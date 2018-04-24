@@ -454,6 +454,7 @@ std::vector<AbEffect::Effect> Map::updateEntityAI(float _tickCount, sf::Vector2i
 		{
 			for (auto eff : enemy->ability.getEffects())
 				effs.push_back(eff);
+			this->game->queueMsg(enemy->name);
 		}
 		getTile(end.x, end.y)->occupied = true;
 		if (end != enemy->tilePos)
@@ -496,18 +497,26 @@ void Map::resolveEntityAI(float tickCount)
 		}
 	}
 	int i = 0;
+	std::vector<int> oldPosBuffer_rmCache;
 	for (auto enemy : moveBuffer)
 	{
+		i = 0;
 		tEnemies[enemy->tilePos.y*this->width + enemy->tilePos.x] = enemy;
 		for (auto pos : oldPosBuffer)
 		{
 			if (enemy->tilePos == pos)
 			{
-				oldPosBuffer.erase(oldPosBuffer.begin() + i);
+				oldPosBuffer_rmCache.push_back(i);
 				break;
 			}
 			i++;
 		}
+	}
+	i = 0;
+	for (auto pos : oldPosBuffer_rmCache)
+	{
+		oldPosBuffer.erase(oldPosBuffer.begin() + (pos - i));
+		i++;
 	}
 	for (auto pos : oldPosBuffer)
 	{
@@ -540,6 +549,9 @@ void Map::loadCave()
 		}
 	}
 	this->spawnPos = caves[maxCave][0];
+	int sLoc = itemGenerator->getRand_0X(caves[maxCave].size() - 1);
+	sf::Vector2i stairs = caves[maxCave][sLoc];
+	cave.setStair(stairs.x, stairs.y);
 	//cave.floodConnect(caves);
 	//cave.print();
 	tiles.reserve(width * height);
@@ -602,7 +614,50 @@ void Map::loadCave()
 		pos.x -= tileSize.x * width;
 		pos.y += tileSize.y;
 	}
+
+	std::vector<sf::Vector2i> eLocs = caves[maxCave];
+	eLocs.erase(eLocs.begin()); // player spawn
+
+	int eCount = eLocs.size() / 50;
+
+	genCaveEntities(eCount, eLocs, { {0,2} });
 }
+
+bool inProximity(std::vector<sf::Vector2i> locs, sf::Vector2i newLoc)
+{
+	for (auto loc : locs)
+	{
+		if (std::abs(loc.x - newLoc.x) < loc.y)
+			return true;
+	}
+	return false;
+}
+
+void Map::genCaveEntities(int eCount, std::vector<sf::Vector2i> locs, std::vector<sf::Vector2i> oldLocs)
+{
+	if (eCount > 0 && locs.size() > 0)
+	{
+		int rSize = itemGenerator->getRand_0X(6) + 1;
+		int loc = itemGenerator->getRand_0X(locs.size() - 1);
+		do
+		{
+			loc = itemGenerator->getRand_0X(locs.size() - 1);
+		} while (inProximity(oldLocs, { loc,rSize }));
+		oldLocs.push_back({ loc,rSize });
+		sf::Vector2i pos = locs[loc];
+		locs.erase(locs.begin() + loc);
+		eCount--;
+		if (pos.x + rSize >= width)
+			pos.x -= (pos.x + rSize + 1) - width;
+		if (pos.y + rSize >= height)
+			pos.y -= (pos.y + rSize + 1) - height;
+		entities.push_back({ 'r',pos.x,pos.y,rSize,rSize });
+		genCaveEntities(eCount, locs, oldLocs);
+		return;
+	}
+	return;
+}
+
 void Map::loadDungeon()
 {
 	//loadCave();
@@ -675,6 +730,7 @@ void Map::loadDungeon()
 			case Dungeon::Tile::DownStairs:
 			{
 				this->tiles[y*this->width + x].tileVariant = 6;
+				//this->spawnPos = { x + 1, y };
 				break;
 			}
 			default:
@@ -690,7 +746,6 @@ void Map::loadDungeon()
 	}
 
 }
-
 void Map::populateDungeon()
 {
 	int roll, bossChance = 20;
@@ -718,50 +773,46 @@ bool Map::spawnBossGroupInRoom(Dungeon::Entity e)
 {
 	float wMod = (itemGenerator->getRand_100() / 100.f), hMod = (itemGenerator->getRand_100() / 100.f);
 	sf::Vector2i eSpawnStart = { e.x + (int)((e.w-1)*wMod), e.y + (int)((e.h-1)*hMod) };
-	if (getTile(eSpawnStart.x, eSpawnStart.y)->occupied)
+	Tile* tile;
+	tile = getTile(eSpawnStart.x, eSpawnStart.y);
+	if (tile->occupied || !tile->passable)
 		return false;
 
-	int roll = itemGenerator->getRand_100();
-	if (roll <= 50)
-	{
-		Ability* e_a = itemGenerator->makeEnemyAbility(level, Item::Rarity::RARE, true, AbEffect::DamageType::PHYS);
-		enemies.push_back(new Enemy("ogre", game, eSpawnStart, 20, level + 1, e_a,
+	int roll = itemGenerator->getRand_0X(ebases.size()-1);
+	EnemyBase ebase = ebases[roll];
+		Ability* e_a = itemGenerator->makeEnemyAbility(level, Item::Rarity::RARE, ebase.melee, ebase.dtype);
+		enemies.push_back(new Enemy(ebase.name, game, eSpawnStart, ebase.hp*2, level + 1, e_a,
 			"enemyattack1", true));
-	}
-	else
-	{
-		Ability* e_a = itemGenerator->makeEnemyAbility(level, Item::Rarity::RARE, true, AbEffect::DamageType::FIRE);
-		enemies.push_back(new Enemy("wraith", game, eSpawnStart, 20, level + 1, e_a,
-			"enemyattack1", true));
-	}
 
 	tEnemies[eSpawnStart.y*this->width + eSpawnStart.x] = enemies[enemies.size() - 1];
 	getTile(eSpawnStart.x, eSpawnStart.y)->occupied = true;
 
-	int followerCount = 4 * (itemGenerator->getRand_100() / 100.f);
+	int followerCount = 4 * (itemGenerator->getRand_100() / 100.f), ecount = 1;
 	for (int i = 0; i < followerCount; i++)
 	{
-		do {
-			wMod = (itemGenerator->getRand_100() / 100.f);
-			hMod = (itemGenerator->getRand_100() / 100.f);
-			eSpawnStart = { e.x + (int)((e.w-1)*wMod), e.y + (int)((e.h-1)*hMod) };
-		} while (getTile(eSpawnStart.x, eSpawnStart.y)->occupied);
+		Ability* a = itemGenerator->makeEnemyAbility(level, Item::Rarity::MAGIC, ebase.melee, ebase.dtype);
 
-		roll = itemGenerator->getRand_100();
-		if (roll <= 50)
+		if (ebase.group.first)
 		{
-			Ability* a = itemGenerator->makeEnemyAbility(level, Item::Rarity::MAGIC, true, AbEffect::DamageType::PHYS);
-			enemies.push_back(new Enemy("ogre", game, eSpawnStart, 10, level, a,
+			ecount = itemGenerator->getRand_0X(ebase.group.second) + 1;
+		}
+
+		for (int i = 0; i < ecount; i++)
+		{
+			do {
+				wMod = (itemGenerator->getRand_100() / 100.f);
+				hMod = (itemGenerator->getRand_100() / 100.f);
+				eSpawnStart = { e.x + (int)((e.w - 1)*wMod), e.y + (int)((e.h - 1)*hMod) };
+				tile = getTile(eSpawnStart.x, eSpawnStart.y);
+			} while (tile->occupied && !tile->passable);
+
+			enemies.push_back(new Enemy(ebase.name, game, eSpawnStart, ebase.hp, level, a,
 				"enemyattack1", false));
+
+			tEnemies[eSpawnStart.y*this->width + eSpawnStart.x] = enemies[enemies.size() - 1];
+			getTile(eSpawnStart.x, eSpawnStart.y)->occupied = true;
 		}
-		else
-		{
-			Ability* a = itemGenerator->makeEnemyAbility(level, Item::Rarity::MAGIC, false, AbEffect::DamageType::FIRE);
-			enemies.push_back(new Enemy("wraith", game, eSpawnStart, 10, level, a,
-				"enemyattack2", false));
-		}
-		tEnemies[eSpawnStart.y*this->width + eSpawnStart.x] = enemies[enemies.size() - 1];
-		getTile(eSpawnStart.x, eSpawnStart.y)->occupied = true;
+		return true;
 	}
 	return true;
 }
@@ -770,30 +821,45 @@ bool Map::spawnEnemyInRoom(Dungeon::Entity e)
 {
 	float wMod = (itemGenerator->getRand_100() / 100.f), hMod = (itemGenerator->getRand_100() / 100.f);
 	sf::Vector2i eSpawnStart = { e.x + (int)((e.w-1)*wMod), e.y + (int)((e.h-1)*hMod) };
-	if (getTile(eSpawnStart.x, eSpawnStart.y)->occupied)
+	Tile* tile;
+	tile = getTile(eSpawnStart.x, eSpawnStart.y);
+	if (tile->occupied)
 		return false;
-	int roll = itemGenerator->getRand_100();
-	if (roll <= 50)
+
+	int ecount = 1;
+
+	int roll = itemGenerator->getRand_0X(ebases.size() - 1);
+	EnemyBase ebase = ebases[roll];
+	Ability* a = itemGenerator->makeEnemyAbility(level, Item::Rarity::MAGIC, ebase.melee, ebase.dtype);
+
+	if (ebase.group.first)
 	{
-		Ability* a = itemGenerator->makeEnemyAbility(level, Item::Rarity::MAGIC, true, AbEffect::DamageType::PHYS);
-		enemies.push_back(new Enemy("ogre", game, eSpawnStart, 10, level, a,
+		ecount = itemGenerator->getRand_0X(ebase.group.second) + 1;
+	}
+
+	for (int i = 0; i < ecount; i++)
+	{
+		do {
+			wMod = (itemGenerator->getRand_100() / 100.f);
+			hMod = (itemGenerator->getRand_100() / 100.f);
+			eSpawnStart = { e.x + (int)((e.w - 1)*wMod), e.y + (int)((e.h - 1)*hMod) };
+			tile = getTile(eSpawnStart.x, eSpawnStart.y);
+		} while (tile->occupied && !tile->passable);
+
+
+		enemies.push_back(new Enemy(ebase.name, game, eSpawnStart, ebase.hp, level, a,
 			"enemyattack1", false));
+
+		tEnemies[eSpawnStart.y*this->width + eSpawnStart.x] = enemies[enemies.size() - 1];
+		getTile(eSpawnStart.x, eSpawnStart.y)->occupied = true;
 	}
-	else
-	{
-		Ability* a = itemGenerator->makeEnemyAbility(level, Item::Rarity::MAGIC, false, AbEffect::DamageType::POIS);
-		enemies.push_back(new Enemy("wraith", game, eSpawnStart, 10, level, a,
-			"enemyattack2", false));
-	}
-	tEnemies[eSpawnStart.y*this->width + eSpawnStart.x] = enemies[enemies.size() - 1];
-	getTile(eSpawnStart.x, eSpawnStart.y)->occupied = true;
 	return true;
 }
 
 Enemy* Map::getEnemyAt(int x, int y)
 {
 	return this->tEnemies[y*this->width + x];
-}
+} 
 
 Tile* Map::getTile(int x, int y)
 {
@@ -808,9 +874,12 @@ Map::Map(Game* game, Camera* camera)
 	this->tileSize = this->game->tileSize;
 	this->canSelect = this->game->tileAtlas.at("can_select");
 	this->cantSelect = this->game->tileAtlas.at("cant_select");
-	this->canSelect.reveal();
+	this->canSelect.reveal(); 
 	this->cantSelect.reveal();
 	this->drawSize = { (float)this->game->windowSize.x / tileSize.x, (float)this->game->windowSize.y / tileSize.y };
+	ebases.push_back(EnemyBase{ true,15,"ogre",AbEffect::DamageType::PHYS,{false,0} });
+	ebases.push_back(EnemyBase{ false,10,"wraith",AbEffect::DamageType::FIRE,{false,0} });
+	ebases.push_back(EnemyBase{ true,4,"rat",AbEffect::DamageType::POIS,{ true,3 } });
 }
 Map::~Map()
 {

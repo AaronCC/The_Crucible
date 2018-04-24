@@ -27,7 +27,7 @@ public:
 		"% global cold damage",
 		"% global lightning damage",
 		"% global poison damage",
-		"% local physical damage",
+		"% weapon physical damage",
 		"% global physical damage",
 		"armor rating",
 		"agility",

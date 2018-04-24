@@ -262,7 +262,7 @@ public:
 	Helper helper;
 
 	sf::Vector2f start = { 5, 5 };
-	sf::Vector2f abStart = { 155, 15 };
+	sf::Vector2f abStart = { 140, 15 };
 
 	PlayerInfo(Game* game, Helper::Stats stats)
 	{
@@ -280,8 +280,13 @@ public:
 				affstr = "0";
 			str = affstr + " " + helper.buffnames[i];
 			info.push_back(sf::Text(str, this->game->fonts["main_font"], tSize));
-			info[i].setPosition(start + sf::Vector2f{ 0, (float)(tSize + 2)*i });
+			info[i].setPosition(start + sf::Vector2f{ 0, (float)(tSize + 4)*i });
 		}
+		int agi = stats.buffs[Helper::Affix::AGI].v1;
+		if (agi == -1) agi = 0;
+		info.push_back(sf::Text("Move Cost: " + std::to_string(1 - helper.getAgiMod(agi)).substr(0, 4),
+			this->game->fonts["main_font"], tSize));
+		info[info.size() - 1].setPosition(start + sf::Vector2f{ 0, (float)(tSize + 4)*(info.size() - 1) });
 	}
 	void setAbilities(std::vector<Ability*> abilities, Ability* default, Helper::Stats stats)
 	{
@@ -289,15 +294,31 @@ public:
 		int i = 0, j = 0;
 		std::vector<std::string> abStr;
 		sf::Vector2f pos = abStart;
-		pos.x += 100;
+		pos.x += 80;
+		sf::Vector2f newPos{};
 		for (auto ab : abilities)
 		{
+			if (newPos.x != 0)
+			{
+				pos.y = abStart.y;
+				pos += newPos;
+			}
+			newPos = { 0,0 };
 			abStr = ab->getBoostedString(&stats);
 			j = 0;
 			for (auto str : abStr)
 			{
 				this->abilities.push_back(std::vector<sf::Text>());
+				if (j == 0)
+				{
+					str = "[" + std::to_string(i + 1) + "] " + str;
+				}
 				this->abilities[i].push_back(sf::Text(str, game->fonts["main_font"], 12));
+				int lineH = pos.y + (this->abilities[i].size()*tSize);
+				if (lineH >= MSG_BACK_H && newPos == sf::Vector2f{ 0, 0 })
+				{
+					newPos.x = 200.f;
+				}
 				this->abilities[i][j].setPosition(pos);
 				j++;
 				pos.y += tSize + 2;
@@ -457,8 +478,7 @@ public:
 		if (!itemSlots[0].getItem()->twoHanded)
 			itemSlots[1].setItem(itemGenerator.makeItem(0, Item::Rarity::NORM, Item::SlotType::OFH));
 
-		//for (int i = 0; i < 25; i++)
-		//	itemSlots[i].setItem(itemGenerator.makeItem(1, 1000));
+
 		std::vector<std::string> eqNames = { "Head","Body","Main-hand","Off-hand","Ring","Amulet","Cloak","Belt" };
 		for (int i = 0; i < 8; i++)
 		{
@@ -471,6 +491,9 @@ public:
 		{
 			scrollSlots.push_back(InvSlot(i, false, this->game, 2));
 		}
+
+	/*	for (int i = 0; i < 25; i++)
+			scrollSlots[i].setItem(itemGenerator.makeScroll(1, 1000));*/
 		std::vector<std::string> scEqNames = { "1","2","3","4","5","6","LMB","RMB" };
 		for (int i = 0; i < A_SLOT_COUNT; i++)
 		{
@@ -717,7 +740,6 @@ public:
 
 	sf::Text hpText;
 
-	std::vector<sf::Text> gameMsgs;
 	enum ShowState {
 		SHOW_MSG,
 		SHOW_INV,
