@@ -103,31 +103,7 @@ public:
 		slotTypeText.setFillColor({ 102, 102, 255 });
 		seperatorText = sf::Text("____", game->fonts["main_font"], tSize);
 		seperatorText.setFillColor({ 102, 102, 255 });
-
-		std::string pre = "", suf = "";
-		if (item->rarity == Item::Rarity::MAGIC || item->rarity == Item::Rarity::NORM)
-		{
-			for (auto buff : item->buffs)
-			{
-				if (buff.second.getStr() != "")
-					if (buff.second.pre)
-						pre = buff.second.id;
-					else
-						suf = buff.second.id;
-			}
-		}
-		else
-		{
-			std::random_device rd;
-			std::mt19937 gen(rd());
-			int i = helper.numpreprefixes;
-			std::uniform_int_distribution<> dist(0, i - 1);
-			pre += helper.inamePrePrefixes[dist(gen)];
-			dist.reset();
-			dist = std::uniform_int_distribution<>(0, helper.inamePrefixes[item->slotType].size() - 1);
-			pre += " " + helper.inamePrefixes[item->slotType][dist(gen)] + ",";
-		}
-		std::string newname = pre + " " + item->name + " " + suf;
+		std::string newname = item->name;
 		for (auto line : wrapWord(maxNameChar, newname))
 		{
 			itemText.push_back(sf::Text(line, game->fonts["main_font"], tSize));
@@ -284,7 +260,7 @@ public:
 		}
 		int agi = stats.buffs[Helper::Affix::AGI].v1;
 		if (agi == -1) agi = 0;
-		info.push_back(sf::Text("Move Cost: " + std::to_string(1 - helper.getAgiMod(agi)).substr(0, 4),
+		info.push_back(sf::Text("Move Cost: " + helper.cutTrailing0s(std::to_string(1 - helper.getAgiMod(agi))),
 			this->game->fonts["main_font"], tSize));
 		info[info.size() - 1].setPosition(start + sf::Vector2f{ 0, (float)(tSize + 4)*(info.size() - 1) });
 	}
@@ -404,6 +380,16 @@ public:
 		}
 		return -1;
 	}
+	int firstEmptySlot(std::vector<std::pair<InvSlot,sf::Text>>& slots) {
+		for (int i = 0; i < slots.size(); i++)
+		{
+			if (slots[i].first.getItem() == nullptr)
+			{
+				return i;
+			}
+		}
+		return -1;
+	}
 	bool pickupItem(Item* item);
 	bool pickupScroll(Scroll * item);
 	bool eqToSlot(int eqIndex, std::vector<InvSlot>& slots, std::vector<std::pair<InvSlot, sf::Text>>& eqSlots)
@@ -472,12 +458,11 @@ public:
 		for (int i = 0; i < 25; i++)
 		{
 			itemSlots.push_back(InvSlot(i, false, this->game, 0));
+			//itemSlots[i].setItem(itemGenerator.makeItem(2, 500));
 		}
-
 		itemSlots[0].setItem(itemGenerator.makeItem(0, Item::Rarity::NORM, Item::SlotType::MAH));
 		if (!itemSlots[0].getItem()->twoHanded)
 			itemSlots[1].setItem(itemGenerator.makeItem(0, Item::Rarity::NORM, Item::SlotType::OFH));
-
 
 		std::vector<std::string> eqNames = { "Head","Body","Main-hand","Off-hand","Ring","Amulet","Cloak","Belt" };
 		for (int i = 0; i < 8; i++)
@@ -492,7 +477,7 @@ public:
 			scrollSlots.push_back(InvSlot(i, false, this->game, 2));
 		}
 
-	/*	for (int i = 0; i < 25; i++)
+		/*for (int i = 0; i < 25; i++)
 			scrollSlots[i].setItem(itemGenerator.makeScroll(1, 1000));*/
 		std::vector<std::string> scEqNames = { "1","2","3","4","5","6","LMB","RMB" };
 		for (int i = 0; i < A_SLOT_COUNT; i++)
@@ -668,8 +653,8 @@ public:
 					scrollSlots[selected].slotBack.setOutlineColor(sf::Color::Black);
 					if (slotType != -1)
 					{
-						/*eqToSlot(slotType, scrollSlots, eqScrolls);
-						slotToEq(selected, slotType, scrollSlots, eqScrolls);*/
+						eqToSlot(firstEmptySlot(eqScrolls), scrollSlots, eqScrolls);
+						slotToEq(selected, firstEmptySlot(eqScrolls), scrollSlots, eqScrolls);
 					}
 					selected = -1;
 					lastSelected = false;

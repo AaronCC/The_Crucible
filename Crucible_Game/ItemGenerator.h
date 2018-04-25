@@ -21,6 +21,7 @@ class ItemGenerator
 public:
 	Game * game;
 	static const int numEfType = 4;
+	static const int MAX_ILVL = 100;
 	struct AbBase {
 		std::string texName;
 		std::string iconName;
@@ -89,9 +90,9 @@ public:
 		bool l = (bool)local_I;
 		DMG dtype = (DMG)dType_I;
 		sf::Color c = helper.damageColors[dtype];
-		for (int i = 0; i < names.size(); i++)
+		while (ilvl < MAX_ILVL)
 		{
-			std::string name = names[i];
+			std::string name = names[getRand_0X(names.size() - 1)];
 			v1 = off + (off*ilvl);
 			v2 = v1 + range + (range*ilvl*0.5);
 			if (v1 == v2)
@@ -127,9 +128,9 @@ public:
 		bool l = (bool)local_I;
 		DMG dtype = (DMG)dType_I;
 		sf::Color c = helper.damageColors[dtype];
-		for (int i = 0; i < names.size(); i++)
+		while (ilvl < MAX_ILVL)
 		{
-			std::string name = names[i];
+			std::string name = names[getRand_0X(names.size() - 1)];
 			v1 = off + (off*ilvl);
 			v2 = v1 + range + (range*ilvl*0.5);
 			if (v1 == v2)
@@ -263,7 +264,6 @@ public:
 
 	bool parseAbAff(std::vector<std::string> data)
 	{
-		const int MAX_ILVL = 100;
 		bool hasStats;
 		bool buff;
 		int dmgtype, v1, v2, dur, ilvl = 0, b, i = 2, range, off;

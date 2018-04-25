@@ -6,14 +6,14 @@
 6 Ash Cinders Heat Glow Blaze Flame Pyre Combustion Inferno Conflagration
 0 4 4 0 1 1
 ;1 cold damage
-6 Cool Bleak Nipping Frost Freezing Chilling Stinging Frostbite Hypothermia Glacial
+6 Cool Bleak Nipping Frost Freezing Chilling Stinging Frostbite Hypothermia Glacier
 0 2 6 1 1 2
 ;2 lightning damage
 6 Sparking Light Voltage Magnetism Galvanism Current Electrocution Lightning Thunder Zeus
 0 10 1 2 1 3
 ;3 poison damage
-6 Germs Poison
-0 1 1 3 1 4
+6 Germs Bacteria Viruses Venom Sickness Plague Corruption Blight Miasma
+0 3 5 3 1 4
 ;4 physical damage
 6 Striking Smashing
 0 3 5 4 1 0
@@ -49,7 +49,7 @@
 0 0 10 14 0 5
 ;15 % armor rating
 6 Swiss Padded
-0 0 10 15 1 5
+0 0 10 15 0 5
 ;16 agility
 6 Slow Agile
 0 0 1 16 0 5
@@ -107,10 +107,12 @@
 3 1 1 18 5; 5 0 0 10
 3 1 1 19 5; 5 0 0 10
 ;texname iconname description name animstart animend cd ct area|-1 multiplier.f
-4 slash slash_icon Targeted quick attack; Blue Slash; 0 3 4 1 0 1
-4 slash2 slash_icon2 Targeted heavy attack; Red Slash; 0 3 10 1 0 1.5
-4 poison poison_icon Weak area attack; Cloud; 0 3 6 1 3 1
-4 spiral spiral_icon Weak line attack; Spiral; 0 3 6 1 1 1
-;ENEMY AB BASES
-5 poison poison_icon Weak area attack; Cloud; 0 3 1 3 1 0.8
-5 spiral spiral_icon Weak line attack; Spiral; 0 3 1 2 1 0.5
+4 slash slash_icon Targeted quick attack; Blue Slash; 0 3 6 1 0 1
+4 slash2 slash_icon2 Targeted heavy attack; Red Slash; 0 3 15 1 0 1.5
+4 poison poison_icon Weak area attack; Cloud; 0 3 9 1 3 1
+4 spiral spiral_icon Weak line attack; Spiral; 0 3 9 1 1 1
+;ENEMY AB BASES (CD IGNORED // CAST TIME = CD)
+5 slash slash_icon Targeted quick attack; Blue Slash; 0 3 1 3 1 1.5
+5 slash2 slash_icon2 Targeted heavy attack; Red Slash; 0 3 1 4 1 2
+5 poison poison_icon Weak area attack; Cloud; 0 3 1 2 1 1
+5 spiral spiral_icon Weak line attack; Spiral; 0 3 1 1 1 0.3

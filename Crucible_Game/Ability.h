@@ -59,7 +59,7 @@ public:
 		Helper::Stats stats;
 		Damage damage;
 		EffType type;
-		int dur;
+		float dur;
 		Effect(Helper::Stats stats, Damage damage, int dur, EffType type)
 		{
 			this->stats = stats;

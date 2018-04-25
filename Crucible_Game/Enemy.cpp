@@ -7,13 +7,17 @@ std::pair<sf::Vector2i, sf::Vector2i> Enemy::resolveTick(float newTicks)
 	for (int i = 0; i < effs.size(); i++)
 	{
 		AbEffect::Effect& eff = effs[i];
-		eff.dur -= 1;
-		dealDamage(eff.damage.getDamage());
+		int oldDur = eff.dur;
+		eff.dur -= newTicks;
 		if (eff.dur < 1)
 		{
 			this->stats = this->stats + eff.stats;
 			erase.push_back(i);
+			continue;
 		}
+		int diff = (int)oldDur - (int)eff.dur;
+		for (int i = 0; i < diff; i++)
+			dealDamage(eff.damage.getDamage());
 	}
 	int i = 0;
 	for (auto e : erase)
@@ -58,7 +62,7 @@ sf::Vector2i Enemy::updateAI(float newTicks, sf::Vector2i playerPos, PathFinder*
 	sf::Vector2i diff = playerPos - tilePos;
 	std::pair<int, int> point = { tilePos.x, tilePos.y };
 	this->tickCount += newTicks;
-	if ((std::abs(diff.x) <= ability.info.range && std::abs(diff.y) <= ability.info.range) 
+	if ((std::abs(diff.x) <= ability.info.range && std::abs(diff.y) <= ability.info.range)
 		&& losToPlayer && tickCount >= ability.tickCost)
 	{
 		tickCount -= ability.tickCost;
@@ -90,13 +94,16 @@ sf::Vector2i Enemy::updateAI(float newTicks, sf::Vector2i playerPos, PathFinder*
 		tickCount -= newTicks;*/
 	if (wayPoints.size() > 0)
 		return wayPoints[wayPoints.size() - 1];
-	else return { 0,0 };
+	else return { tilePos.x,tilePos.y };
 }
 
 void Enemy::applyEff(AbEffect::Effect eff)
 {
-	eff.dur -= 1;
-	dealDamage(eff.damage.getDamage());
+	if (eff.dur == 1)
+	{
+		eff.dur -= 1;
+		dealDamage(eff.damage.getDamage());
+	}
 	this->stats = this->stats - eff.stats;
 	if (eff.dur > 0)
 		effs.push_back(eff);

@@ -56,15 +56,15 @@ public:
 
 	std::string name;
 
-	Enemy(std::string spriteName, Game* game, sf::Vector2i pos, int hp, int lvl, Ability* attack, std::string atkSound, bool elite)
+	Enemy(std::string spriteName, std::string name, Game* game, sf::Vector2i pos, int hp, int lvl, Ability* attack, std::string atkSound, bool elite)
 	{
 		this->game = game;
-		this->hp = hp;
 		this->elite = elite;
 		this->tilePos = pos;
 		this->mf = 500;
 		this->lvl = lvl;
-		this->maxHp = hp * (1 + (lvl*0.2));
+		this->maxHp = hp * (1 + (lvl*0.5));
+		this->hp = maxHp;
 		this->pos = { (float)pos.x*TILE_SIZE,(float)pos.y*TILE_SIZE };
 		this->sprite.setTexture(this->game->texmgr.getRef(spriteName));
 		this->sprite.setOrigin(TILE_SIZE / 2, TILE_SIZE / 2);
@@ -82,7 +82,7 @@ public:
 		this->moveRange = 1;
 		this->qDmg = 0;
 		this->speed = 1;
-		this->name = spriteName;
+		this->name = name;
 		losToPlayer = false;
 		ability = Ability(*attack);
 		/*ability = Ability(this->game, game->texmgr.getRef("poison"), "poison_icon",

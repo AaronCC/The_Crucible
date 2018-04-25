@@ -30,11 +30,11 @@ public:
 	struct EnemyBase {
 		bool melee;
 		int hp;
-		std::string name;
+		std::string name, tx_name;
 		std::pair<bool, int> group;
 		AbEffect::DamageType dtype;
-		EnemyBase(bool melee, int hp, std::string name, AbEffect::DamageType dtype, std::pair<bool,int> group) :
-			melee(melee), hp(hp), name(name), dtype(dtype), group(group) {};
+		EnemyBase(bool melee, int hp, std::string name, AbEffect::DamageType dtype, std::pair<bool,int> group, std::string tx_name) :
+			melee(melee), hp(hp), name(name), dtype(dtype), group(group), tx_name(tx_name) {};
 	};
 	std::vector<EnemyBase> ebases;
 
@@ -67,9 +67,14 @@ public:
 
 	bool hasLineOfSight(sf::Vector2i from, sf::Vector2i to);
 
-	void drawL2(sf::RenderWindow & window, float dt);
+	void drawL2(sf::RenderWindow & window, float dt, sf::Vector2i pPos);
 
 	void drawL3(sf::RenderWindow & window, float dt);
+
+	void resizeMiniView(float windowH, float windowW)
+	{
+		miniMapView.setViewport(helper.resizeView(windowH, windowW, game->aspectRatio));
+	}
 
 	void draw(sf::RenderWindow & window, float dt);
 	sf::Vector2i globalToTilePos(sf::Vector2f global);
@@ -92,6 +97,9 @@ public:
 
 	void genCaveEntities(int eCount, std::vector<sf::Vector2i> locs, std::vector<sf::Vector2i> oldLocs);
 
+	sf::RectangleShape youAreHere;
+	sf::View miniMapView;
+	bool showMiniMap;
 
 	void Map::loadDungeon();
 
@@ -106,6 +114,49 @@ public:
 	Enemy * getEnemyAt(int x, int y);
 
 	Tile * getTile(int x, int y);
+
+	void Map::parseEbases()
+	{
+		std::string line;
+		std::ifstream texFile("media/Enemies.txt");
+
+		if (texFile.is_open())
+		{
+			while (std::getline(texFile, line))
+			{
+				if (line[0] == ';')
+					continue;
+				std::string name = "", tx_name;
+				bool melee, group;
+				int hp, dtype, groupSize;
+				std::istringstream iss(line);
+				std::vector<std::string> results(std::istream_iterator<std::string>{iss},
+					std::istream_iterator<std::string>());
+				std::string word = results[0];
+				name = word;
+				int i = 0;
+				while (word[word.size() - 1] != ';')
+				{
+					i++;
+					word = results[i];
+					name += " " + word;
+				}
+				name = name.substr(0, name.size() - 1);
+				tx_name = results[1+i];
+				std::stringstream ss(results[2+i]);
+				ss >> melee;
+				ss = std::stringstream(results[3+i]);
+				ss >> hp;
+				ss = std::stringstream(results[4+i]);
+				ss >> dtype;
+				ss = std::stringstream(results[5+i]);
+				ss >> group;
+				ss = std::stringstream(results[6+i]);
+				ss >> groupSize;
+				ebases.push_back(EnemyBase(melee, hp, name, (AbEffect::DamageType)dtype, { group,groupSize }, tx_name));
+			}
+		}
+	}
 
 	Map(Game* game, Camera* camera);
 	~Map();

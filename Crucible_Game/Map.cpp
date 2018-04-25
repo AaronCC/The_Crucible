@@ -54,7 +54,7 @@ bool Map::hasLineOfSight(sf::Vector2i from, sf::Vector2i to)
 	}
 	return false;
 }
-void Map::drawL2(sf::RenderWindow & window, float dt)
+void Map::drawL2(sf::RenderWindow & window, float dt, sf::Vector2i pPos)
 {
 	// Get the camera's position
 	sf::Vector2f camPos = this->camera->view.getCenter();
@@ -91,6 +91,20 @@ void Map::drawL2(sf::RenderWindow & window, float dt)
 	}
 	for (auto t : actionText)
 		window.draw(t);
+	if (showMiniMap)
+	{
+		this->game->window.setView(miniMapView);
+		for (int r = 0; r < height; r++)
+		{
+			for (int c = 0; c < width; c++)
+			{
+				tiles[r*this->width + c].draw(this->game->window,dt);
+				tiles[r*this->width + c].drawFoW(this->game->window, dt);
+			}
+		}
+		youAreHere.setPosition(pPos.x*TILE_SIZE, pPos.y*TILE_SIZE);
+		this->game->window.draw(youAreHere);
+	}
 }
 void Map::drawL3(sf::RenderWindow & window, float dt)
 {
@@ -205,29 +219,36 @@ void Map::updateHoverText()
 			hoverText[1].setOutlineThickness(1);
 		}
 	}
-	else if ((loot = tLoot[mouseIndex.y*this->width + mouseIndex.x][0]) != nullptr)
+	else if (tLoot[mouseIndex.y*this->width + mouseIndex.x][0] != nullptr)
 	{
-		std::string name = loot->getName();
+		loot = tLoot[mouseIndex.y*this->width + mouseIndex.x][0];
+		int i = 0;
 		hoverText.clear();
-		hoverText.push_back(sf::Text(name, game->fonts["main_font"], tSize));
-		hoverText[0].setPosition((mouseIndex.x * tileSize.x) - (TILE_SIZE / 2), (mouseIndex.y * tileSize.y) - (tSize * 2.5));
-		switch (loot->getRarity())
+		for (auto loot : tLoot[mouseIndex.y*this->width + mouseIndex.x])
 		{
-		case Item::Rarity::NORM:
-			hoverText[0].setFillColor(NORM_COLOR);
-			break;
-		case Item::Rarity::MAGIC:
-			hoverText[0].setFillColor(MAGIC_COLOR);
-			break;
-		case Item::Rarity::RARE:
-			hoverText[0].setFillColor(RARE_COLOR);
-			break;
-		case Item::Rarity::ULTRA:
-			hoverText[0].setFillColor(ULTRA_COLOR);
-			break;
-		}
-		hoverText[0].setOutlineThickness(1);
+			std::string name = loot->getName();
+			hoverText.push_back(sf::Text(name, game->fonts["main_font"], tSize));
+			//hoverText[i].setPosition((mouseIndex.x * tileSize.x) - (TILE_SIZE / 2), (mouseIndex.y * tileSize.y) - (tSize * 2.5));
 
+			hoverText[i].setPosition((mouseIndex.x * tileSize.x) - (TILE_SIZE / 2), (mouseIndex.y * tileSize.y) - tSize - (tSize * (2.5 + (1 * (i - 1)))));
+			switch (loot->getRarity())
+			{
+			case Item::Rarity::NORM:
+				hoverText[i].setFillColor(NORM_COLOR);
+				break;
+			case Item::Rarity::MAGIC:
+				hoverText[i].setFillColor(MAGIC_COLOR);
+				break;
+			case Item::Rarity::RARE:
+				hoverText[i].setFillColor(RARE_COLOR);
+				break;
+			case Item::Rarity::ULTRA:
+				hoverText[i].setFillColor(ULTRA_COLOR);
+				break;
+			}
+			hoverText[i].setOutlineThickness(1);
+			i++;
+		}
 		if (sf::Keyboard::isKeyPressed(sf::Keyboard::LAlt))
 		{
 			std::vector<std::pair<sf::Color, std::string>> info = loot->getBuffString();
@@ -488,20 +509,21 @@ void Map::resolveEntityAI(float tickCount)
 	for (int i = 0; i < enemies.size(); i++)
 	{
 		Enemy* enemy = enemies[i];
-		if (enemy->active)
-			for (int t = 0; t < tickCount; t++)
+		if (enemy->active) {
+			/*for (int t = 0; t < tickCount; t++)
+			{*/
+			std::pair<sf::Vector2i, sf::Vector2i> occ_tiles;
+			occ_tiles = enemy->resolveTick(tickCount);
+			// If the enemy moved
+			if (occ_tiles.first != occ_tiles.second)
 			{
-				std::pair<sf::Vector2i, sf::Vector2i> occ_tiles;
-				occ_tiles = enemy->resolveTick(tickCount);
-				// If the enemy moved
-				if (occ_tiles.first != occ_tiles.second)
-				{
-					getTile(occ_tiles.first.x, occ_tiles.first.y)->occupied = false;
-					moveBuffer.push_back(enemy);
-					oldPosBuffer.push_back(occ_tiles.first);
-				}
-				getTile(occ_tiles.second.x, occ_tiles.second.y)->occupied = true;
+				getTile(occ_tiles.first.x, occ_tiles.first.y)->occupied = false;
+				moveBuffer.push_back(enemy);
+				oldPosBuffer.push_back(occ_tiles.first);
 			}
+			getTile(occ_tiles.second.x, occ_tiles.second.y)->occupied = true;
+			//}
+		}
 		else if (enemy->dead)
 		{
 			oldPosBuffer.push_back(enemy->tilePos);
@@ -774,7 +796,7 @@ bool Map::spawnBossGroupInRoom(Dungeon::Entity e)
 	int roll = itemGenerator->getRand_0X(ebases.size() - 1);
 	EnemyBase ebase = ebases[roll];
 	Ability* e_a = itemGenerator->makeEnemyAbility(level, Item::Rarity::RARE, ebase.melee, ebase.dtype);
-	enemies.push_back(new Enemy(ebase.name, game, eSpawnStart, ebase.hp * 2, level + 1, e_a,
+	enemies.push_back(new Enemy(ebase.tx_name, ebase.name, game, eSpawnStart, ebase.hp * 2, level + 1, e_a,
 		"enemyattack1", true));
 
 	tEnemies[eSpawnStart.y*this->width + eSpawnStart.x] = enemies[enemies.size() - 1];
@@ -802,7 +824,7 @@ bool Map::spawnBossGroupInRoom(Dungeon::Entity e)
 				tile = getTile(eSpawnStart.x, eSpawnStart.y);
 			} while (tile->occupied || !tile->passable);
 
-			enemies.push_back(new Enemy(ebase.name, game, eSpawnStart, ebase.hp, level, a,
+			enemies.push_back(new Enemy(ebase.tx_name, ebase.name, game, eSpawnStart, ebase.hp, level, a,
 				"enemyattack1", false));
 
 			tEnemies[eSpawnStart.y*this->width + eSpawnStart.x] = enemies[enemies.size() - 1];
@@ -845,7 +867,7 @@ bool Map::spawnEnemyInRoom(Dungeon::Entity e)
 			tile = getTile(eSpawnStart.x, eSpawnStart.y);
 		} while (tile->occupied || !tile->passable);
 
-		enemies.push_back(new Enemy(ebase.name, game, eSpawnStart, ebase.hp, level, a,
+		enemies.push_back(new Enemy(ebase.tx_name, ebase.name, game, eSpawnStart, ebase.hp, level, a,
 			"enemyattack1", false));
 
 		tEnemies[eSpawnStart.y*this->width + eSpawnStart.x] = enemies[enemies.size() - 1];
@@ -864,6 +886,7 @@ Tile* Map::getTile(int x, int y)
 	return &this->tiles[y*this->width + x];
 }
 
+
 Map::Map(Game* game, Camera* camera)
 {
 	this->game = game;
@@ -875,9 +898,12 @@ Map::Map(Game* game, Camera* camera)
 	this->canSelect.reveal();
 	this->cantSelect.reveal();
 	this->drawSize = { (float)this->game->windowSize.x / tileSize.x, (float)this->game->windowSize.y / tileSize.y };
-	ebases.push_back(EnemyBase{ true,15,"ogre",AbEffect::DamageType::PHYS,{false,0} });
-	ebases.push_back(EnemyBase{ false,10,"wraith",AbEffect::DamageType::FIRE,{false,0} });
-	ebases.push_back(EnemyBase{ true,4,"rat",AbEffect::DamageType::POIS,{ true,3 } });
+
+	youAreHere.setFillColor(sf::Color::Red);
+	youAreHere.setSize({ 32, 32 });
+	youAreHere.setOrigin({ 16, 16 });
+	miniMapView = sf::View(sf::FloatRect(-50,-50,this->game->windowSize.x*4,this->game->windowSize.y*4));
+	parseEbases();
 }
 Map::~Map()
 {

@@ -134,7 +134,32 @@ public:
 		this->base = base;
 		this->rarity = rarity;
 		this->twoHanded = base.twoh;
-		updateBaseVals();
+		updateBaseVals();		
+		std::string pre = "", suf = "";
+		if (rarity == Item::Rarity::MAGIC || rarity == Item::Rarity::NORM)
+		{
+			for (auto buff : buffs)
+			{
+				if (buff.second.getStr() != "")
+					if (buff.second.pre)
+						pre = buff.second.id + " ";
+					else
+						suf = " of " + buff.second.id;
+			}
+			this->name = pre + name + suf;
+		}
+		else
+		{
+			std::random_device rd;
+			std::mt19937 gen(rd());
+			int i = helper.numpreprefixes;
+			std::uniform_int_distribution<> dist(0, i - 1);
+			pre += helper.inamePrePrefixes[dist(gen)];
+			dist.reset();
+			dist = std::uniform_int_distribution<>(0, helper.inamePrefixes[slotType].size() - 1);
+			pre += " " + helper.inamePrefixes[slotType][dist(gen)] + ",";
+			this->name = pre + suf + name;
+		}
 	}
 	~Item();
 
@@ -186,13 +211,14 @@ public:
 		else
 			buffStr.push_back({ sf::Color::White, "Ranged" });*/
 		std::vector<AbEffect::Effect> effs = ability->getEffects();
+		//float cd = 
 		buffStr.push_back({ sf::Color::White, "Range: " + std::to_string(ability->info.range) });
 		buffStr.push_back({ sf::Color::White, "Cooldown: " + std::to_string(ability->cooldown).substr(0,4) });
 		buffStr.push_back({ sf::Color::White, "Cast Time: " + std::to_string((float)ability->tickCost).substr(0, 4) });
 		for (auto eff : effs)
 		{
-			std::string min = std::to_string(eff.damage.min * eff.dur);
-			std::string max = std::to_string(eff.damage.max * eff.dur);
+			std::string min = helper.cutTrailing0s(std::to_string(eff.damage.min * eff.dur));
+			std::string max = helper.cutTrailing0s(std::to_string(eff.damage.max * eff.dur));
 			std::string type = damageStrings[eff.damage.type];
 			if (eff.type != AbEffect::EffType::BUFF && eff.type != AbEffect::EffType::DEBUFF)
 			{
@@ -206,9 +232,9 @@ public:
 				else
 				{
 					if (min != max)
-						buffStr.push_back({ damageColors[eff.damage.type], min + "-" + max + " " + type + " over " + std::to_string(eff.dur) + " ticks" });
+						buffStr.push_back({ damageColors[eff.damage.type], min + "-" + max + " " + type + " over " + helper.cutTrailing0s(std::to_string(eff.dur)) + " ticks" });
 					else
-						buffStr.push_back({ damageColors[eff.damage.type], min + " " + type + " over " + std::to_string(eff.dur) + " ticks" });
+						buffStr.push_back({ damageColors[eff.damage.type], min + " " + type + " over " + helper.cutTrailing0s(std::to_string(eff.dur)) + " ticks" });
 				}
 			}
 			Helper::Stats stats = eff.stats;
@@ -218,12 +244,14 @@ public:
 				if (v1 != -1)
 				{
 					if (v1 > 0)
-						buffStr.push_back({ sf::Color::White,"Buffs " + helper.buffnames[i] + " by " + std::to_string(v1) + " for " + std::to_string(eff.dur) + " ticks" });
+						buffStr.push_back({ sf::Color::White,"Buffs " + helper.buffnames[i] + " by " + std::to_string(v1) + " for " + helper.cutTrailing0s(std::to_string(eff.dur)) + " ticks" });
 					else
-						buffStr.push_back({ sf::Color::White,"Debuffs " + helper.buffnames[i] + " by " + std::to_string(v1) + " for " + std::to_string(eff.dur) + " ticks" });
+						buffStr.push_back({ sf::Color::White,"Debuffs " + helper.buffnames[i] + " by " + std::to_string(v1) + " for " + helper.cutTrailing0s(std::to_string(eff.dur)) + " ticks" });
 				}
 			}
 		}
+
+
 		return buffStr;
 	}
 

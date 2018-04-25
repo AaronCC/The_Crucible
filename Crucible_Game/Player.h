@@ -142,8 +142,10 @@ public:
 	void addWayPoint(std::pair<int, int> point) {
 		queuedPoints.push_back({ point.first, point.second });
 		wayPoints.push({ point.first,point.second });
-		float agi = helper.getAgiMod(bStats.buffs[Helper::Affix::AGI].v1);
-		this->tickCount += stats.speed * (1 - agi);
+		int agi = bStats.buffs[Helper::Affix::AGI].v1;
+		if (agi == -1) agi = 0;
+		float mod = helper.getAgiMod(agi);
+		this->tickCount += stats.speed * (1 - mod);
 	}
 	void clearWayPoints() {
 		this->tickCount = 0;
@@ -189,7 +191,7 @@ public:
 		this->mIndex = mIndex;
 		this->view = view;
 		this->game = game;
-		this->lightRadius = 6;
+		this->lightRadius = 7;
 		this->resolveActions = false;
 		this->tickCount = 0;
 		this->friction = 15.f;
@@ -260,10 +262,10 @@ public:
 
 	int calcNewMax_Exp_Health()
 	{
-		this->maxHealth = helper.linearEq(15, level, maxHealth, 1);
-		this->health = this->maxHealth;
+		this->maxHealth = helper.linearEq(10, level, maxHealth, 1);
+		//this->health = this->maxHealth;
 		this->effs.clear();
-		hud.updateHealth(health, maxHealth, 1);
+		hud.updateHealth(health, maxHealth, health/(float)maxHealth);
 		return helper.linearEq(10, level, maxExp, 1);
 	}
 

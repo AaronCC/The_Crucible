@@ -131,6 +131,7 @@
   </ItemGroup>
   <ItemGroup>
     <Text Include="media\Affixes.txt" />
+    <Text Include="media\Enemies.txt" />
     <Text Include="media\Music.txt" />
     <Text Include="media\Sounds.txt" />
     <Text Include="media\Textures.txt" />

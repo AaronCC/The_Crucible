@@ -51,7 +51,7 @@ void ExploreState::draw(const float dt)
 	fps++;
 	testText.setString("FPS: " + std::to_string(fTotal));
 	this->player.draw(dt);
-	this->map->drawL2(this->game->window, dt);
+	this->map->drawL2(this->game->window, dt, player.tilePos);
 	this->player.drawHud(dt);
 	//this->game->window.draw(testText);
 }
@@ -163,6 +163,7 @@ void ExploreState::handleInput()
 		case sf::Event::Resized:
 		{
 			this->camera.resizeView(event.size.width, event.size.height);
+			this->map->resizeMiniView(event.size.width, event.size.height);
 			break;
 		}
 		case sf::Event::KeyReleased:
@@ -174,6 +175,18 @@ void ExploreState::handleInput()
 	}
 	sf::Vector2f mousePos = this->game->window.mapPixelToCoords(sf::Mouse::getPosition(this->game->window), this->view);
 	bool hudHover = mousePos.y >= game->hudTop ? true : false;
+	if (sf::Keyboard::isKeyPressed(sf::Keyboard::Escape))
+	{
+		player.hud.showState = Hud::ShowState::SHOW_NONE;
+	}
+	if (sf::Keyboard::isKeyPressed(sf::Keyboard::M) && old_mState == false)
+	{
+		map->showMiniMap = !map->showMiniMap;
+		old_mState = true;
+	}
+	else if (!sf::Keyboard::isKeyPressed(sf::Keyboard::M))
+		old_mState = false;
+
 	if (map->action == Map::Action::PICKUP && sf::Keyboard::isKeyPressed(sf::Keyboard::E))
 	{
 		map->resolveAction(&player);

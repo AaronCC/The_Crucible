@@ -70,6 +70,8 @@ void Hud::setSlotSprites(std::vector<std::pair<sf::Keyboard::Key, std::string>> 
 	}
 }
 void Hud::equipCon() {
+	if (consumables.size() == 0)
+		return;
 	Consumable temp = consumables[0];
 	consumables[0] = consumables[conAt];
 	consumables[conAt] = temp;

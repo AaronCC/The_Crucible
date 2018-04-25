@@ -13,7 +13,9 @@ void Player::resolveLineOfSight(sf::Vector2i los)
 	float knoMod = helper.getKnoMod(bStats.buffs[Helper::Affix::KNO].v1);
 	queuedCooldown = queuedAbility->cooldown * (1 - knoMod);
 	checkLineOfSight = true;
-	float agiMod = helper.getAgiMod(bStats.buffs[Helper::Affix::AGI].v1);
+	int agi = bStats.buffs[Helper::Affix::AGI].v1;
+	if (agi == -1) agi = 0;
+	float agiMod = helper.getAgiMod(agi);
 	this->tickCount = queuedAbility->tickCost * (stats.speed - agiMod);
 }
 
@@ -23,9 +25,13 @@ void Player::resolveMeleeLineOfSight(sf::Vector2i los)
 	queuedPoints.clear();
 	for (auto tile : queuedAbility->getActiveTiles(tilePos, los))
 		addQueuedPoint(tile);
-	float knoMod = helper.getKnoMod(bStats.buffs[Helper::Affix::KNO].v1);
+	int KNO = bStats.buffs[Helper::Affix::KNO].v1;
+	int AGI = bStats.buffs[Helper::Affix::AGI].v1;
+	if (KNO == -1) KNO = 0;
+	if (AGI == -1) AGI = 0;
+	float knoMod = helper.getKnoMod(KNO);
 	queuedCooldown = queuedAbility->cooldown * (1 - knoMod);
-	float agiMod = helper.getAgiMod(bStats.buffs[Helper::Affix::AGI].v1);
+	float agiMod = helper.getAgiMod(AGI);
 	this->tickCount = queuedAbility->tickCost * (stats.speed - agiMod);
 }
 void Player::resolveAbilityOnTile(sf::Vector2i pos)
@@ -412,15 +418,18 @@ void Player::updateAbilities(float dt)
 }
 void Player::updateAbilities()
 {
-	Item* itm_MAH = inventory.eqItems[(int)Item::MAH].first.getItem();
-	Item* itm_RNG = inventory.eqItems[(int)Item::RNG].first.getItem();
+	std::vector<Item*> itm_s;
+	for (int i = 0; i < Item::SlotType::SCR; i++)
+	{
+		itm_s.push_back(inventory.eqItems[(Item::SlotType)i].first.getItem());
+	}
 	autoAttack.effs.clear();
-	if (itm_MAH != nullptr)
-		for (auto eff : itm_MAH->getEffectFromMAH())
-			autoAttack.addEffect(eff);
-	if (itm_RNG != nullptr)
-		for (auto eff : itm_RNG->getEffectFromMAH())
-			autoAttack.addEffect(eff);
+	if (itm_s[(int)Item::SlotType::MAH] == nullptr)
+		autoAttack.addEffect(AbEffect::Effect({}, AbEffect::Damage(AbEffect::DamageType::PHYS, 1, 4), 1, AbEffect::EffType::INST));
+	for (auto itm : itm_s)
+		if (itm != nullptr)
+			for (auto eff : itm->getEffectFromMAH())
+				autoAttack.addEffect(eff);
 }
 float Player::applyAR(float dmg)
 {
@@ -432,7 +441,7 @@ float Player::applyAR(float dmg)
 }
 float Player::applyRES(float dmg, AbEffect::DamageType type)
 {
-	Helper::Affix aff = helper.dmgTypeToAffix[(int)type-1];
+	Helper::Affix aff = helper.dmgTypeToAffix[(int)type - 1];
 	int def = bStats.buffs[Helper::Affix::DEF].v1;
 	if (def == -1) def = 0;
 	int afv = bStats.buffs[aff].v1;

@@ -175,5 +175,8 @@
     <Text Include="media\Affixes.txt">
       <Filter>Resource Files</Filter>
     </Text>
+    <Text Include="media\Enemies.txt">
+      <Filter>Resource Files</Filter>
+    </Text>
   </ItemGroup>
 </Project>

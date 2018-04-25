@@ -218,8 +218,10 @@ Ability * ItemGenerator::makeEnemyAbility(int aLvl, Item::Rarity rarity, bool me
 				{
 					numaff--;
 					has_dType = true;
-					eff.first.damage.min *= (abBase.mult + (aLvl * 0.02));
-					eff.first.damage.max *= (abBase.mult + (aLvl * 0.02));
+					eff.first.damage.min *= (abBase.mult + (aLvl * 0.2));
+					if (eff.first.damage.min < 1) eff.first.damage.min = 1;
+					eff.first.damage.max *= (abBase.mult + (aLvl * 0.2));
+					if (eff.first.damage.max < 1) eff.first.damage.max = 1;
 					effs.push_back(eff.first);
 				}
 				else

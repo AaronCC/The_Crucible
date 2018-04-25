@@ -107,7 +107,24 @@ public:
 		Affix::LGHT_RES,
 		Affix::POIS_RES
 	};
-
+	std::string cutTrailing0s(std::string in)
+	{
+		int newSize = 0;
+		for (int c = in.size() - 1; c >= 0; c--)
+		{
+			if (in[c] == '.')
+			{
+				newSize = c;
+				break;
+			}
+			else if (in[c] != '0')
+			{
+				newSize = c + 1;
+				break;
+			}
+		}
+		return in.substr(0, newSize);
+	}
 	struct AffVal {
 		int v1 = -1,
 			v2 = -1;

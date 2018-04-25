@@ -36,7 +36,6 @@ public:
 	//std::map<std::string, GuiStyle> stylesheets;
 	std::map<std::string, sf::Font> fonts;
 	sf::Vector2u tileSize;
-
 	sf::RenderWindow window;
 	TextureManager texmgr;
 	SoundManager sndmgr;

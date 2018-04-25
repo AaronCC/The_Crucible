@@ -8,7 +8,6 @@ int main()
 {
 	Game game;
 
-	//game.pushState(new TestState(&game));
 	game.pushState(new MenuState(&game));
 	game.gameLoop();
 
