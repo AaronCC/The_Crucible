@@ -282,9 +282,9 @@ Consumable * ItemGenerator::makeConsumable(int aLvl)
 {
 	int roll = getRand_100();
 	std::string tiers[5] = { "Meager", "Lesser", "Medium", "Greater", "Mega" };
-	if (aLvl > 5)
+	if (aLvl >= 5)
 		aLvl = 4;
-	return new Consumable{ game,"hpot",{ 10 * aLvl,Consumable::ConType::H_POT },tiers[aLvl] + " Health Potion",aLvl };
+	return new Consumable{ game,"hpot",{ 10+(10 * aLvl),Consumable::ConType::H_POT },tiers[aLvl] + " Health Potion",aLvl };
 }
 
 Item * ItemGenerator::makeItem(int aLvl, float mf)

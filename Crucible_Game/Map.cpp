@@ -594,6 +594,7 @@ void Map::loadCave()
 			case Dungeon::Tile::DownStairs:
 			{
 				this->tiles[y*this->width + x].tileVariant = 6;
+				//this->spawnPos = { x,y };
 				break;
 			}
 			default:
@@ -723,13 +724,12 @@ void Map::loadDungeon()
 			case Dungeon::Tile::DownStairs:
 			{
 				this->tiles[y*this->width + x].tileVariant = 6;
-				//this->spawnPos = { x + 1, y };
+				//this->spawnPos = { x, y };
 				break;
 			}
 			default:
 				break;
 			}
-
 			this->tiles[y*this->width + x].setPosition(pos, x, y);
 			this->tiles[y*this->width + x].sprite.setPosition((sf::Vector2f)pos);
 			pos.x += tileSize.x;
@@ -792,7 +792,10 @@ bool Map::spawnBossGroupInRoom(Dungeon::Entity e)
 
 		for (int i = 0; i < ecount; i++)
 		{
+			int try_do = 2 * (e.w*e.h);
 			do {
+				try_do--;
+				if (try_do == 0) break;
 				wMod = (itemGenerator->getRand_100() / 100.f);
 				hMod = (itemGenerator->getRand_100() / 100.f);
 				eSpawnStart = { e.x + (int)((e.w - 1)*wMod), e.y + (int)((e.h - 1)*hMod) };
@@ -832,7 +835,10 @@ bool Map::spawnEnemyInRoom(Dungeon::Entity e)
 
 	for (int i = 0; i < ecount; i++)
 	{
+		int try_do = 2 * (e.w*e.h);
 		do {
+			try_do--;
+			if (try_do == 0) break;
 			wMod = (itemGenerator->getRand_100() / 100.f);
 			hMod = (itemGenerator->getRand_100() / 100.f);
 			eSpawnStart = { e.x + (int)((e.w - 1)*wMod), e.y + (int)((e.h - 1)*hMod) };

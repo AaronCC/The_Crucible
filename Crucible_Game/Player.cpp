@@ -425,22 +425,20 @@ void Player::updateAbilities()
 float Player::applyAR(float dmg)
 {
 	int AR = bStats.buffs[Helper::Affix::ARM_RAT].v1;
-	if (AR == -1)
-		return dmg;
+	if (AR == -1) return dmg;
 	int def = bStats.buffs[Helper::Affix::DEF].v1;
-	if (def == -1)
-		def = 0;
+	if (def == -1) def = 0;
 	return dmg - ((AR + (def * 2)) * helper.linearEq(-0.05, AR, 0.5, 5));
 }
 float Player::applyRES(float dmg, AbEffect::DamageType type)
 {
-	Helper::Affix aff = helper.dmgTypeToAffix[(int)type];
+	Helper::Affix aff = helper.dmgTypeToAffix[(int)type-1];
 	int def = bStats.buffs[Helper::Affix::DEF].v1;
-	if (def == -1)
-		def = 0;
-	int res = bStats.buffs[aff].v1 + def;
-	if (res == -1)
-		return dmg;
+	if (def == -1) def = 0;
+	int afv = bStats.buffs[aff].v1;
+	if (afv == -1) afv = 0;
+	int res = afv + def;
+	if (res == -1) return dmg;
 	float mod = 1 - (res / 100.f);
 	return dmg * mod;
 }

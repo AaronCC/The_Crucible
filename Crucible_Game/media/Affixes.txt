@@ -1,72 +1,72 @@
 ;dtypes { (0)phys, (1)fire, (2)cold, (3)lightning, (4)poison, (5)none }
-;types { (0)suffix||prefix, (2)base, (3)abaff, (4)abbase }
-;type a1 a2 ilvl aftype local dtype name
+;types { (0)suffix||prefix, (2)base, (3)abaff, (4)abbase, (5) e_abBase, (6) names }
+;type range offset aftype local dtype
 ;---------------------------------------
 ;0 fire damage
-0 1 2 0 0 1 1 Ash
-0 3 5 1 0 1 1 Cinders
+6 Ash Cinders Heat Glow Blaze Flame Pyre Combustion Inferno Conflagration
+0 4 4 0 1 1
 ;1 cold damage
-0 1 2 0 1 1 2 Chill
-0 3 5 1 1 1 2 Frost
+6 Cool Bleak Nipping Frost Freezing Chilling Stinging Frostbite Hypothermia Glacial
+0 2 6 1 1 2
 ;2 lightning damage
-0 1 2 0 2 1 3 Sparking
-0 3 5 1 2 1 3 Shocking
+6 Sparking Light Voltage Magnetism Galvanism Current Electrocution Lightning Thunder Zeus
+0 10 1 2 1 3
 ;3 poison damage
-0 1 2 0 3 1 4 Sickness
-0 3 5 1 3 1 4 Poison
+6 Germs Poison
+0 1 1 3 1 4
 ;4 physical damage
-0 1 2 0 4 1 0 Striking
-0 3 5 1 4 1 0 Smashing
+6 Striking Smashing
+0 3 5 4 1 0
 ;5 % fire resistance
-0 5 -1 0 5 0 5 Warmth
-0 10 -1 1 5 0 5 Heat
+6 Warmth Heat
+0 0 5 5 0 5
 ;6 % lightning resistance
-0 5 -1 0 6 0 5 Sparking
-0 10 -1 1 6 0 5 Shocking
+6 Sparking Shocking
+0 0 5 6 0 5
 ;7 % cold resistance
-0 5 -1 0 7 0 5 Chill
-0 10 -1 1 7 0 5 Frost
+6 Chill Frost
+0 0 5 7 0 5
 ;8 % poison resistance
-0 5 -1 0 8 0 5 Sickness
-0 10 -1 1 8 0 5 Poison
+6 Sickness Poison
+0 0 5 8 0 5
 ;9 % global fire damage
-0 5 -1 0 9 0 5 Warm
-0 10 -1 1 9 0 5 Hot
+6 Warm Hot
+0 0 5 9 0 1
 ;10 % global cold damage
-0 5 -1 0 10 0 5 Cool
-0 10 -1 1 10 0 5 Bitter
+6 Cool Bitter
+0 0 5 10 0 2
 ;11 % global lightning damage
-0 5 -1 0 11 0 5 Sparking
-0 10 -1 1 11 0 5 Shocking
+6 Sparking Shocking
+0 0 5 11 0 3
 ;12 % global poison damage
-0 5 -1 0 12 0 5 Sickening
-0 10 -1 1 12 0 5 Poisonous
+6 Sickening Poisonous
+0 0 5 12 0 4
 ;13 % local physical damage
-0 25 -1 0 13 1 5 Weakened
-0 50 -1 1 13 1 5 Heavy
+6 Hardened Sharp
+0 0 10 13 1 5
 ;14 % global physical damage
-0 5 -1 0 14 0 5 Weakened
-0 10 -1 1 14 0 5 Heavy
+6 Strengthened Swole
+0 0 10 14 0 5
 ;15 % armor rating
-0 5 -1 0 15 1 5 Swiss
-0 10 -1 1 15 1 5 Padded
+6 Swiss Padded
+0 0 10 15 1 5
 ;16 agility
-0 1 -1 0 16 0 5 Slow
-0 2 -1 1 16 0 5 Agile
+6 Slow Agile
+0 0 1 16 0 5
 ;17 defense
-0 1 -1 0 17 0 5 Stitched
-0 2 -1 1 17 0 5 Welded
+6 Stitched Welded
+0 0 1 17 0 5
 ;18 knowledge
-0 1 -1 0 16 0 5 Dumb
-0 2 -1 1 15 0 5 Novice
+6 Dumb Novice
+0 0 1 17 0 5
 ;19 attack
-0 1 -1 0 16 0 5 Weak
-0 2 -1 1 15 0 5 Lean
+6 Weak Lean
+0 0 1 18 0 5
 ;HED = 0,BDY = 1,MAH = 2,OFH = 3,RNG = 4,AMU = 5,CLK = 6,BLT = 7,SCR = 8
 ;BASE type twoh? name; v1 v2 dType afType local? ilvl
 ;Head Bases
 2 0 0 Leather Cowl; 5 -1 5 15 1 0
-2 0 0 Leather Helm; 8 -1 5 15 1 1
+2 0 0 Leather Helm; 8 -1 5 15 1 2
 ;body bases
 2 1 0 Leather Body; 10 -1 5 15 1 0
 2 1 0 Studded Body; 14 -1 5 15 1 1
@@ -96,16 +96,16 @@
 2 7 0 Leather Cord; 2 -1 5 19 1 0
 2 7 0 Heavy Belt; 5 -1 5 19 1 1
 ;Ability Affixes
-;type hasstats? buff? stats{aff afv}; dmgtype a1 a2 dur ilvl
-3 0 0 5 15 1 0
-3 0 1 8 12 1 0
-3 0 2 9 11 1 0
-3 0 3 1 20 1 0
-3 0 4 2 4 4 0
-3 1 1 16 5; 5 0 0 10 0
-3 1 1 17 5; 5 0 0 10 0
-3 1 1 18 5; 5 0 0 10 0
-3 1 1 19 5; 5 0 0 10 0
+;type hasstats? buff? stats{aff afv}; dmgtype range off dur ilvl
+3 0 0 3 4 1
+3 0 1 4 3 1
+3 0 2 2 5 1
+3 0 3 10 1 1
+3 0 4 2 1 4
+3 1 1 16 5; 5 0 0 10
+3 1 1 17 5; 5 0 0 10
+3 1 1 18 5; 5 0 0 10
+3 1 1 19 5; 5 0 0 10
 ;texname iconname description name animstart animend cd ct area|-1 multiplier.f
 4 slash slash_icon Targeted quick attack; Blue Slash; 0 3 4 1 0 1
 4 slash2 slash_icon2 Targeted heavy attack; Red Slash; 0 3 10 1 0 1.5

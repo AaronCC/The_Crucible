@@ -233,9 +233,9 @@ public:
 		if (AGI == -1) AGI = 0;
 		str.push_back("Cooldown: " + std::to_string(cooldown * (1-helper.getKnoMod(KNO))).substr(0, 4));
 		str.push_back("Cast Time: " + std::to_string((float)tickCost*(stats->speed-helper.getAgiMod(AGI))).substr(0, 4));
-		for (auto e : effs)
+		for (auto e : getBuffedEffects(stats))
 		{
-			AbEffect::Damage damage = e.getEffects().damage;
+			AbEffect::Damage damage = e.damage;
 			for (int i = 0; i < numdamagetype; i++)
 			{
 				if (damage.type == (AbEffect::DamageType)i)
@@ -243,16 +243,15 @@ public:
 					damage.modDamage(stats->buffs[damageAffixes[damage.type]].v1);
 				}
 			}
-			AbEffect::Effect ef = e.getEffects();
 			if (damage.min + damage.max != 0)
 			{
-				if (ef.dur <= 1)
+				if (e.dur <= 1)
 					str.push_back(std::to_string(damage.min) + "-" + std::to_string(damage.max) + " " + helper.damagenames[(int)damage.type]);
 				else
-					str.push_back(std::to_string(damage.min * ef.dur) + "-" + std::to_string(damage.max * ef.dur) + " " + helper.damagenames[(int)damage.type] + " over " +
-						std::to_string(ef.dur) + " ticks");
+					str.push_back(std::to_string(damage.min * e.dur) + "-" + std::to_string(damage.max * e.dur) + " " + helper.damagenames[(int)damage.type] + " over " +
+						std::to_string(e.dur) + " ticks");
 			}
-			Helper::Stats stats = e.getEffects().stats;
+			Helper::Stats stats = e.stats;
 			for (int i = 0; i < Helper::numbuffs; i ++)
 			{
 				int v1 = stats.buffs[(Helper::Affix)i].v1;

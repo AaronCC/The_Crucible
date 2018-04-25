@@ -57,7 +57,7 @@ public:
 	std::map<AF, std::vector<std::pair<AFV, int>>> prefixes;
 
 	void addSuffix(AF af, AFV afv, int ilvl) {
-		suffixes[af].push_back({ afv,0 });
+		suffixes[af].push_back({ afv,ilvl });
 	}
 	void addPrefix(AF af, AFV afv, int ilvl) {
 		prefixes[af].push_back({ afv,ilvl });
@@ -66,62 +66,80 @@ public:
 		abAffixes[type].push_back({ ef ,ilvl });
 	}
 
-	bool parseSuffix(std::vector<std::string> data)
+	bool parseSuffix(std::vector<std::string> names, std::vector<std::string> data)
 	{
 		bool p = false;
 		Helper helper;
 		std::stringstream ss;
-		if (data.size() < 6)
+		std::vector<std::pair<AF, std::pair<AFV, int>>> afs;
+		int range, off, af_I, local_I, dType_I, v1, v2, ilvl = 0;
+		if (data.size() < 5)
 			return false;
-		int a1 = 0, a2 = 0, i = 0, afInt = 0, lInt = 0, dtypeInt = 0;
 		ss = std::stringstream(data[0]);
-		ss >> a1;
+		ss >> range;
 		ss = std::stringstream(data[1]);
-		ss >> a2;
+		ss >> off;
 		ss = std::stringstream(data[2]);
-		ss >> i;
+		ss >> af_I;
 		ss = std::stringstream(data[3]);
-		ss >> afInt;
+		ss >> local_I;
 		ss = std::stringstream(data[4]);
-		ss >> lInt;
-		ss = std::stringstream(data[5]);
-		ss >> dtypeInt;
-		AF af = (AF)afInt;
-		bool l = (bool)lInt;
-		DMG dtype = (DMG)dtypeInt;
+		ss >> dType_I;
+		AF af = (AF)af_I;
+		bool l = (bool)local_I;
+		DMG dtype = (DMG)dType_I;
 		sf::Color c = helper.damageColors[dtype];
-		std::string name = " of " + data[6];
-		AFV afv = AFV(a1, a2, name, p, c, l);
-		addSuffix(af, afv, i);
+		for (int i = 0; i < names.size(); i++)
+		{
+			std::string name = names[i];
+			v1 = off + (off*ilvl);
+			v2 = v1 + range + (range*ilvl*0.5);
+			if (v1 == v2)
+				v2 = -1;
+			AFV afv = AFV(v1, v2, name, p, c, l);
+			afs.push_back({ af,{ afv,ilvl } });
+			ilvl += 2;
+		}
+		for (auto af_afv : afs)
+			addSuffix(af_afv.first, af_afv.second.first, af_afv.second.second);
 		return true;
 	}
-	bool parsePrefix(std::vector<std::string> data)
+	bool parsePrefix(std::vector<std::string> names, std::vector<std::string> data)
 	{
 		bool p = true;
 		Helper helper;
 		std::stringstream ss;
-		if (data.size() < 6)
+		std::vector<std::pair<AF, std::pair<AFV, int>>> afs;
+		int range, off, af_I, local_I, dType_I, v1, v2, ilvl = 0;
+		if (data.size() < 5)
 			return false;
-		int a1 = 0, a2 = 0, i = 0, afInt = 0, lInt = 0, dtypeInt = 0;
 		ss = std::stringstream(data[0]);
-		ss >> a1;
+		ss >> range;
 		ss = std::stringstream(data[1]);
-		ss >> a2;
+		ss >> off;
 		ss = std::stringstream(data[2]);
-		ss >> i;
+		ss >> af_I;
 		ss = std::stringstream(data[3]);
-		ss >> afInt;
+		ss >> local_I;
 		ss = std::stringstream(data[4]);
-		ss >> lInt;
-		ss = std::stringstream(data[5]);
-		ss >> dtypeInt;
-		AF af = (AF)afInt;
-		bool l = (bool)lInt;
-		DMG dtype = (DMG)dtypeInt;
+		ss >> dType_I;
+		AF af = (AF)af_I;
+		bool l = (bool)local_I;
+		DMG dtype = (DMG)dType_I;
 		sf::Color c = helper.damageColors[dtype];
-		std::string name = data[6];
-		AFV afv = AFV(a1, a2, name, p, c, l);
-		addPrefix(af, afv, i);
+		for (int i = 0; i < names.size(); i++)
+		{
+			std::string name = names[i];
+			v1 = off + (off*ilvl);
+			v2 = v1 + range + (range*ilvl*0.5);
+			if (v1 == v2)
+				v2 = -1;
+			AFV afv = AFV(v1, v2, name, p, c, l);
+			afs.push_back({ af,{afv,ilvl} });
+			ilvl += 2;
+		}
+		for (auto af_afv : afs)
+			addPrefix(af_afv.first, af_afv.second.first, af_afv.second.second);
 		return true;
 	}
 	bool parseBase(std::vector<std::string> data)
@@ -153,7 +171,7 @@ public:
 		ss = std::stringstream(data[i + 4]);
 		ss >> afInt;
 		ss = std::stringstream(data[i + 5]);
-		ss >> lInt;		
+		ss >> lInt;
 		ss = std::stringstream(data[i + 6]);
 		ss >> ilvl;
 		bool local = (bool)lInt;
@@ -217,7 +235,7 @@ public:
 			desc += data[i] + " ";
 			i++;
 		}
-		desc += data[i].substr(0,data[i].size() - 1); 
+		desc += data[i].substr(0, data[i].size() - 1);
 		i++;
 		std::string name;
 		while (data[i][data[i].size() - 1] != ';')
@@ -225,9 +243,9 @@ public:
 			name += data[i] + " ";
 			i++;
 		}
-		name += data[i].substr(0,data[i].size() - 1);
+		name += data[i].substr(0, data[i].size() - 1);
 		std::stringstream ss(data[i + 1]);
-		ss >> aStart;	
+		ss >> aStart;
 		ss = std::stringstream(data[i + 2]);
 		ss >> aEnd;
 		ss = std::stringstream(data[i + 3]);
@@ -235,19 +253,20 @@ public:
 		ss = std::stringstream(data[i + 4]);
 		ss >> ct;
 		ss = std::stringstream(data[i + 5]);
-		ss >> area; 
+		ss >> area;
 		ss = std::stringstream(data[i + 6]);
 		ss >> mult;
 		abBases.push_back(AbBase(texname, iconname, desc, name,
 			{ aStart,aEnd,0.1f }, cd, ct, area, mult));
 		return false;
 	}
-	
+
 	bool parseAbAff(std::vector<std::string> data)
 	{
+		const int MAX_ILVL = 100;
 		bool hasStats;
 		bool buff;
-		int dmgtype, a1, a2, dur, ilvl, b, i = 2;
+		int dmgtype, v1, v2, dur, ilvl = 0, b, i = 2, range, off;
 		std::stringstream ss(data[0]);
 		ss >> b;
 		hasStats = (bool)b;
@@ -255,7 +274,7 @@ public:
 		if (hasStats)
 		{
 			int af, afv;
-			ss = std::stringstream (data[1]);
+			ss = std::stringstream(data[1]);
 			ss >> b;
 			buff = (bool)b;
 			while (data[i + 1][data[i + 1].size() - 1] != ';')
@@ -275,25 +294,31 @@ public:
 			stats.buffs[(AF)af] = AFV{ afv,-1,"",true,sf::Color::White,false };
 		}
 		else
-			i = 0;
+			i = 0;	
 		ss = std::stringstream(data[i + 1]);
 		ss >> dmgtype;
 		ss = std::stringstream(data[i + 2]);
-		ss >> a1;
+		ss >> range;
 		ss = std::stringstream(data[i + 3]);
-		ss >> a2;
+		ss >> off;
 		ss = std::stringstream(data[i + 4]);
 		ss >> dur;
-		ss = std::stringstream(data[i + 5]);
-		ss >> ilvl;
-		if (!hasStats && dur == 1)
-			abAffixes[EffType::INST].push_back({ AbEffect::Effect(Helper::Stats(), AbEffect::Damage((DMG)dmgtype, a1, a2), dur, EffType::INST) ,ilvl });
-		else if(!hasStats)
-			abAffixes[EffType::DOT].push_back({ AbEffect::Effect(Helper::Stats(), AbEffect::Damage((DMG)dmgtype, a1, a2), dur, EffType::DOT) ,ilvl });
-		else if(hasStats && buff)
-			abAffixes[EffType::BUFF].push_back({ AbEffect::Effect(stats, AbEffect::Damage((DMG)dmgtype, a1, a2), dur,EffType::BUFF) ,ilvl });
-		else if (hasStats && !buff)
-			abAffixes[EffType::DEBUFF].push_back({ AbEffect::Effect(stats, AbEffect::Damage((DMG)dmgtype, a1, a2), dur, EffType::DEBUFF) ,ilvl });
+		while (ilvl <= MAX_ILVL)
+		{
+			v1 = off + (off*ilvl);
+			v2 = v1 + range + (range*ilvl*0.5);
+			if (v1 == v2)
+				v2 = -1;
+			if (!hasStats && dur == 1)
+				abAffixes[EffType::INST].push_back({ AbEffect::Effect(Helper::Stats(), AbEffect::Damage((DMG)dmgtype, v1, v2), dur, EffType::INST) ,ilvl });
+			else if (!hasStats)
+				abAffixes[EffType::DOT].push_back({ AbEffect::Effect(Helper::Stats(), AbEffect::Damage((DMG)dmgtype, v1, v2), dur, EffType::DOT) ,ilvl });
+			else if (hasStats && buff)
+				abAffixes[EffType::BUFF].push_back({ AbEffect::Effect(stats, AbEffect::Damage((DMG)dmgtype, v1, v2), dur,EffType::BUFF) ,ilvl });
+			else if (hasStats && !buff)
+				abAffixes[EffType::DEBUFF].push_back({ AbEffect::Effect(stats, AbEffect::Damage((DMG)dmgtype, v1, v2), dur, EffType::DEBUFF) ,ilvl });
+			ilvl += 2;
+		}
 		return false;
 	}
 	void loadAffixes() {
@@ -306,27 +331,35 @@ public:
 			AB_AF,
 			AB_BAS,
 			E_AB_BAS,
+			NAMES,
 			NA
 		};
 		Helper helper;
 		Parsing parsing = Parsing::NA;
 		if (texFile.is_open())
 		{
+			std::vector<std::string> names{};
 			while (std::getline(texFile, line))
 			{
-				if (line[0] == ';')
-					continue;
 				std::istringstream iss(line);
 				std::vector<std::string> results(std::istream_iterator<std::string>{iss},
 					std::istream_iterator<std::string>());
+				int type = 0;
+				if (line[0] == ';')
+					continue;
 				if (results.size() == 0)
 					break;
 				std::stringstream ss(results[0]);
-				int type = 0;
 				ss >> type;
+				if (type == (int)NAMES)
+				{
+					results.erase(results.begin());
+					names = results;
+					continue;
+				}
 				if (type == 0)
 				{
-					std::stringstream ss(results[4]);
+					std::stringstream ss(results[3]);
 					int afftype = 0;
 					ss >> afftype;
 					if (afftype <= helper.sRange.second)
@@ -335,15 +368,16 @@ public:
 						type = 1;
 				}
 				parsing = (Parsing)type;
+
 				results.erase(results.begin());
 				switch (parsing)
 				{
 				case Parsing::SUF:
-					parseSuffix(results);
+					parseSuffix(names, results);
 					std::cout << "\nadded suffix";
 					break;
 				case Parsing::PRE:
-					parsePrefix(results);
+					parsePrefix(names, results);
 					std::cout << "\nadded prefix";
 					break;
 				case Parsing::BAS:

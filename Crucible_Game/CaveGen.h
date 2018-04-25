@@ -44,10 +44,10 @@ public:
 	}
 	char getTile(int c, int r) // Get tile at
 	{
-		if (map[r*width + c] != 1)
-			return ' ';
-		else if (map[r*width + c] == 62)
+		if (map[r*width + c] == 62)
 			return '>';
+		else if (map[r*width + c] != 1)
+			return ' ';
 		else
 			return '#';
 	}
@@ -157,7 +157,7 @@ public:
 	{
 		std::vector<sf::Vector2i> caves = {};
 		fCount++;
-		if (fCount > 9999)
+		if (fCount > 700)
 			return caves;
 		if (c < 0 || r < 0 || c >= width || r >= height) // Check bounds
 			return caves;

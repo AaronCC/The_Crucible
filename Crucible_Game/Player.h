@@ -268,19 +268,20 @@ public:
 	}
 
 	bool gainExp(int newExp) {
-		if (exp + newExp >= maxExp)
+		exp += newExp;
+		if (exp >= maxExp)
 		{
-			level++;
-			hud.levelUp();
-			exp += newExp;
-			exp -= maxExp;
-			maxExp = calcNewMax_Exp_Health();
+			do {
+				level++;
+				hud.levelUp();
+				exp -= maxExp;
+				maxExp = calcNewMax_Exp_Health();
+			} while (exp >= maxExp);
 			hud.updateExpBar(exp, maxExp, level);
 			return true;
 		}
 		else
 		{
-			exp += newExp;
 			hud.updateExpBar(exp, maxExp, level);
 			return false;
 		}

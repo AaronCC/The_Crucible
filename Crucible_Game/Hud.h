@@ -790,8 +790,6 @@ public:
 	void setSlotSprites(std::vector<std::pair<sf::Keyboard::Key, std::string>> slotSpriteIDs,
 		std::string lmbID, std::string rmbID);
 
-	void queueMsg(std::string msg);
-
 	void equipCon();
 
 	void setCooldown(int index, float timer) {

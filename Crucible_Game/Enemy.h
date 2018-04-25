@@ -61,10 +61,10 @@ public:
 		this->game = game;
 		this->hp = hp;
 		this->elite = elite;
-		this->maxHp = hp;
 		this->tilePos = pos;
 		this->mf = 500;
 		this->lvl = lvl;
+		this->maxHp = hp * (1 + (lvl*0.2));
 		this->pos = { (float)pos.x*TILE_SIZE,(float)pos.y*TILE_SIZE };
 		this->sprite.setTexture(this->game->texmgr.getRef(spriteName));
 		this->sprite.setOrigin(TILE_SIZE / 2, TILE_SIZE / 2);

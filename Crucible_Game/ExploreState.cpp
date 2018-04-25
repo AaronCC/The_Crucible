@@ -151,7 +151,8 @@ void ExploreState::handleInput()
 {
 	sf::Event event;
 	std::queue<std::string> msgs;
-	bool act = false, moveQueued = false;
+	bool act = false;
+	moveQueued = false;
 	while (this->game->window.pollEvent(event))
 	{
 		player.handleEvent(event);
@@ -186,7 +187,7 @@ void ExploreState::handleInput()
 	{
 		if (player.hud.levelCache > 0)
 		{
-			std::pair<int,int> stat = player.hud.checkLevelClick();
+			std::pair<int, int> stat = player.hud.checkLevelClick();
 			if (stat.first != -1)
 			{
 				player.levelUp(stat);
@@ -228,7 +229,7 @@ void ExploreState::handleInput()
 
 	if (sf::Keyboard::isKeyPressed(sf::Keyboard::Z) && old_zState == false)
 	{
-		point = { player.tilePos.x-1,player.tilePos.y - 1 };
+		point = { player.tilePos.x - 1,player.tilePos.y - 1 };
 		moveQueued = true;
 		old_zState = true;
 	}
@@ -308,33 +309,32 @@ void ExploreState::handleInput()
 			if (cave)
 			{
 				map->loadCave();
-				pf = PathFinder(this->map->getTiles(), this->map->width, this->map->height);
-				this->old_mLeftState = true;
-				this->player.updateTilePos();
-				map->getTile(player.tilePos.x, player.tilePos.y)->occupied = true;
-				map->itemGenerator = &player.inventory.itemGenerator;
-				map->level = aLvl + 1;
-				map->populateDungeon();
 			}
 			else
 			{
 				map->loadDungeon();
-				pf = PathFinder(this->map->getTiles(), this->map->width, this->map->height);
-				this->old_mLeftState = true;
-				this->player.updateTilePos();
-				map->getTile(player.tilePos.x, player.tilePos.y)->occupied = true;
-				map->itemGenerator = &player.inventory.itemGenerator;
-				map->level = aLvl + 1;
-				map->populateDungeon();
 			}
-			player.hud.updateDLevelText(map->level);
+			playerOccToClear = { -1, -1 };
+			pf = PathFinder(this->map->getTiles(), this->map->width, this->map->height);
+			this->old_mLeftState = true;
 			player.setPos(sf::Vector2f{ map->spawnPos.x*(float)TILE_SIZE,map->spawnPos.y*(float)TILE_SIZE });
+			this->player.updateTilePos();
+			map->getTile(player.tilePos.x, player.tilePos.y)->occupied = true;
+			map->itemGenerator = &player.inventory.itemGenerator;
+			map->level = aLvl + 1;
+			map->populateDungeon();
+			player.hud.updateDLevelText(map->level);
 			fowCache.clear();
 			resolveFoW();
 		}
 	}
 	if (moveQueued)
 	{
+		if (point.first > map->width) point.first = map->width - 1;
+		if (point.first < 0) point.first = 0;
+		if (point.second > map->height) point.second = map->height - 1;
+		if (point.second < 0) point.second = 0;
+
 		Tile* tile = map->getTile(point.first, point.second);
 		if (tile->passable)
 		{
@@ -346,17 +346,16 @@ void ExploreState::handleInput()
 			else
 			{
 				if (playerOccToClear != sf::Vector2i{ -1, -1 })
-					if (playerOccToClear != sf::Vector2i{ -1, -1 })
-					{
-						map->getTile(playerOccToClear.x, playerOccToClear.y)->occupied = false;
-						playerOccToClear = { -1, -1 };
-					}
+				{
+					map->getTile(playerOccToClear.x, playerOccToClear.y)->occupied = false;
+					playerOccToClear = { -1, -1 };
+				}
 				this->player.clearWayPoints();
 				this->player.addWayPoint(point);
 				this->player.queuedAction = Player::Action::MOVE;
 				map->getTile(player.tilePos.x, player.tilePos.y)->occupied = false;
 				map->getTile(point.first, point.second)->occupied = true;
-				playerOccToClear = { point.first,point.second };
+				playerOccToClear = { point.first, point.second };
 			}
 		}
 	}
