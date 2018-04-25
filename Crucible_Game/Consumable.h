@@ -44,6 +44,18 @@ public:
 			return true;
 		return false;
 	}
+
+	std::string getEffectString() {
+		switch (effect.type)
+		{
+		case ConType::H_POT:
+			return "Heals " + std::to_string(effect.v1);
+		default:
+			return "CON_EFF_STR";
+		}
+		return "ERR";
+	}
+
 	void draw(sf::RenderWindow & window);
 	Consumable(Game* game, std::string texName, ConEffect eff, std::string name, int ilvl)
 		: effect(eff) {

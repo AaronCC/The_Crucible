@@ -450,7 +450,6 @@ void ExploreState::resolveGameState(float ticks)
 				dmg = player.applyAR(dmg);
 			else
 				dmg = player.applyRES(dmg, eff.damage.type);
-			this->game->appendMsg(" dealt " + std::to_string((int)dmg) + " " + player.helper.damagenames[(int)eff.damage.type] + " damage.");
 			player.damage(dmg);
 		}
 		if (eff.dur < 1)

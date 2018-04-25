@@ -182,6 +182,10 @@ void Map::update(float dt)
 void Map::updateHoverText()
 {
 	Loot* loot;
+	if (mouseIndex.x < 0) mouseIndex.x = 0;
+	if (mouseIndex.y < 0) mouseIndex.y = 0;
+	if (mouseIndex.x > width - 1) mouseIndex.x = width - 1;
+	if (mouseIndex.y > height - 1) mouseIndex.y = height - 1;
 	if (getTile(mouseIndex.x, mouseIndex.y)->occupied)
 	{
 		Enemy* enemy = tEnemies[mouseIndex.y*this->width + mouseIndex.x];
@@ -381,13 +385,13 @@ void Map::updateActionText(sf::Vector2i playerPos)
 		actionText.push_back(sf::Text("[e] pickup", game->fonts["main_font"], tSize));
 		actionText[0].setFillColor(sf::Color::White);
 		actionText[0].setOutlineThickness(1);
-		actionText[0].setPosition((playerPos.x * tileSize.x) - (TILE_SIZE / 2), (playerPos.y * tileSize.y) - (tSize * (3.5 + (1*(newLoot.size()-1)))));
+		actionText[0].setPosition((playerPos.x * tileSize.x) - (TILE_SIZE / 2), (playerPos.y * tileSize.y) - (tSize * (3.5 + (1 * (newLoot.size() - 1)))));
 		int i = 1;
 		for (auto loot : newLoot)
 		{
 			std::string name = loot->getName();
 			actionText.push_back(sf::Text(name, game->fonts["main_font"], tSize));
-			actionText[i].setPosition((playerPos.x * tileSize.x) - (TILE_SIZE / 2), (playerPos.y * tileSize.y) - (tSize * (2.5 + (1 * (i-1)))));
+			actionText[i].setPosition((playerPos.x * tileSize.x) - (TILE_SIZE / 2), (playerPos.y * tileSize.y) - (tSize * (2.5 + (1 * (i - 1)))));
 			switch (loot->getRarity())
 			{
 			case Item::Rarity::NORM:
@@ -452,9 +456,16 @@ std::vector<AbEffect::Effect> Map::updateEntityAI(float _tickCount, sf::Vector2i
 		sf::Vector2i end = enemy->updateAI(_tickCount, pPos, pf);
 		if (enemy->queuedAbility != nullptr)
 		{
-			for (auto eff : enemy->ability.getEffects())
-				effs.push_back(eff);
 			this->game->queueMsg(enemy->name);
+			for (auto eff : enemy->ability.getEffects())
+			{
+				effs.push_back(eff);
+				float dmg = eff.damage.getDamage();
+				if (eff.dur > 1)
+					this->game->appendMsg(" dealt " + std::to_string((int)dmg) + " " + helper.damagenames[(int)eff.damage.type] + " damage [duration " + std::to_string(eff.dur) + "].");
+				else
+					this->game->appendMsg(" dealt " + std::to_string((int)dmg) + " " + helper.damagenames[(int)eff.damage.type] + " damage.");
+			}
 		}
 		getTile(end.x, end.y)->occupied = true;
 		if (end != enemy->tilePos)
@@ -754,17 +765,17 @@ void Map::populateDungeon()
 bool Map::spawnBossGroupInRoom(Dungeon::Entity e)
 {
 	float wMod = (itemGenerator->getRand_100() / 100.f), hMod = (itemGenerator->getRand_100() / 100.f);
-	sf::Vector2i eSpawnStart = { e.x + (int)((e.w-1)*wMod), e.y + (int)((e.h-1)*hMod) };
+	sf::Vector2i eSpawnStart = { e.x + (int)((e.w - 1)*wMod), e.y + (int)((e.h - 1)*hMod) };
 	Tile* tile;
 	tile = getTile(eSpawnStart.x, eSpawnStart.y);
 	if (tile->occupied || !tile->passable)
 		return false;
 
-	int roll = itemGenerator->getRand_0X(ebases.size()-1);
+	int roll = itemGenerator->getRand_0X(ebases.size() - 1);
 	EnemyBase ebase = ebases[roll];
-		Ability* e_a = itemGenerator->makeEnemyAbility(level, Item::Rarity::RARE, ebase.melee, ebase.dtype);
-		enemies.push_back(new Enemy(ebase.name, game, eSpawnStart, ebase.hp*2, level + 1, e_a,
-			"enemyattack1", true));
+	Ability* e_a = itemGenerator->makeEnemyAbility(level, Item::Rarity::RARE, ebase.melee, ebase.dtype);
+	enemies.push_back(new Enemy(ebase.name, game, eSpawnStart, ebase.hp * 2, level + 1, e_a,
+		"enemyattack1", true));
 
 	tEnemies[eSpawnStart.y*this->width + eSpawnStart.x] = enemies[enemies.size() - 1];
 	getTile(eSpawnStart.x, eSpawnStart.y)->occupied = true;
@@ -802,7 +813,7 @@ bool Map::spawnBossGroupInRoom(Dungeon::Entity e)
 bool Map::spawnEnemyInRoom(Dungeon::Entity e)
 {
 	float wMod = (itemGenerator->getRand_100() / 100.f), hMod = (itemGenerator->getRand_100() / 100.f);
-	sf::Vector2i eSpawnStart = { e.x + (int)((e.w-1)*wMod), e.y + (int)((e.h-1)*hMod) };
+	sf::Vector2i eSpawnStart = { e.x + (int)((e.w - 1)*wMod), e.y + (int)((e.h - 1)*hMod) };
 	Tile* tile;
 	tile = getTile(eSpawnStart.x, eSpawnStart.y);
 	if (tile->occupied)
@@ -840,7 +851,7 @@ bool Map::spawnEnemyInRoom(Dungeon::Entity e)
 Enemy* Map::getEnemyAt(int x, int y)
 {
 	return this->tEnemies[y*this->width + x];
-} 
+}
 
 Tile* Map::getTile(int x, int y)
 {
@@ -855,7 +866,7 @@ Map::Map(Game* game, Camera* camera)
 	this->tileSize = this->game->tileSize;
 	this->canSelect = this->game->tileAtlas.at("can_select");
 	this->cantSelect = this->game->tileAtlas.at("cant_select");
-	this->canSelect.reveal(); 
+	this->canSelect.reveal();
 	this->cantSelect.reveal();
 	this->drawSize = { (float)this->game->windowSize.x / tileSize.x, (float)this->game->windowSize.y / tileSize.y };
 	ebases.push_back(EnemyBase{ true,15,"ogre",AbEffect::DamageType::PHYS,{false,0} });

@@ -111,7 +111,8 @@ bool Hud::hoverCon(sf::Vector2f mPos)
 		)
 	{
 		conAt = std::floor(((conPos.y + slotW) - mPos.y) / slotW);
-		conHoverText.setString(consumables[conAt].name);
+		if (conAt >= consumables.size()) conAt = consumables.size() - 1;
+		conHoverText.setString(consumables[conAt].name + "\n" + consumables[conAt].getEffectString());
 		conHoverText.setPosition({ conPos.x + slotW + 4.f,conPos.y - (slotW*conAt) });
 		return true;
 	}
