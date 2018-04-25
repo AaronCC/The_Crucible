@@ -496,31 +496,13 @@ void Map::resolveEntityAI(float tickCount)
 			oldPosBuffer.push_back(enemy->tilePos);
 		}
 	}
-	int i = 0;
-	std::vector<int> oldPosBuffer_rmCache;
-	for (auto enemy : moveBuffer)
-	{
-		i = 0;
-		tEnemies[enemy->tilePos.y*this->width + enemy->tilePos.x] = enemy;
-		for (auto pos : oldPosBuffer)
-		{
-			if (enemy->tilePos == pos)
-			{
-				oldPosBuffer_rmCache.push_back(i);
-				break;
-			}
-			i++;
-		}
-	}
-	i = 0;
-	for (auto pos : oldPosBuffer_rmCache)
-	{
-		oldPosBuffer.erase(oldPosBuffer.begin() + (pos - i));
-		i++;
-	}
 	for (auto pos : oldPosBuffer)
 	{
 		tEnemies[pos.y*this->width + pos.x] = nullptr;
+	}
+	for (auto enemy : moveBuffer)
+	{
+		tEnemies[enemy->tilePos.y*this->width + enemy->tilePos.x] = enemy;
 	}
 }
 void Map::loadCave()
@@ -595,8 +577,8 @@ void Map::loadCave()
 			{
 				this->tiles[y*this->width + x].tileVariant = 0;
 				break;
-				/*this->tiles[y*this->width + x].tileVariant = 5;
-				break;*/
+				//this->tiles[y*this->width + x].tileVariant = 5;
+				/*break;*/
 			}
 			case Dungeon::Tile::DownStairs:
 			{
@@ -637,7 +619,7 @@ void Map::genCaveEntities(int eCount, std::vector<sf::Vector2i> locs, std::vecto
 {
 	if (eCount > 0 && locs.size() > 0)
 	{
-		int rSize = itemGenerator->getRand_0X(6) + 1;
+		int rSize = itemGenerator->getRand_0X(4) + 3;
 		int loc = itemGenerator->getRand_0X(locs.size() - 1);
 		do
 		{
@@ -804,7 +786,7 @@ bool Map::spawnBossGroupInRoom(Dungeon::Entity e)
 				hMod = (itemGenerator->getRand_100() / 100.f);
 				eSpawnStart = { e.x + (int)((e.w - 1)*wMod), e.y + (int)((e.h - 1)*hMod) };
 				tile = getTile(eSpawnStart.x, eSpawnStart.y);
-			} while (tile->occupied && !tile->passable);
+			} while (tile->occupied || !tile->passable);
 
 			enemies.push_back(new Enemy(ebase.name, game, eSpawnStart, ebase.hp, level, a,
 				"enemyattack1", false));
@@ -844,8 +826,7 @@ bool Map::spawnEnemyInRoom(Dungeon::Entity e)
 			hMod = (itemGenerator->getRand_100() / 100.f);
 			eSpawnStart = { e.x + (int)((e.w - 1)*wMod), e.y + (int)((e.h - 1)*hMod) };
 			tile = getTile(eSpawnStart.x, eSpawnStart.y);
-		} while (tile->occupied && !tile->passable);
-
+		} while (tile->occupied || !tile->passable);
 
 		enemies.push_back(new Enemy(ebase.name, game, eSpawnStart, ebase.hp, level, a,
 			"enemyattack1", false));

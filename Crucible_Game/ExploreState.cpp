@@ -443,13 +443,16 @@ void ExploreState::resolveGameState(float ticks)
 	{
 		AbEffect::Effect& eff = player.effs[i];
 		eff.dur -= 1;
-		float dmg = eff.damage.getDamage();
-		if (eff.damage.type == AbEffect::DamageType::PHYS)
-			dmg = player.applyAR(dmg);
-		else
-			dmg = player.applyRES(dmg, eff.damage.type); 
-		this->game->appendMsg(" dealt " + std::to_string((int)dmg) + " " + player.helper.damagenames[(int)eff.damage.type] + " damage.");
-		player.damage(dmg);
+		if (eff.damage.min != -1 && eff.damage.max != -1)
+		{
+			float dmg = eff.damage.getDamage();
+			if (eff.damage.type == AbEffect::DamageType::PHYS)
+				dmg = player.applyAR(dmg);
+			else
+				dmg = player.applyRES(dmg, eff.damage.type);
+			this->game->appendMsg(" dealt " + std::to_string((int)dmg) + " " + player.helper.damagenames[(int)eff.damage.type] + " damage.");
+			player.damage(dmg);
+		}
 		if (eff.dur < 1)
 		{
 			player.eStats = player.eStats - eff.stats;
