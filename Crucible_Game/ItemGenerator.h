@@ -413,6 +413,7 @@ public:
 		this->game = game;
 		loadAffixes();
 
+		afTypeExMap[AF::HEALTH] = { 2 };
 		afTypeExMap[AF::FIRE_FLT_DMG] = { 0,1,3,4,5,6,7,8 };
 		afTypeExMap[AF::COLD_FLT_DMG] = { 0,1,3,4,5,6,7,8 };
 		afTypeExMap[AF::LGHT_FLT_DMG] = { 0,1,3,4,5,6,7,8 };

@@ -58,6 +58,10 @@ void Player::updatePlayerStats()
 	}
 	bStats = bStats + eStats;
 	bStats = bStats + this->stats;
+	int bonusHealth = bStats.buffs[Helper::Affix::HEALTH].v1;
+	if (bonusHealth == -1) bonusHealth = 0;
+	this->maxHealth = this->baseHealth + bonusHealth;
+	hud.updateHealth(health, maxHealth, health / (float)maxHealth);
 	playerInfo.updateInfo(bStats);
 }
 void Player::levelUp(std::pair<int, int> stat)

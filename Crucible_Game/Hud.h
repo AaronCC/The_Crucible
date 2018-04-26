@@ -247,11 +247,15 @@ public:
 	}
 	void updateInfo(Helper::Stats stats)
 	{
+		AFV afv;
 		std::string str, affstr;
 		info.clear();
 		for (int i = 0; i < helper.numbuffs; i++)
 		{
-			affstr = stats.buffs.at((Helper::Affix)i).getStr();
+			afv = stats.buffs.at((Helper::Affix)i);
+			affstr = afv.getStr();
+			if (affstr.substr(0, 5) == "Local")
+				continue;
 			if (affstr == "")
 				affstr = "0";
 			str = affstr + " " + helper.buffnames[i];

@@ -30,6 +30,7 @@ public:
 	Action queuedAction;
 
 	int health;
+	int baseHealth;
 	int maxHealth;
 
 	float tickCount;
@@ -201,6 +202,7 @@ public:
 		this->bStats = Helper::Stats();
 
 		this->health = 100;
+		this->baseHealth = this->health;
 		this->maxHealth = this->health;
 
 		this->position = { spawnPos.x * (float)game->tileSize.x, spawnPos.y * (float)game->tileSize.y };
@@ -253,6 +255,7 @@ public:
 		autoAttack.setInfo(Ability::AbInfo(0, 1));
 
 		hud.updateHealth(maxHealth, maxHealth, 1.f);
+		updateAbilities();
 
 		exp = 0;
 		maxExp = 100;
@@ -269,8 +272,9 @@ public:
 
 	int calcNewMax_Exp_Health()
 	{
-		this->maxHealth = helper.linearEq(10, level, maxHealth, 1);
-		//this->health = this->maxHealth;
+		this->maxHealth -= baseHealth;
+		this->baseHealth = helper.linearEq(10, level, baseHealth, 1);
+		this->maxHealth += baseHealth;
 		this->effs.clear();
 		hud.updateHealth(health, maxHealth, health/(float)maxHealth);
 		return helper.linearEq(10, level, maxExp, 1);

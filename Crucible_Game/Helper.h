@@ -12,8 +12,9 @@ class Helper
 {
 public:
 	
-	static const int numbuffs = 20;
+	static const int numbuffs = 21;
 	std::string buffnames[numbuffs] = {
+		"bonus health",
 		"fire damage",
 		"cold damage",
 		"lightning damage",
@@ -73,10 +74,11 @@ public:
 	damageColors[AbEffect::DamageType::LGHT] = sf::Color({ 248, 255, 61 });
 	damageColors[AbEffect::DamageType::PHYS] = sf::Color({ 226, 165, 86 });
 	damageColors[AbEffect::DamageType::POIS] = sf::Color({ 131, 211, 69 });*/
-	std::pair<int, int> sRange = std::pair<int, int>{ 0,8 };
-	std::pair<int, int> pRange = std::pair<int, int>{ 9,19 };
+	std::pair<int, int> sRange = std::pair<int, int>{ 0,9 };
+	std::pair<int, int> pRange = std::pair<int, int>{ 10,20 };
 	enum Affix {
 		//SUFFIX
+		HEALTH,
 		FIRE_FLT_DMG,
 		COLD_FLT_DMG,
 		LGHT_FLT_DMG,
