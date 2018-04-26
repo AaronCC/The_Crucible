@@ -40,7 +40,6 @@ public:
 	void resolveGameState(float ticks);
 
 private:
-
 	sf::Keyboard::Key oldMoveKey;
 	bool old_mLeftState = false;
 	bool old_wState = false;
@@ -53,6 +52,7 @@ private:
 	bool old_vState = false;
 	bool moveQueued = false;
 	bool old_mState = false;
+	bool old_pState = false;
 	sf::Font testFont;
 	sf::Text testText;
 	PathFinder pf;

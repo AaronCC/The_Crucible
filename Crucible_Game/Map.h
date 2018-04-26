@@ -10,6 +10,8 @@
 #include "Loot.h"
 #include "Dungeon.h"
 
+#define SHR_SPN_CHANCE 15
+
 class Map
 {
 public:
@@ -30,11 +32,12 @@ public:
 	struct EnemyBase {
 		bool melee;
 		int hp;
+		float mult;
 		std::string name, tx_name;
 		std::pair<bool, int> group;
 		AbEffect::DamageType dtype;
-		EnemyBase(bool melee, int hp, std::string name, AbEffect::DamageType dtype, std::pair<bool,int> group, std::string tx_name) :
-			melee(melee), hp(hp), name(name), dtype(dtype), group(group), tx_name(tx_name) {};
+		EnemyBase(bool melee, int hp, std::string name, AbEffect::DamageType dtype, std::pair<bool,int> group, std::string tx_name, float mult) :
+			melee(melee), hp(hp), name(name), dtype(dtype), group(group), tx_name(tx_name), mult(mult) {};
 	};
 	std::vector<EnemyBase> ebases;
 
@@ -43,6 +46,7 @@ public:
 
 	enum Action {
 		PICKUP,
+		SHRINE,
 		NONE
 	};
 	Action action;
@@ -107,6 +111,8 @@ public:
 
 	void populateDungeon();
 
+	bool spawnShrine(Dungeon::Entity e);
+
 	bool spawnBossGroupInRoom(Dungeon::Entity e);
 
 	bool spawnEnemyInRoom(Dungeon::Entity e);
@@ -129,6 +135,7 @@ public:
 				std::string name = "", tx_name;
 				bool melee, group;
 				int hp, dtype, groupSize;
+				float mult;
 				std::istringstream iss(line);
 				std::vector<std::string> results(std::istream_iterator<std::string>{iss},
 					std::istream_iterator<std::string>());
@@ -153,7 +160,9 @@ public:
 				ss >> group;
 				ss = std::stringstream(results[6+i]);
 				ss >> groupSize;
-				ebases.push_back(EnemyBase(melee, hp, name, (AbEffect::DamageType)dtype, { group,groupSize }, tx_name));
+				ss = std::stringstream(results[7+i]);
+				ss >> mult;
+				ebases.push_back(EnemyBase(melee, hp, name, (AbEffect::DamageType)dtype, { group,groupSize }, tx_name, mult));
 			}
 		}
 	}

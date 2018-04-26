@@ -15,7 +15,7 @@
 6 Germs Bacteria Viruses Venom Sickness Plague Corruption Blight Miasma
 0 3 5 3 1 4
 ;4 physical damage
-6 Striking Smashing
+6 Striking Smashing Crushing Weight 
 0 3 5 4 1 0
 ;5 % fire resistance
 6 Warmth Heat
@@ -47,9 +47,9 @@
 ;14 % global physical damage
 6 Strengthened Swole
 0 0 10 14 0 5
-;15 % armor rating
+;15 flat armor rating
 6 Swiss Padded
-0 0 10 15 0 5
+0 0 10 15 1 5
 ;16 agility
 6 Slow Agile
 0 0 1 16 0 5
@@ -65,19 +65,35 @@
 ;HED = 0,BDY = 1,MAH = 2,OFH = 3,RNG = 4,AMU = 5,CLK = 6,BLT = 7,SCR = 8
 ;BASE type twoh? name; v1 v2 dType afType local? ilvl
 ;Head Bases
-2 0 0 Leather Cowl; 5 -1 5 15 1 0
-2 0 0 Leather Helm; 8 -1 5 15 1 2
+2 0 0 Leather Cowl; 5 -1 5 15 0 0
+2 0 0 Strapped Helm; 8 -1 5 15 0 2
+2 0 0 Dented Barbute; 15 -1 5 15 0 4
+2 0 0 Great Helm; 25 -1 5 15 0 6
+2 0 0 Men-yoroi; 5 -1 5 16 0 8
+2 0 0 Honored Kabuto; 20 -1 5 14 0 10
 ;body bases
-2 1 0 Leather Body; 10 -1 5 15 1 0
-2 1 0 Studded Body; 14 -1 5 15 1 1
+2 1 0 Leather Body; 10 -1 5 15 0 0
+2 1 0 Studded Body; 15 -1 5 15 0 2
+2 1 0 Fitted Leather; 25 -1 5 15 0 4
+2 1 0 Old Plate; 40 -1 5 15 0 6
+2 1 0 Ring Mail; 60 -1 5 15 0 8
+2 1 0 Scale Mail; 100 -1 5 15 0 10
 ;Weapon Bases
 2 2 0 Rusted Gladius; 1 5 0 4 1 0
-2 2 0 Dull Rapier; 2 7 0 4 1 1
+2 2 0 Dull Rapier; 2 7 0 4 1 2
+2 2 0 Charged Rod; 5 30 4 4 1 4
+2 2 0 Dripping Cestus; 15 30 4 4 1 6
+2 2 0 Bladed Torch; 25 40 1 4 1 8
+2 2 0 Honed Scimitar; 50 75 0 4 1 10
 2 2 1 Chipped Claymore; 2 10 0 4 1 0
-2 2 1 Dull Zweihander; 4 14 0 4 1 1
+2 2 1 Dull Zweihander; 4 14 0 4 1 2
+2 2 1 Heavy Maul; 10 20 0 4 1 4
+2 2 1 Mallet; 20 35 0 4 1 6
+2 2 1 Piledriver; 45 60 0 4 1 8
+2 2 1 Collosal Voulge; 70 100 0 4 1 10
 ;Offhand bases
-2 3 0 Leather Shield; 4 -1 5 15 1 0
-2 3 0 Brittle Ancile; 8 -1 5 15 1 1
+2 3 0 Leather Shield; 4 -1 5 15 0 0
+2 3 0 Brittle Ancile; 8 -1 5 15 0 2
 ;Ring bases
 2 4 0 Ruby Ring; 10 -1 5 5 0 0
 2 4 0 Topaz Ring; 10 -1 5 6 0 0
@@ -90,11 +106,18 @@
 2 5 0 Locket; 5 -1 5 18 0 0
 2 5 0 Chain; 5 -1 5 19 0 0
 ;Cloak bases
-2 6 0 Worn Scarf; 5 -1 5 15 1 0
-2 6 0 Wool Cloak; 8 -1 5 15 1 1
+2 6 0 Worn Scarf; 5 -1 5 15 0 0
+2 6 0 Torn Shawl; 8 -1 5 15 0 2
+2 6 0 Wool Cloak; 12 -1 5 15 0 4
+2 6 0 Stiff Pelt; 18 -1 5 15 0 6
+2 6 0 Sturdy Mantle; 30 -1 5 15 0 8
+2 6 0 Iron Pauldrons; 45 -1 5 15 0 10
 ;Belt bases
-2 7 0 Leather Cord; 2 -1 5 19 1 0
-2 7 0 Heavy Belt; 5 -1 5 19 1 1
+2 7 0 Leather Cord; 10 -1 5 11 0 0
+2 7 0 Heavy Belt; 10 -1 5 10 0 0
+2 7 0 Silk Ribbon; 10 -1 5 9 0 0
+2 7 0 Iron Girdle; 10 -1 5 14 0 0
+2 7 0 Stained Sash; 10 -1 5 12 0 0
 ;Ability Affixes
 ;type hasstats? buff? stats{aff afv}; dmgtype range off dur ilvl
 3 0 0 3 4 1

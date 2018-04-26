@@ -39,3 +39,5 @@ def_button media/def_button.png
 kno_button media/kno_button.png
 agi_button media/agi_button.png
 rat media/rat.png
+health_shrine media/health_shrine.png
+empty_shrine media/shrine_empty.png

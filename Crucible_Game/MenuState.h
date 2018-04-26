@@ -15,7 +15,7 @@ public:
 	virtual void draw(const float dt);
 	virtual void update(const float dt);
 	virtual void handleInput();
-
+	bool loading = false;
 private:
 	Gui buttons;
 	sf::Font testFont;

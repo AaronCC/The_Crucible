@@ -3,6 +3,17 @@
 #include "AnimationHandler.h"
 #include "Tile.h"
 
+std::pair<bool, Helper::Stats> Tile::getShrineEffect()
+{
+	bool hp = shrine == HP_SHRINE ? true : false;
+	if (!hp)
+	{
+
+	}
+
+	return { hp, {} };
+}
+
 void Tile::draw(sf::RenderWindow& window, float dt)
 {
 	/* Change the sprite to reflect the tile variant */
@@ -17,6 +28,9 @@ void Tile::draw(sf::RenderWindow& window, float dt)
 
 	/* Draw the tile */
 	window.draw(this->sprite);
+
+	if (shrine != NO_SHRINE)
+		window.draw(this->shrineSprite);
 
 	return;
 }

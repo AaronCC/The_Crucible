@@ -49,6 +49,8 @@ void MenuState::handleInput()
 	
 	while (this->game->window.pollEvent(event))
 	{
+		if (loading)
+			return;
 		switch (event.type)
 		{
 		case sf::Event::Closed:
@@ -61,6 +63,7 @@ void MenuState::handleInput()
 		case sf::Event::MouseMoved:
 		{
 			this->buttons.highlight(this->buttons.getElement(mousePos));	
+			break;
 		}
 		case sf::Event::MouseButtonPressed:
 		{
@@ -68,12 +71,17 @@ void MenuState::handleInput()
 			{
 				std::string msg = this->buttons.getEMsg(mousePos);
 				if (msg == "btn1")
+				{
+					loading = true;
 					this->game->pushState(new ExploreState(game));
+				}
 			}
+			break;
 		}
 		case sf::Event::KeyReleased:
 		{
 
+			break;
 		}
 		default: break;
 		}

@@ -98,7 +98,7 @@ void Map::drawL2(sf::RenderWindow & window, float dt, sf::Vector2i pPos)
 		{
 			for (int c = 0; c < width; c++)
 			{
-				tiles[r*this->width + c].draw(this->game->window,dt);
+				tiles[r*this->width + c].draw(this->game->window, dt);
 				tiles[r*this->width + c].drawFoW(this->game->window, dt);
 			}
 		}
@@ -200,7 +200,9 @@ void Map::updateHoverText()
 	if (mouseIndex.y < 0) mouseIndex.y = 0;
 	if (mouseIndex.x > width - 1) mouseIndex.x = width - 1;
 	if (mouseIndex.y > height - 1) mouseIndex.y = height - 1;
-	if (getTile(mouseIndex.x, mouseIndex.y)->occupied)
+
+	Tile* tile = getTile(mouseIndex.x, mouseIndex.y);
+	if (tile->occupied)
 	{
 		Enemy* enemy = tEnemies[mouseIndex.y*this->width + mouseIndex.x];
 		if (enemy != nullptr && enemy->active)
@@ -263,6 +265,13 @@ void Map::updateHoverText()
 				count++;
 			}
 		}
+	}
+	else if (tile->shrine != Tile::Shrine::NO_SHRINE)
+	{
+		hoverText.push_back(sf::Text(tile->shrineNames[(int)tile->shrine], game->fonts["main_font"], tSize));
+		hoverText[0].setPosition((mouseIndex.x * tileSize.x) - (TILE_SIZE / 2), (mouseIndex.y * tileSize.y) - (tSize * 2.5));
+		hoverText[0].setFillColor(sf::Color::White);
+		hoverText[0].setOutlineThickness(1);
 	}
 	else
 		hoverText.clear();
@@ -347,6 +356,8 @@ void Map::resolveAction(Player* player)
 	Scroll * scr = nullptr;
 	Consumable * con = nullptr;
 	Loot * newLoot;
+	std::pair<bool, Helper::Stats> shrineEffect;
+	Tile* tile;
 	switch (action)
 	{
 	case Action::PICKUP:
@@ -392,6 +403,18 @@ void Map::resolveAction(Player* player)
 			}
 		}
 		break;
+	case SHRINE:
+		tile = getTile(player->tilePos.x, player->tilePos.y);
+		shrineEffect = tile->getShrineEffect();
+		if (shrineEffect.first)
+			player->healToMax();
+		else
+		{
+		}
+		tile->emptyShrine(this->game->texmgr.getRef("empty_shrine"));
+		this->game->sndmgr.playSound("buff");
+		updateActionText(player->tilePos);
+		break;
 	default:
 		break;
 	}
@@ -400,6 +423,7 @@ void Map::updateActionText(sf::Vector2i playerPos)
 {
 	actionText.clear();
 	this->action = Action::NONE;
+	Tile* tile = getTile(playerPos.x, playerPos.y);
 	std::vector<Loot*> newLoot = tLoot[playerPos.y *this->width + playerPos.x];
 	if (newLoot[0] != nullptr)
 	{
@@ -433,19 +457,32 @@ void Map::updateActionText(sf::Vector2i playerPos)
 		}
 		this->action = Action::PICKUP;
 	}
-	else if (getTile(playerPos.x, playerPos.y)->tileVariant == 5)
+	else if (tile->tileVariant == 5)
 	{
 		actionText.push_back(sf::Text("[f] go up", game->fonts["main_font"], tSize));
 		actionText[0].setFillColor(sf::Color::White);
 		actionText[0].setOutlineThickness(1);
 		actionText[0].setPosition((playerPos.x * tileSize.x) - (TILE_SIZE / 2), (playerPos.y * tileSize.y) - (tSize * 3.5));
 	}
-	else if (getTile(playerPos.x, playerPos.y)->tileVariant == 6)
+	else if (tile->tileVariant == 6)
 	{
 		actionText.push_back(sf::Text("[f] go down", game->fonts["main_font"], tSize));
 		actionText[0].setFillColor(sf::Color::White);
 		actionText[0].setOutlineThickness(1);
 		actionText[0].setPosition((playerPos.x * tileSize.x) - (TILE_SIZE / 2), (playerPos.y * tileSize.y) - (tSize * 3.5));
+	}
+	else if (tile->shrine != Tile::Shrine::NO_SHRINE)
+	{
+		actionText.push_back(sf::Text("[g] drink", game->fonts["main_font"], tSize));
+		actionText[0].setFillColor(sf::Color::White);
+		actionText[0].setOutlineThickness(1);
+		actionText[0].setPosition((playerPos.x * tileSize.x) - (TILE_SIZE / 2), (playerPos.y * tileSize.y) - (tSize * 3.5));
+		actionText.push_back(sf::Text(tile->shrineNames[(int)tile->shrine], game->fonts["main_font"], tSize));
+		actionText[1].setFillColor(sf::Color::White);
+		actionText[1].setOutlineThickness(1);
+		actionText[1].setPosition((playerPos.x * tileSize.x) - (TILE_SIZE / 2), (playerPos.y * tileSize.y) - (tSize * 2.5));
+		if (tile->shrine != Tile::Shrine::EMPTY_SHRINE)
+			this->action = Action::SHRINE;
 	}
 }
 
@@ -667,7 +704,7 @@ void Map::genCaveEntities(int eCount, std::vector<sf::Vector2i> locs, std::vecto
 			pos.x -= (pos.x + rSize + 1) - width;
 		if (pos.y + rSize >= height)
 			pos.y -= (pos.y + rSize + 1) - height;
-		entities.push_back({ 'r',pos.x,pos.y,rSize,rSize });
+		entities.push_back({ 'e',pos.x,pos.y,rSize,rSize });
 		genCaveEntities(eCount, locs, oldLocs);
 		return;
 	}
@@ -770,13 +807,16 @@ void Map::populateDungeon()
 			continue;
 		switch (e.id)
 		{
-		case 'r':
-
+		case 'e':
 			roll = itemGenerator->getRand_100();
 			if (roll <= bossChance)
-				do {} while (!spawnBossGroupInRoom(e));
+				spawnBossGroupInRoom(e);
 			else
-				do {} while (!spawnEnemyInRoom(e));
+				spawnEnemyInRoom(e);
+			if (roll <= SHR_SPN_CHANCE)
+			{
+				spawnShrine(e);
+			}
 			break;
 		default:
 			break;
@@ -784,28 +824,56 @@ void Map::populateDungeon()
 	}
 }
 
+bool Map::spawnShrine(Dungeon::Entity e)
+{
+	Tile* tile;
+	std::vector<sf::Vector2i> unOccupied{};
+	for (int r = e.y; r < e.y + e.h; r++)
+	{
+		for (int c = e.x; c < e.x + e.w; c++)
+		{
+			if (!getTile(c, r)->occupied)
+				unOccupied.push_back({ c,r });
+		}
+	}
+	if (unOccupied.size() == 0)
+		return false;
+	int at = itemGenerator->getRand_0X(unOccupied.size() - 1);
+	sf::Vector2i pos = unOccupied[at];
+	getTile(pos.x, pos.y)->addShrine(Tile::Shrine::HP_SHRINE, game->texmgr.getRef("health_shrine"));
+}
+
 bool Map::spawnBossGroupInRoom(Dungeon::Entity e)
 {
-	float wMod = (itemGenerator->getRand_100() / 100.f), hMod = (itemGenerator->getRand_100() / 100.f);
-	sf::Vector2i eSpawnStart = { e.x + (int)((e.w - 1)*wMod), e.y + (int)((e.h - 1)*hMod) };
 	Tile* tile;
-	tile = getTile(eSpawnStart.x, eSpawnStart.y);
-	if (tile->occupied || !tile->passable)
+	std::vector<sf::Vector2i> unOccupied{};
+	for (int r = e.y; r < e.y + e.h; r++)
+	{
+		for (int c = e.x; c < e.x + e.w; c++)
+		{
+			tile = getTile(c, r);
+			if (!tile->occupied && tile->passable)
+				unOccupied.push_back({ c,r });
+		}
+	}
+	if (unOccupied.size() == 0)
 		return false;
-
+	int at = itemGenerator->getRand_0X(unOccupied.size() - 1);
+	sf::Vector2i eSpawnStart = unOccupied[at];
+	tile = getTile(eSpawnStart.x, eSpawnStart.y);
 	int roll = itemGenerator->getRand_0X(ebases.size() - 1);
 	EnemyBase ebase = ebases[roll];
-	Ability* e_a = itemGenerator->makeEnemyAbility(level, Item::Rarity::RARE, ebase.melee, ebase.dtype);
+	Ability* e_a = itemGenerator->makeEnemyAbility(level, Item::Rarity::RARE, ebase.melee, ebase.dtype, ebase.mult);
 	enemies.push_back(new Enemy(ebase.tx_name, ebase.name, game, eSpawnStart, ebase.hp * 2, level + 1, e_a,
 		"enemyattack1", true));
-
 	tEnemies[eSpawnStart.y*this->width + eSpawnStart.x] = enemies[enemies.size() - 1];
 	getTile(eSpawnStart.x, eSpawnStart.y)->occupied = true;
+	unOccupied.erase(unOccupied.begin() + at);
 
 	int followerCount = 4 * (itemGenerator->getRand_100() / 100.f), ecount = 1;
 	for (int i = 0; i < followerCount; i++)
 	{
-		Ability* a = itemGenerator->makeEnemyAbility(level, Item::Rarity::MAGIC, ebase.melee, ebase.dtype);
+		Ability* a = itemGenerator->makeEnemyAbility(level, Item::Rarity::MAGIC, ebase.melee, ebase.dtype, ebase.mult);
 
 		if (ebase.group.first)
 		{
@@ -814,21 +882,17 @@ bool Map::spawnBossGroupInRoom(Dungeon::Entity e)
 
 		for (int i = 0; i < ecount; i++)
 		{
-			int try_do = 2 * (e.w*e.h);
-			do {
-				try_do--;
-				if (try_do == 0) break;
-				wMod = (itemGenerator->getRand_100() / 100.f);
-				hMod = (itemGenerator->getRand_100() / 100.f);
-				eSpawnStart = { e.x + (int)((e.w - 1)*wMod), e.y + (int)((e.h - 1)*hMod) };
-				tile = getTile(eSpawnStart.x, eSpawnStart.y);
-			} while (tile->occupied || !tile->passable);
+			if (unOccupied.size() == 0)
+				return false;
+			at = itemGenerator->getRand_0X(unOccupied.size() - 1);
+			eSpawnStart = unOccupied[at];
 
 			enemies.push_back(new Enemy(ebase.tx_name, ebase.name, game, eSpawnStart, ebase.hp, level, a,
 				"enemyattack1", false));
 
 			tEnemies[eSpawnStart.y*this->width + eSpawnStart.x] = enemies[enemies.size() - 1];
 			getTile(eSpawnStart.x, eSpawnStart.y)->occupied = true;
+			unOccupied.erase(unOccupied.begin() + at);
 		}
 		return true;
 	}
@@ -837,18 +901,25 @@ bool Map::spawnBossGroupInRoom(Dungeon::Entity e)
 
 bool Map::spawnEnemyInRoom(Dungeon::Entity e)
 {
-	float wMod = (itemGenerator->getRand_100() / 100.f), hMod = (itemGenerator->getRand_100() / 100.f);
-	sf::Vector2i eSpawnStart = { e.x + (int)((e.w - 1)*wMod), e.y + (int)((e.h - 1)*hMod) };
 	Tile* tile;
-	tile = getTile(eSpawnStart.x, eSpawnStart.y);
-	if (tile->occupied)
+	std::vector<sf::Vector2i> unOccupied{};
+	for (int r = e.y; r < e.y + e.h; r++)
+	{
+		for (int c = e.x; c < e.x + e.w; c++)
+		{
+			tile = getTile(c, r);
+			if (!tile->occupied && tile->passable)
+				unOccupied.push_back({ c,r });
+		}
+	}
+	if (unOccupied.size() == 0)
 		return false;
-
+	int at;
+	sf::Vector2i eSpawnStart;
 	int ecount = 1;
-
 	int roll = itemGenerator->getRand_0X(ebases.size() - 1);
 	EnemyBase ebase = ebases[roll];
-	Ability* a = itemGenerator->makeEnemyAbility(level, Item::Rarity::MAGIC, ebase.melee, ebase.dtype);
+	Ability* a = itemGenerator->makeEnemyAbility(level, Item::Rarity::MAGIC, ebase.melee, ebase.dtype, ebase.mult);
 
 	if (ebase.group.first)
 	{
@@ -857,21 +928,15 @@ bool Map::spawnEnemyInRoom(Dungeon::Entity e)
 
 	for (int i = 0; i < ecount; i++)
 	{
-		int try_do = 2 * (e.w*e.h);
-		do {
-			try_do--;
-			if (try_do == 0) break;
-			wMod = (itemGenerator->getRand_100() / 100.f);
-			hMod = (itemGenerator->getRand_100() / 100.f);
-			eSpawnStart = { e.x + (int)((e.w - 1)*wMod), e.y + (int)((e.h - 1)*hMod) };
-			tile = getTile(eSpawnStart.x, eSpawnStart.y);
-		} while (tile->occupied || !tile->passable);
+		at = itemGenerator->getRand_0X(unOccupied.size() - 1);
+		eSpawnStart = unOccupied[at];
 
 		enemies.push_back(new Enemy(ebase.tx_name, ebase.name, game, eSpawnStart, ebase.hp, level, a,
 			"enemyattack1", false));
 
 		tEnemies[eSpawnStart.y*this->width + eSpawnStart.x] = enemies[enemies.size() - 1];
 		getTile(eSpawnStart.x, eSpawnStart.y)->occupied = true;
+		unOccupied.erase(unOccupied.begin() + at);
 	}
 	return true;
 }
@@ -902,7 +967,8 @@ Map::Map(Game* game, Camera* camera)
 	youAreHere.setFillColor(sf::Color::Red);
 	youAreHere.setSize({ 32, 32 });
 	youAreHere.setOrigin({ 16, 16 });
-	miniMapView = sf::View(sf::FloatRect(-50,-50,this->game->windowSize.x*4,this->game->windowSize.y*4));
+	miniMapView = sf::View(sf::FloatRect(-50, -50, this->game->windowSize.x * 4, this->game->windowSize.y * 4));
+	resizeMiniView(this->game->window.getSize().x, this->game->window.getSize().y);
 	parseEbases();
 }
 Map::~Map()

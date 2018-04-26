@@ -266,7 +266,7 @@ private:
 			if (dir != West || firstRoom) // east side
 				_exits.emplace_back(Rect{ room.x + room.width, room.y, 1, room.height });
 
-			entities.push_back({ 'r',room.x,room.y,room.width,room.height });
+			entities.push_back({ 'e',room.x,room.y,room.width,room.height });
 
 			return true;
 		}

@@ -249,7 +249,7 @@ public:
 		updateAbilities();
 		autoAttack = Ability(this->game, game->texmgr.getRef("slash"), "slash_icon",
 			{ 0,3,0.1f }, { 32,32 }, 0, 1, "Default Attack",
-			"Melee slash in an arc");
+			"Melee Attack");
 		autoAttack.setInfo(Ability::AbInfo(0, 1));
 
 		hud.updateHealth(maxHealth, maxHealth, 1.f);
@@ -258,6 +258,13 @@ public:
 		maxExp = 100;
 		level = 0;
 		hud.updateExpBar(exp, maxExp, level);
+
+		hudView.setViewport(helper.resizeView(this->game->window.getSize().x, this->game->window.getSize().y, game->aspectRatio));
+	}
+
+	void healToMax() {
+		this->health = this->maxHealth;
+		hud.updateHealth(maxHealth, maxHealth, 1);
 	}
 
 	int calcNewMax_Exp_Health()

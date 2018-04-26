@@ -22,9 +22,16 @@ sf::SoundBuffer & SoundManager::getSoundRef(const std::string & sound)
 {
 	return this->sounds.at(sound);
 }
-
+void SoundManager::mute() {
+	this->isMute = !this->isMute;
+	if (isMute)
+		stopPlaying();
+	else
+		getMusicRef(playing);
+}
 void SoundManager::playSound(const std::string & sound)
 {
+	if (isMute) return;
 	effects[e_at].setBuffer(sounds.at(sound));
 	effects[e_at].play();
 	e_at++;
@@ -37,6 +44,7 @@ void SoundManager::stopPlaying()
 }
 sf::Music & SoundManager::getMusicRef(const std::string & music)
 {
+	if (isMute) return this->musics.at(music);
 	if (playing != "")
 		this->musics.at(playing).stop();
 	this->musics.at(music).setVolume(25);

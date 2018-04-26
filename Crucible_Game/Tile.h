@@ -6,6 +6,7 @@
 #include <time.h>
 #include "AnimationHandler.h"
 #include <limits>
+#include "Helper.h"
 
 struct Node {
 	enum set {
@@ -90,6 +91,28 @@ public:
 	sf::Uint32 unitHeight;
 	sf::Uint32 unitWidth;
 
+	enum Shrine {
+		HP_SHRINE,
+		STAT_SHRINE,
+		EMPTY_SHRINE,
+		NO_SHRINE
+	};
+	std::string shrineNames[3] = { "Health Shrine" , "Stat Shrine", "Empty Shrine" };
+	Shrine shrine = NO_SHRINE;
+	sf::Sprite shrineSprite;
+	std::pair<bool, Helper::Stats> getShrineEffect();
+
+	void addShrine(Shrine type, sf::Texture& texture)
+	{
+		shrine = type;
+		shrineSprite.setTexture(texture);
+		shrineSprite.setOrigin(TILE_SIZE / 2, TILE_SIZE / 2);
+	}
+	void emptyShrine(sf::Texture& emptyTexture)
+	{
+		this->shrineSprite.setTexture(emptyTexture);
+		shrine = EMPTY_SHRINE;
+	}
 	bool fow;
 	bool dark_fow;
 
@@ -141,6 +164,7 @@ public:
 		this->sprite.setPosition(roundedPos);
 		this->fowSprite.setPosition(roundedPos);
 		this->fowDarkSprite.setPosition(roundedPos);
+		this->shrineSprite.setPosition(roundedPos);
 	}
 	void setPosition(sf::Vector2i position, int x, int y) {
 		this->position = position;
@@ -148,6 +172,7 @@ public:
 		this->sprite.setPosition(roundedPos);
 		this->fowSprite.setPosition(roundedPos);
 		this->fowDarkSprite.setPosition(roundedPos);
+		this->shrineSprite.setPosition(roundedPos);
 		this->node.x = x;
 		this->node.y = y;
 		this->node.parent = nullptr;

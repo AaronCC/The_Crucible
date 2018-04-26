@@ -116,8 +116,8 @@ Scroll* ItemGenerator::makeScroll(int aLvl, float mf)
 		ab->addEffect(eff);
 	scroll = new Scroll(ab->name, Item::SlotType::SCR, ab, rarity);
 	return scroll;
-}
-Ability * ItemGenerator::makeEnemyAbility(int aLvl, Item::Rarity rarity, bool melee)
+}/*
+Ability * ItemGenerator::makeEnemyAbility(int aLvl, Item::Rarity rarity, bool melee, float eMult)
 {
 	std::random_device rd;
 	std::mt19937 gen(rd());
@@ -186,8 +186,8 @@ Ability * ItemGenerator::makeEnemyAbility(int aLvl, Item::Rarity rarity, bool me
 	for (auto eff : effs)
 		ab->addEffect(eff);
 	return ab;
-}
-Ability * ItemGenerator::makeEnemyAbility(int aLvl, Item::Rarity rarity, bool melee, AbEffect::DamageType dtype)
+}*/
+Ability * ItemGenerator::makeEnemyAbility(int aLvl, Item::Rarity rarity, bool melee, AbEffect::DamageType dtype, float eMult)
 {
 	bool has_dType = false;
 	std::random_device rd;
@@ -206,6 +206,7 @@ Ability * ItemGenerator::makeEnemyAbility(int aLvl, Item::Rarity rarity, bool me
 	std::vector<AbEffect> effs;
 	std::map<EffType, std::vector<AbEffect>> pools;
 	std::vector<EffType> choices;
+	float multiplier = ((abBase.mult + eMult) / 2.f) + (aLvl * 0.2f);
 	for (int i = 0; i < numEfType; i++)
 	{
 		if ((EffType)i == EffType::BUFF)
@@ -218,9 +219,9 @@ Ability * ItemGenerator::makeEnemyAbility(int aLvl, Item::Rarity rarity, bool me
 				{
 					numaff--;
 					has_dType = true;
-					eff.first.damage.min *= (abBase.mult + (aLvl * 0.2));
+					eff.first.damage.min *= multiplier;
 					if (eff.first.damage.min < 1) eff.first.damage.min = 1;
-					eff.first.damage.max *= (abBase.mult + (aLvl * 0.2));
+					eff.first.damage.max *= multiplier;
 					if (eff.first.damage.max < 1) eff.first.damage.max = 1;
 					effs.push_back(eff.first);
 				}
@@ -243,8 +244,10 @@ Ability * ItemGenerator::makeEnemyAbility(int aLvl, Item::Rarity rarity, bool me
 			dist = std::uniform_int_distribution<>(0, poolsize - 1);
 			int poolat = dist(gen);
 			AbEffect eff = pools[efType][poolat];
-			eff.eff.damage.min *= abBase.mult;
-			eff.eff.damage.max *= abBase.mult;
+			eff.eff.damage.min *= multiplier;
+			if (eff.eff.damage.min < 1) eff.eff.damage.min = 1;
+			eff.eff.damage.max *= multiplier;
+			if (eff.eff.damage.max < 1) eff.eff.damage.max = 1;
 			effs.push_back(eff);
 			pools[efType].erase(pools[efType].begin() + poolat);
 			if (pools[efType].size() == 0)

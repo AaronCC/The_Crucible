@@ -438,9 +438,7 @@ public:
 
 	Scroll * makeScroll(int aLvl, float mf);
 
-	Ability * makeEnemyAbility(int aLvl, Item::Rarity rarity, bool melee);
-
-	Ability * makeEnemyAbility(int aLvl, Item::Rarity rarity, bool melee, AbEffect::DamageType dtype);
+	Ability * makeEnemyAbility(int aLvl, Item::Rarity rarity, bool melee, AbEffect::DamageType dtype, float eMult);
 
 	bool canRollAf(Item::SlotType type, AF af);
 

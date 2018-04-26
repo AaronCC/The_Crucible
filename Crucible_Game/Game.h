@@ -26,6 +26,7 @@ public:
 	void appendMsg(std::string msg);
 
 	float hudTop;
+	bool focus = true;
 
 	void pushState(GameState* state);
 	void popState();

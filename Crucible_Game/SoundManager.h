@@ -14,11 +14,14 @@ private:
 	sf::SoundBuffer buffer;
 	std::vector<sf::Sound> effects;
 	int e_at = 0;
+	std::string lastPlayed;
 	const int e_count = 4;
 public:
+	bool isMute = false;
 	void loadSound(const std::string& name, const std::string &filename);
 	void loadMusic(const std::string& name, const std::string &filename);
 	sf::SoundBuffer& getSoundRef(const std::string& sound);
+	void mute();
 	void playSound(const std::string & sound);
 	void stopPlaying();
 	sf::Music& getMusicRef(const std::string& music);

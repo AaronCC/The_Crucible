@@ -437,7 +437,10 @@ float Player::applyAR(float dmg)
 	if (AR == -1) return dmg;
 	int def = bStats.buffs[Helper::Affix::DEF].v1;
 	if (def == -1) def = 0;
-	return dmg - ((AR + (def * 2)) * helper.linearEq(-0.05, AR, 0.5, 5));
+	float met = ((AR + (def * 2)) * helper.linearEq(-0.05, AR, 0.5, 5));
+	if (met >= dmg)
+		met = dmg * 0.75;
+	return dmg - met;
 }
 float Player::applyRES(float dmg, AbEffect::DamageType type)
 {

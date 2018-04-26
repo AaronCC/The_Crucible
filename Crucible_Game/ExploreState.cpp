@@ -31,6 +31,7 @@ ExploreState::ExploreState(Game* game)
 	this->game->sndmgr.stopPlaying();
 	this->themeName = "exploretheme";
 	this->game->sndmgr.getMusicRef(this->themeName);
+	this->camera.resizeView(this->game->window.getSize().x, this->game->window.getSize().y);
 }
 
 ExploreState::~ExploreState()
@@ -158,6 +159,12 @@ void ExploreState::handleInput()
 		player.handleEvent(event);
 		switch (event.type)
 		{
+		case sf::Event::GainedFocus:
+			this->game->focus = true;
+			break;
+		case sf::Event::LostFocus:
+			this->game->focus = false;
+			break;
 		case sf::Event::Closed:
 			exit(0);
 		case sf::Event::Resized:
@@ -173,6 +180,8 @@ void ExploreState::handleInput()
 		default: break;
 		}
 	}
+	if (!this->game->focus)
+		return;
 	sf::Vector2f mousePos = this->game->window.mapPixelToCoords(sf::Mouse::getPosition(this->game->window), this->view);
 	bool hudHover = mousePos.y >= game->hudTop ? true : false;
 	if (sf::Keyboard::isKeyPressed(sf::Keyboard::Escape))
@@ -186,8 +195,16 @@ void ExploreState::handleInput()
 	}
 	else if (!sf::Keyboard::isKeyPressed(sf::Keyboard::M))
 		old_mState = false;
+	if (sf::Keyboard::isKeyPressed(sf::Keyboard::P) && old_pState == false)
+	{
+		this->game->sndmgr.mute();
+		old_pState = true;
+	}
+	else if (!sf::Keyboard::isKeyPressed(sf::Keyboard::P))
+		old_pState = false;
 
-	if (map->action == Map::Action::PICKUP && sf::Keyboard::isKeyPressed(sf::Keyboard::E))
+	if ((map->action == Map::Action::PICKUP && sf::Keyboard::isKeyPressed(sf::Keyboard::E))
+		|| (map->action == Map::Action::SHRINE && sf::Keyboard::isKeyPressed(sf::Keyboard::G)))
 	{
 		map->resolveAction(&player);
 	}
