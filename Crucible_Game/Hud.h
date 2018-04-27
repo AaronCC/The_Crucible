@@ -28,7 +28,7 @@ class InvSlot {
 #define invSlotH 32
 #define infoWidth 296
 #define tSize 12
-#define charWidth 8
+#define charWidth 7
 #define slotBorder 2
 
 public:
@@ -481,8 +481,8 @@ public:
 			scrollSlots.push_back(InvSlot(i, false, this->game, 2));
 		}
 
-		/*for (int i = 0; i < 25; i++)
-			scrollSlots[i].setItem(itemGenerator.makeScroll(1, 1000));*/
+		for (int i = 0; i < 25; i++)
+			scrollSlots[i].setItem(itemGenerator.makeScroll(1, 1000));
 		std::vector<std::string> scEqNames = { "1","2","3","4","5","6","LMB","RMB" };
 		for (int i = 0; i < A_SLOT_COUNT; i++)
 		{

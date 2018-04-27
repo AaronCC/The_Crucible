@@ -16,8 +16,11 @@ private:
 	int e_at = 0;
 	std::string lastPlayed;
 	const int e_count = 4;
+	int sCount = 0;
+	const int max_sCount = 4;
 public:
 	bool isMute = false;
+	void clearSounds() { sCount = 0; }
 	void loadSound(const std::string& name, const std::string &filename);
 	void loadMusic(const std::string& name, const std::string &filename);
 	sf::SoundBuffer& getSoundRef(const std::string& sound);

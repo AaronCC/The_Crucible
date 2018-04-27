@@ -41,7 +41,6 @@ void Player::resolveAbilityOnTile(sf::Vector2i pos)
 void Player::lockActions()
 {
 	this->resolveActions = true;
-	//this->hud.gameMsgs.clear();
 	keys[sf::Keyboard::Space] = true;
 }
 
@@ -80,7 +79,7 @@ void Player::handleInput()
 	{
 		lockActions();
 	}
-	else if (keys[sf::Keyboard::Space] == true)
+	else// if (keys[sf::Keyboard::Space] == true)
 	{
 		this->resolveActions = false;
 		keys[sf::Keyboard::Space] = sf::Keyboard::isKeyPressed(sf::Keyboard::Space);

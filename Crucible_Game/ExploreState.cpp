@@ -59,6 +59,7 @@ void ExploreState::draw(const float dt)
 
 void ExploreState::update(const float dt)
 {
+	this->game->sndmgr.clearSounds();
 	bool shouldResolve = false;
 	sf::Vector2f oldPos = player.position;
 	this->player.update(dt);
@@ -494,19 +495,5 @@ void ExploreState::resolveGameState(float ticks)
 		player.effs.erase(player.effs.begin() + e);
 		i++;
 	}
-	/*
-	std::queue<std::string> msgs;
-	if (player.queuedAction == Player::Action::ABILITY)
-		msgs.push(player.activateQueuedAbility());
-	else if (player.queuedAction == Player::Action::MOVE)
-		while (player.moveNext())
-		{
-			resolveFoW();
-			msgs.push("Moved");
-		}
-	player.resolveAbilityCDs(ticks);
-	player.queueHudMsg(msgs);
-	this->player.clearWayPoints();
-	*/
 }
 

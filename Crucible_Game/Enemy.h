@@ -61,7 +61,7 @@ public:
 		this->game = game;
 		this->elite = elite;
 		this->tilePos = pos;
-		this->mf = 500;
+		this->mf = 0;
 		this->lvl = lvl;
 		this->maxHp = hp * (1 + (lvl*0.5));
 		this->hp = maxHp;
@@ -93,6 +93,7 @@ public:
 		ability.setInfo(Ability::AbInfo(0, 1));*/
 		if (elite)
 		{
+			this->mf += 500;
 			this->name = "Elite " + this->name;
 			crown.setTexture(this->game->texmgr.getRef("elite_crown"));
 			crown.setOrigin(TILE_SIZE / 2, TILE_SIZE / 2);

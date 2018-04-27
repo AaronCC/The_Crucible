@@ -201,6 +201,8 @@ void Map::updateHoverText()
 	if (mouseIndex.x > width - 1) mouseIndex.x = width - 1;
 	if (mouseIndex.y > height - 1) mouseIndex.y = height - 1;
 
+	hoverText.clear();
+
 	Tile* tile = getTile(mouseIndex.x, mouseIndex.y);
 	if (tile->occupied)
 	{
@@ -225,7 +227,6 @@ void Map::updateHoverText()
 	{
 		loot = tLoot[mouseIndex.y*this->width + mouseIndex.x][0];
 		int i = 0;
-		hoverText.clear();
 		for (auto loot : tLoot[mouseIndex.y*this->width + mouseIndex.x])
 		{
 			std::string name = loot->getName();
@@ -863,7 +864,7 @@ bool Map::spawnBossGroupInRoom(Dungeon::Entity e)
 	tile = getTile(eSpawnStart.x, eSpawnStart.y);
 	int roll = itemGenerator->getRand_0X(ebases.size() - 1);
 	EnemyBase ebase = ebases[roll];
-	Ability* e_a = itemGenerator->makeEnemyAbility(level, Item::Rarity::RARE, ebase.melee, ebase.dtype, ebase.mult);
+	Ability* e_a = itemGenerator->makeEnemyAbility(level, Item::Rarity::MAGIC, ebase.melee, ebase.dtype, ebase.mult);
 	enemies.push_back(new Enemy(ebase.tx_name, ebase.name, game, eSpawnStart, ebase.hp * 2, level + 1, e_a,
 		"enemyattack1", true));
 	tEnemies[eSpawnStart.y*this->width + eSpawnStart.x] = enemies[enemies.size() - 1];
