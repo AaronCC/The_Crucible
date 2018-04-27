@@ -213,7 +213,7 @@ void Game::loadMusic()
 void Game::loadFonts()
 {
 	sf::Font font;
-	if (!font.loadFromFile("media/font.ttf"))
+	if (!font.loadFromFile("media/Roboto-Black.ttf"))
 	{
 		//Error
 	}

@@ -99,7 +99,7 @@ public:
 				v2 = -1;
 			AFV afv = AFV(v1, v2, name, p, c, l);
 			afs.push_back({ af,{ afv,ilvl } });
-			ilvl += 2;
+			ilvl++;
 		}
 		for (auto af_afv : afs)
 			addSuffix(af_afv.first, af_afv.second.first, af_afv.second.second);
@@ -137,7 +137,7 @@ public:
 				v2 = -1;
 			AFV afv = AFV(v1, v2, name, p, c, l);
 			afs.push_back({ af,{afv,ilvl} });
-			ilvl += 2;
+			ilvl++;
 		}
 		for (auto af_afv : afs)
 			addPrefix(af_afv.first, af_afv.second.first, af_afv.second.second);

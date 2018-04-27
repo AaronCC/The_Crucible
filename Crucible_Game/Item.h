@@ -157,7 +157,7 @@ public:
 			pre += helper.inamePrePrefixes[dist(gen)];
 			dist.reset();
 			dist = std::uniform_int_distribution<>(0, helper.inamePrefixes[slotType].size() - 1);
-			pre += " " + helper.inamePrefixes[slotType][dist(gen)] + ",";
+			pre += " " + helper.inamePrefixes[slotType][dist(gen)] + ", ";
 			this->name = pre + suf + name;
 		}
 	}

@@ -304,7 +304,7 @@ public:
 				pos.y += tSize + 2;
 			}
 			i++;
-			pos.y += 2 * tSize;
+			pos.y += tSize;
 		}
 		abStr = default->getBoostedString(&stats);
 		j = 0;

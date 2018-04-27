@@ -893,6 +893,8 @@ bool Map::spawnBossGroupInRoom(Dungeon::Entity e)
 			tEnemies[eSpawnStart.y*this->width + eSpawnStart.x] = enemies[enemies.size() - 1];
 			getTile(eSpawnStart.x, eSpawnStart.y)->occupied = true;
 			unOccupied.erase(unOccupied.begin() + at);
+			if (unOccupied.size() == 0)
+				return false;
 		}
 		return true;
 	}
@@ -937,6 +939,8 @@ bool Map::spawnEnemyInRoom(Dungeon::Entity e)
 		tEnemies[eSpawnStart.y*this->width + eSpawnStart.x] = enemies[enemies.size() - 1];
 		getTile(eSpawnStart.x, eSpawnStart.y)->occupied = true;
 		unOccupied.erase(unOccupied.begin() + at);
+		if (unOccupied.size() == 0)
+			return false;
 	}
 	return true;
 }
