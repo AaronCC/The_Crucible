@@ -5,6 +5,7 @@
 #include "Gui.h"
 #include "TestState.h"
 #include "ExploreState.h"
+#include "EditorState.h"
 
 class MenuState : public GameState
 {

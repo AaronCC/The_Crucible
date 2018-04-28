@@ -43,11 +43,11 @@
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
-    <IncludePath>C:\Program Files %28x86%29\SFML-2.4.0\include;$(IncludePath);C:\Users\Aaron\Documents\Crucible_Game\SFML-2.4.2\include;C:\Users\Aaron\source\The_Crucible\SFML-2.4.2\include;C:\Users\Aaron\Documents\Projects\The_Crucible\SFML-2.4.2\include</IncludePath>
+    <IncludePath>C:\Program Files %28x86%29\SFML-2.4.0\include;$(IncludePath);C:\Users\Aaron\Documents\Crucible_Game\SFML-2.4.2\include;C:\Users\Aaron\source\The_Crucible\SFML-2.4.2\include;C:\Users\Aaron\Documents\Projects\The_Crucible\SFML-2.4.2\include;C:\Users\Aaron\source\The_Crucible\imgui-master;C:\Users\Aaron\source\The_Crucible\dirent-1.23.1\include</IncludePath>
     <LibraryPath>C:\Program Files %28x86%29\SFML-2.4.0\lib;$(LibraryPath);C:\Users\Aaron\Documents\Crucible_Game\SFML-2.4.2\lib;C:\Users\Aaron\source\The_Crucible\SFML-2.4.2\lib;C:\Users\Aaron\Documents\Projects\The_Crucible\SFML-2.4.2\lib</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
-    <IncludePath>C:\Users\Aaron\Documents\Crucible_Game\SFML-2.4.2\include;$(IncludePath);C:\Users\Aaron\Documents\Crucible_Game\SFML-2.4.2\include;C:\Users\Aaron\source\The_Crucible\SFML-2.4.2\include;C:\Users\Aaron\Documents\Projects\The_Crucible\SFML-2.4.2\include</IncludePath>
+    <IncludePath>C:\Users\Aaron\Documents\Crucible_Game\SFML-2.4.2\include;$(IncludePath);C:\Users\Aaron\Documents\Crucible_Game\SFML-2.4.2\include;C:\Users\Aaron\source\The_Crucible\SFML-2.4.2\include;C:\Users\Aaron\Documents\Projects\The_Crucible\SFML-2.4.2\include;C:\Users\Aaron\source\The_Crucible\imgui-master;C:\Users\Aaron\source\The_Crucible\dirent-1.23.1\include</IncludePath>
     <LibraryPath>C:\Users\Aaron\Documents\Crucible_Game\SFML-2.4.2\lib;$(LibraryPath);C:\Users\Aaron\Documents\Crucible_Game\SFML-2.4.2\lib;C:\Users\Aaron\source\The_Crucible\SFML-2.4.2\lib;C:\Users\Aaron\Documents\Projects\The_Crucible\SFML-2.4.2\lib</LibraryPath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
@@ -56,7 +56,7 @@
       <Optimization>Disabled</Optimization>
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>SFML_STATIC;_UNICODE;UNICODE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>sfml-main-d.lib;sfml-graphics-s-d.lib;sfml-window-s-d.lib;sfml-system-s-d.lib;sfml-audio-s-d.lib;opengl32.lib;freetype.lib;jpeg.lib;winmm.lib;;openal32.lib;ogg.lib;flac.ib;vorbisfile.lib;vorbis.lib;</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>sfml-main-d.lib;sfml-graphics-s-d.lib;sfml-window-s-d.lib;sfml-system-s-d.lib;sfml-audio-s-d.lib;opengl32.lib;freetype.lib;jpeg.lib;winmm.lib;;openal32.lib;ogg.lib;flac.ib;vorbisfile.lib;vorbis.lib;;</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <AdditionalDependencies>sfml-main-d.lib;sfml-graphics-s-d.lib;sfml-window-s-d.lib;sfml-system-s-d.lib;sfml-audio-s-d.lib;opengl32.lib;freetype.lib;jpeg.lib;winmm.lib;%(AdditionalDependencies);openal32.lib;flac.lib;ogg.lib;vorbis.lib;vorbisfile.lib</AdditionalDependencies>
@@ -70,7 +70,7 @@
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>SFML_STATIC;_UNICODE;UNICODE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>sfml-main.lib;sfml-graphics-s.lib;sfml-window-s.lib;sfml-system-s.lib;sfml-audio-s.lib;opengl32.lib;freetype.lib;jpeg.lib;winmm.lib;;openal32.lib;ogg.lib;flac.ib;vorbisfile.lib;vorbis.lib;</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>sfml-main.lib;sfml-graphics-s.lib;sfml-window-s.lib;sfml-system-s.lib;sfml-audio-s.lib;opengl32.lib;freetype.lib;jpeg.lib;winmm.lib;;openal32.lib;ogg.lib;flac.ib;vorbisfile.lib;vorbis.lib;;</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
@@ -84,12 +84,16 @@
     <ClCompile Include="AnimationHandler.cpp" />
     <ClCompile Include="Camera.cpp" />
     <ClCompile Include="Consumable.cpp" />
+    <ClCompile Include="EditorState.cpp" />
     <ClCompile Include="Enemy.cpp" />
     <ClCompile Include="ExploreState.cpp" />
     <ClCompile Include="Game.cpp" />
     <ClCompile Include="Gui.cpp" />
     <ClCompile Include="Helper.cpp" />
     <ClCompile Include="Hud.cpp" />
+    <ClCompile Include="imgui-SFML.cpp" />
+    <ClCompile Include="imgui.cpp" />
+    <ClCompile Include="imgui_draw.cpp" />
     <ClCompile Include="Item.cpp" />
     <ClCompile Include="ItemGenerator.cpp" />
     <ClCompile Include="Loot.cpp" />
@@ -109,6 +113,7 @@
     <ClInclude Include="CaveGen.h" />
     <ClInclude Include="Consumable.h" />
     <ClInclude Include="Dungeon.h" />
+    <ClInclude Include="EditorState.h" />
     <ClInclude Include="Enemy.h" />
     <ClInclude Include="ExploreState.h" />
     <ClInclude Include="Game.h" />

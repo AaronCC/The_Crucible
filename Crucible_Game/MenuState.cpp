@@ -13,11 +13,12 @@ MenuState::MenuState(Game* game)
 	buttons = Gui(
 		GuiStyle(sf::Color::Black, sf::Color::White, &testFont, false),
 		true,
-		{ "beginbutton" },
-		{ { btnAnim } },
-		{ std::pair<std::string,std::string>("btn1","btn1") },
+		{ "beginbutton", "editorbutton" },
+		{ { btnAnim }, {btnAnim} },
+		{ std::pair<std::string,std::string>("btn1","btn1"), std::pair<std::string,std::string>("btn2","btn2") },
 		{ 128, 64 },
-		{ { (float)this->game->windowSize.x/2, (float)this->game->windowSize.y/2 } },
+		{ { (float)this->game->windowSize.x / 2, (float)this->game->windowSize.y / 2 - 32},
+		{(float)this->game->windowSize.x / 2, (float)(this->game->windowSize.y / 2) + 64} },
 		EType::BUTTON, 0, game);
 	initView();
 	this->themeName = "menutheme";
@@ -74,6 +75,11 @@ void MenuState::handleInput()
 				{
 					loading = true;
 					this->game->pushState(new ExploreState(game));
+				}
+				else if (msg == "btn2")
+				{
+					loading = true;
+					this->game->pushState(new EditorState(game));
 				}
 			}
 			break;

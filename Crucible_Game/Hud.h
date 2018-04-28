@@ -355,7 +355,7 @@ public:
 	int scrollSelect = -1;
 	bool lastSelected = false;
 	int hovering;
-	int selected;
+	int selected = -1;
 	bool delHover = false;
 	bool delSelect = false;
 	std::map<std::string, Ability> abilityMap;
@@ -480,9 +480,9 @@ public:
 		{
 			scrollSlots.push_back(InvSlot(i, false, this->game, 2));
 		}
-
-		for (int i = 0; i < 25; i++)
-			scrollSlots[i].setItem(itemGenerator.makeScroll(1, 1000));
+		scrollSlots[0].setItem(itemGenerator.makeScroll(0, 0));
+		/*for (int i = 0; i < 25; i++)
+			scrollSlots[i].setItem(itemGenerator.makeScroll(1, 1000));*/
 		std::vector<std::string> scEqNames = { "1","2","3","4","5","6","LMB","RMB" };
 		for (int i = 0; i < A_SLOT_COUNT; i++)
 		{
@@ -565,7 +565,7 @@ public:
 			{
 			case Hovering::EQI:
 			{
-				if (selected == hovering && lastSelected)
+				if (selected == hovering && lastSelected&& scrollSelect == -1)
 				{
 					int slotType = eqItems[hovering].first.getItemSlotType();
 					eqItems[hovering].first.selected = false;
@@ -591,7 +591,7 @@ public:
 			}
 			case Hovering::ITM:
 			{
-				if (selected == hovering && !lastSelected)
+				if (selected == hovering && !lastSelected && scrollSelect == -1)
 				{
 					int slotType = itemSlots[selected].getItemSlotType();
 					itemSlots[selected].selected = false;

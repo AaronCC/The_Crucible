@@ -32,10 +32,10 @@ void SoundManager::mute() {
 void SoundManager::playSound(const std::string & sound)
 {
 	if (isMute) return;
-	if (sCount > max_sCount) return;
-	sCount++;
 	effects[e_at].setBuffer(sounds.at(sound));
+	effects[e_at].setVolume(100 - (sCount * 50));	
 	effects[e_at].play();
+	sCount++;
 	e_at++;
 	e_at = e_at == e_count ? 0 : e_at;
 }

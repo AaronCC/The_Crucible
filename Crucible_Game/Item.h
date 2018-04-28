@@ -30,10 +30,24 @@ public:
 	struct BaseItem {
 		SlotType t;
 		bool twoh;
-		std::string id;
+		char* id;
+		int init_af;
+		int init_v1, init_v2;
 		std::map<AF, AFV> aff;
-		void addAff(AF a, AFV av) { aff[a] = av; }
-		BaseItem(SlotType t, std::string id, bool twoh) :t(t), id(id), twoh(twoh) {}
+		void addAff(AF a, AFV av) {
+			if (aff.size() == 0)
+			{
+				init_v1 = av.v1;
+				init_v2 = av.v2;
+				init_af = (int)a;
+			}
+			aff[a] = av;
+		}
+		BaseItem(SlotType t, char* id, bool twoh) :t(t), id(id), twoh(twoh) {
+			init_v1 = -1;
+			init_v2 = -1;
+			init_af = 0;
+		}
 		BaseItem() :
 			t(SlotType::AMU),
 			id("") {}
@@ -134,7 +148,7 @@ public:
 		this->base = base;
 		this->rarity = rarity;
 		this->twoHanded = base.twoh;
-		updateBaseVals();		
+		updateBaseVals();
 		std::string pre = "", suf = "";
 		if (rarity == Item::Rarity::MAGIC || rarity == Item::Rarity::NORM)
 		{
@@ -204,12 +218,12 @@ public:
 
 		std::vector<std::pair<sf::Color, std::string>> buffStr;
 		buffStr.push_back({ sf::Color::White, getDesc() });
-	/*	if (ability->info.range == 0)
-			buffStr.push_back({ sf::Color::White, "Buff" });
-		else if (ability->info.range == 1)
-			buffStr.push_back({ sf::Color::White, "Melee" });
-		else
-			buffStr.push_back({ sf::Color::White, "Ranged" });*/
+		/*	if (ability->info.range == 0)
+				buffStr.push_back({ sf::Color::White, "Buff" });
+			else if (ability->info.range == 1)
+				buffStr.push_back({ sf::Color::White, "Melee" });
+			else
+				buffStr.push_back({ sf::Color::White, "Ranged" });*/
 		std::vector<AbEffect::Effect> effs = ability->getEffects();
 		//float cd = 
 		buffStr.push_back({ sf::Color::White, "Range: " + std::to_string(ability->info.range) });

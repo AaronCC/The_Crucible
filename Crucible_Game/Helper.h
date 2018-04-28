@@ -11,8 +11,9 @@
 class Helper
 {
 public:
-	
+
 	static const int numbuffs = 21;
+
 	std::string buffnames[numbuffs] = {
 		"bonus health",
 		"fire damage",
@@ -42,6 +43,7 @@ public:
 		float result = (m * (x / mod)) + b;
 		return result;
 	}
+
 	static const int numpreprefixes = 10;
 	std::string inamePrePrefixes[10] = {
 		"Pain",
@@ -76,6 +78,53 @@ public:
 	damageColors[AbEffect::DamageType::POIS] = sf::Color({ 131, 211, 69 });*/
 	std::pair<int, int> sRange = std::pair<int, int>{ 0,9 };
 	std::pair<int, int> pRange = std::pair<int, int>{ 10,20 };
+	char* c_buffnames[numbuffs] = {
+		"bonus health",
+		"fire damage",
+		"cold damage",
+		"lightning damage",
+		"poison damage",
+		"physical damage",
+		"% fire resistance",
+		"% lightning resistance",
+		"% cold resistance",
+		"% poison resistance",
+		"% global fire damage",
+		"% global cold damage",
+		"% global lightning damage",
+		"% global poison damage",
+		"% weapon physical damage",
+		"% global physical damage",
+		"armor rating",
+		"agility",
+		"defense",
+		"knowledge",
+		"attack"
+	};
+	char* c_suffix_buffnames[10] = {
+		"bonus health",
+		"fire damage",
+		"cold damage",
+		"lightning damage",
+		"poison damage",
+		"physical damage",
+		"% fire resistance",
+		"% lightning resistance",
+		"% cold resistance",
+		"% poison resistance" };
+	char* c_prefix_buffnames[11] = {
+		"% global fire damage",
+		"% global cold damage",
+		"% global lightning damage",
+		"% global poison damage",
+		"% weapon physical damage",
+		"% global physical damage",
+		"armor rating",
+		"agility",
+		"defense",
+		"knowledge",
+		"attack"
+	};
 	enum Affix {
 		//SUFFIX
 		HEALTH,
@@ -83,7 +132,7 @@ public:
 		COLD_FLT_DMG,
 		LGHT_FLT_DMG,
 		POIS_FLT_DMG,
-		PHYS_FLT_DMG, 
+		PHYS_FLT_DMG,
 		FIRE_RES,
 		LGHT_RES,
 		COLD_RES,
@@ -100,6 +149,30 @@ public:
 		DEF,
 		KNO,
 		ATK // 19
+	};
+	std::map<Affix, bool> isDamage = {
+		{ HEALTH,false },
+		{ FIRE_FLT_DMG,true },
+		{ COLD_FLT_DMG,true },
+		{ LGHT_FLT_DMG,true },
+		{ POIS_FLT_DMG,true },
+		{ PHYS_FLT_DMG,true },
+		{ FIRE_RES,false },
+		{ LGHT_RES,false },
+		{ COLD_RES,false },
+		{ POIS_RES,false },
+	//PREFIX
+		{ FIRE_PRC_DMG,false },
+		{ COLD_PRC_DMG,false },
+		{ LGHT_PRC_DMG,false },
+		{ POIS_PRC_DMG,false },
+		{ PHYS_PRC_L_DMG,false },
+		{ PHYS_PRC_G_DMG,false },
+		{ ARM_RAT,false },
+		{ AGI,false },
+		{ DEF,false },
+		{ KNO,false },
+		{ ATK,false }
 	};
 	float getAgiMod(int agi);
 	float getKnoMod(int kno);
@@ -133,7 +206,7 @@ public:
 		std::string id;
 		bool pre;
 		bool local;
-		
+
 		sf::Color color;
 		std::string getStr() {
 			if (v1 != -1)

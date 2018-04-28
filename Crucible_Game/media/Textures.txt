@@ -4,6 +4,7 @@ cave media/ground_cave.png
 walktest media/walktest.png
 button media/button.png
 beginbutton media/beginbutton.png
+editorbutton media/editorbutton.png
 globe media/globe.png
 life_globe media/life_globe.png
 slash media/slash.png

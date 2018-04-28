@@ -10,6 +10,10 @@
 #include <iostream>
 #include <fstream>
 #include <sstream>
+#include <string.h>
+#include <assert.h>
+#include <Windows.h>
+#include "dirent.h"
 
 #define BaseItem Item::BaseItem
 #define ST Item::SlotType
@@ -19,6 +23,30 @@
 class ItemGenerator
 {
 public:
+	std::vector<std::string> filePaths;
+	std::string dir_path = "media/data/";
+	void getFilePaths() {
+		filePaths.clear();
+		DIR *dir;
+		struct dirent *ent;
+		if ((dir = opendir("media/data/")) != NULL) {
+			/* print all the files and directories within directory */
+			while ((ent = readdir(dir)) != NULL) {
+				if (ent->d_name[0] != '.')
+					filePaths.push_back(ent->d_name);
+			}
+			closedir(dir);
+		} 
+		else {
+			/* could not open directory */
+			perror("");
+		}
+	}
+	void writeFile(std::string file) {
+		std::ofstream newFile(dir_path + file + ".txt");
+		newFile.close();
+	}
+
 	Game * game;
 	static const int numEfType = 4;
 	static const int MAX_ILVL = 100;
@@ -33,7 +61,19 @@ public:
 		AbBase(std::string tn, std::string in, std::string desc, std::string n, Animation anim, int cd, int tc, int area, float mult) :
 			texName(tn), iconName(in), description(desc), name(n), anim(anim), cd(cd), tc(tc), area(area), mult(mult) {}
 	};
+	struct AfBase {
+		//; type range offset aftype local dtype
+		int range;
+		int offset;
+		int dtype;
+		bool local;
+		AfBase(int range, int offset, int dtype, bool local) :
+			range(range), offset(offset), dtype(dtype), local(local) {
 
+		}
+		AfBase() {}
+	};
+	std::map<AF, AfBase> afBases;
 	int getRand_100() {
 		std::random_device rd;
 		std::mt19937 gen(rd());
@@ -57,6 +97,8 @@ public:
 	std::map<AF, std::vector<std::pair<AFV, int>>> suffixes;
 	std::map<AF, std::vector<std::pair<AFV, int>>> prefixes;
 
+	std::map<AF, std::vector<char*>> nameTable;
+
 	void addSuffix(AF af, AFV afv, int ilvl) {
 		suffixes[af].push_back({ afv,ilvl });
 	}
@@ -67,7 +109,7 @@ public:
 		abAffixes[type].push_back({ ef ,ilvl });
 	}
 
-	bool parseSuffix(std::vector<std::string> names, std::vector<std::string> data)
+	bool parseSuffix(std::vector<const char*> names, std::vector<std::string> data)
 	{
 		bool p = false;
 		Helper helper;
@@ -87,6 +129,11 @@ public:
 		ss = std::stringstream(data[4]);
 		ss >> dType_I;
 		AF af = (AF)af_I;
+		afBases[af] = { range,off,dType_I,(bool)local_I };
+		for (int i = 0; i < names.size(); i++)
+		{
+			nameTable[af].push_back(_strdup(names[i]));
+		}
 		bool l = (bool)local_I;
 		DMG dtype = (DMG)dType_I;
 		sf::Color c = helper.damageColors[dtype];
@@ -105,7 +152,7 @@ public:
 			addSuffix(af_afv.first, af_afv.second.first, af_afv.second.second);
 		return true;
 	}
-	bool parsePrefix(std::vector<std::string> names, std::vector<std::string> data)
+	bool parsePrefix(std::vector<const char*> names, std::vector<std::string> data)
 	{
 		bool p = true;
 		Helper helper;
@@ -125,6 +172,11 @@ public:
 		ss = std::stringstream(data[4]);
 		ss >> dType_I;
 		AF af = (AF)af_I;
+		afBases[af] = { range,off,dType_I,(bool)local_I };
+		for (int i = 0; i < names.size(); i++)
+		{
+			nameTable[af].push_back(_strdup(names[i]));
+		}
 		bool l = (bool)local_I;
 		DMG dtype = (DMG)dType_I;
 		sf::Color c = helper.damageColors[dtype];
@@ -163,6 +215,7 @@ public:
 			i++;
 		}
 		name += data[i].substr(0, data[i].size() - 1);
+		char* c_name = _strdup(name.c_str());
 		ss = std::stringstream(data[i + 1]);
 		ss >> a1;
 		ss = std::stringstream(data[i + 2]);
@@ -180,7 +233,7 @@ public:
 		sf::Color c = helper.damageColors[dtype];
 		AFV afv = { a1, a2, "Base", true, c, local };
 		AF af = (AF)afInt;
-		BaseItem* bi = new BaseItem(type, name, twoh);
+		BaseItem* bi = new BaseItem(type, c_name, twoh);
 		bi->addAff(af, afv);
 		bases[type].push_back({ ilvl,*bi });
 		return true;
@@ -294,7 +347,7 @@ public:
 			stats.buffs[(AF)af] = AFV{ afv,-1,"",true,sf::Color::White,false };
 		}
 		else
-			i = 0;	
+			i = 0;
 		ss = std::stringstream(data[i + 1]);
 		ss >> dmgtype;
 		ss = std::stringstream(data[i + 2]);
@@ -321,9 +374,28 @@ public:
 		}
 		return false;
 	}
-	void loadAffixes() {
+
+	void exportAffixes(std::string fileName) {
+		std::ofstream newFile(dir_path + fileName);
+
+
+
+		newFile.close();
+	}
+
+	void loadAffixes(std::string fileName) {
+
+		nameTable.clear();
+		afBases.clear();
+		abBases.clear();
+		e_abBases.clear();
+		bases.clear();
+		abAffixes.clear();
+		suffixes.clear();
+		prefixes.clear();
+
 		std::string line;
-		std::ifstream texFile("media/Affixes.txt");
+		std::ifstream texFile(dir_path + fileName);
 		enum Parsing {
 			SUF,
 			PRE,
@@ -338,7 +410,7 @@ public:
 		Parsing parsing = Parsing::NA;
 		if (texFile.is_open())
 		{
-			std::vector<std::string> names{};
+			std::vector<const char*> names{};
 			while (std::getline(texFile, line))
 			{
 				std::istringstream iss(line);
@@ -354,7 +426,10 @@ public:
 				if (type == (int)NAMES)
 				{
 					results.erase(results.begin());
-					names = results;
+					for (int i = 0; i < results.size(); i++)
+					{
+						names.push_back(_strdup(results[i].c_str()));
+					}
 					continue;
 				}
 				if (type == 0)
@@ -374,10 +449,12 @@ public:
 				{
 				case Parsing::SUF:
 					parseSuffix(names, results);
+					names.clear();
 					std::cout << "\nadded suffix";
 					break;
 				case Parsing::PRE:
 					parsePrefix(names, results);
+					names.clear();
 					std::cout << "\nadded prefix";
 					break;
 				case Parsing::BAS:
@@ -411,7 +488,6 @@ public:
 	{
 		Helper helper;
 		this->game = game;
-		loadAffixes();
 
 		afTypeExMap[AF::HEALTH] = { 2 };
 		afTypeExMap[AF::FIRE_FLT_DMG] = { 0,1,3,4,5,6,7,8 };
@@ -426,6 +502,8 @@ public:
 		afTypeExMap[AF::PHYS_PRC_L_DMG] = { 0,1,3,4,5,6,7,8 };
 		afTypeExMap[AF::ARM_RAT] = { 2,4,5 };
 
+		getFilePaths();
+		loadAffixes(filePaths[0]);
 		//BaseItem* itm = new BaseItem(ST::MAH, "Elegant Sword");
 		/*itm->addAff(AF::PHYS_FLT_DMG, { 1, 5, "Base", true, helper.damageColors[DMG::PHYS],true });
 		bases[ST::MAH].push_back({ 0,*itm });*/

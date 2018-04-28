@@ -17,7 +17,7 @@ private:
 	std::string lastPlayed;
 	const int e_count = 4;
 	int sCount = 0;
-	const int max_sCount = 4;
+	const int max_sCount = 3;
 public:
 	bool isMute = false;
 	void clearSounds() { sCount = 0; }
