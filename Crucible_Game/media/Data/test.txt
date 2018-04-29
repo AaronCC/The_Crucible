@@ -86,14 +86,20 @@
 2 7 0 Silk Ribbon; 10 -1 1 10 0 0
 2 7 0 Iron Girdle; 10 -1 0 15 0 0
 2 7 0 Stained Sash; 10 -1 4 13 0 0
+3 0 1 4 3 1
+3 0 2 2 5 1
+3 0 3 10 1 1
+3 0 4 2 1 4
 3 0 0 3 4 1
-3 0 4 2 1 1
 3 1 1 16 5; 5 0 0 10
+3 1 1 17 5; 5 0 0 10
+3 1 1 18 5; 5 0 0 10
+3 1 1 19 5; 5 0 0 10
 4 slash slash_icon Targeted quick attack; Blue Slash; 0 3 6 1 0 1.000000
 4 slash2 slash_icon2 Targeted heavy attack; Red Slash; 0 3 15 1 0 1.500000
 4 poison poison_icon Weak area attack; Cloud; 0 3 9 1 3 1.000000
 4 spiral spiral_icon Weak line attack; Spiral; 0 3 9 1 1 1.000000
-4 slash slash_icon Targeted quick attack; Blue Slash; 0 3 1 3 1 1.500000
-4 slash2 slash_icon2 Targeted heavy attack; Red Slash; 0 3 1 4 1 2.000000
-4 poison poison_icon Weak area attack; Cloud; 0 3 1 2 1 1.000000
-4 spiral spiral_icon Weak line attack; Spiral; 0 3 1 1 1 0.300000
+5 slash slash_icon Targeted quick attack; Blue Slash; 0 3 1 3 1 1.500000
+5 slash2 slash_icon2 Targeted heavy attack; Red Slash; 0 3 1 4 1 2.000000
+5 poison poison_icon Weak area attack; Cloud; 0 3 1 2 1 1.000000
+5 spiral spiral_icon Weak line attack; Spiral; 0 3 1 1 1 0.300000

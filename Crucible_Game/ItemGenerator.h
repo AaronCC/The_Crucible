@@ -74,11 +74,24 @@ public:
 		bool local;
 		AfBase(int range, int offset, int dtype, bool local) :
 			range(range), offset(offset), dtype(dtype), local(local) {
-
 		}
 		AfBase() {}
 	};
+	struct AbAfBase {
+		//; type range offset aftype local dtype
+		int range = 0;
+		int offset = 0;
+		int dtype;
+		int dur;
+		bool local;
+		Helper::Stats stats;
+		AbAfBase(Helper::Stats stats,int range, int offset, int dtype, bool local, int dur) :
+			range(range), offset(offset), dtype(dtype), local(local), stats(stats), dur(dur) {
+		}
+		AbAfBase() {}
+	};
 	std::map<AF, AfBase> afBases;
+	std::map<AF, AbAfBase> ab_afBases;
 	int getRand_100() {
 		std::random_device rd;
 		std::mt19937 gen(rd());
@@ -327,14 +340,14 @@ public:
 	{
 		bool hasStats;
 		bool buff;
-		int dmgtype, v1, v2, dur, ilvl = 0, b, i = 2, range, off;
+		int dmgtype, v1, v2, dur, ilvl = 0, b, i = 2, range, off, af;
 		std::stringstream ss(data[0]);
 		ss >> b;
 		hasStats = (bool)b;
 		Helper::Stats stats{};
 		if (hasStats)
 		{
-			int af, afv;
+			int afv;
 			ss = std::stringstream(data[1]);
 			ss >> b;
 			buff = (bool)b;
@@ -353,17 +366,23 @@ public:
 			ss = std::stringstream(data[i]);
 			ss >> afv;
 			stats.buffs[(AF)af] = AFV{ afv,-1,"",true,sf::Color::White,false };
+			ss = std::stringstream(data[i + 1]);
+			ss >> dmgtype;
 		}
 		else
+		{
 			i = 0;
-		ss = std::stringstream(data[i + 1]);
-		ss >> dmgtype;
-		ss = std::stringstream(data[i + 2]);
+			ss = std::stringstream(data[i + 1]);
+			ss >> dmgtype;
+			af = (int)helper.dTypeAffixTable[dmgtype];
+		}
+   		ss = std::stringstream(data[i + 2]);
 		ss >> range;
 		ss = std::stringstream(data[i + 3]);
 		ss >> off;
 		ss = std::stringstream(data[i + 4]);
 		ss >> dur;
+		ab_afBases[(AF)af] = { stats, range,off,dmgtype,false,dur };
 		while (ilvl <= MAX_ILVL)
 		{
 			v1 = off + (off*ilvl);

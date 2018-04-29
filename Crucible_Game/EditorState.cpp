@@ -178,6 +178,100 @@ void EditorState::update(const float dt)
 			ImGui::PopID();
 		}
 	}
+	else if (editing == AE_BASE)
+	{
+		static int abase_at = 0;
+		static int anim_at = 0;
+		static int icon_at = 0;
+		std::vector<std::string> abaseNames;
+		std::vector<std::string> texNames = game->texmgr.getNames();
+		std::string texName;
+		for (int i = 0; i < iGen.e_abBases.size(); i++)
+		{
+			abaseNames.push_back(iGen.e_abBases[i].name);
+		}
+		ImGui::_ListBox("Ability Base", &abase_at, abaseNames);
+		if (ImGui::Button("New Base")) {
+			char* desc = "NULL";
+			char* name = "NULL";
+			iGen.e_abBases.push_back(ItemGenerator::AbBase("NULL","NULL", desc, name, Animation(0,0,0),0,0,0,0.f));
+		}
+		if (iGen.e_abBases.size() > abase_at)
+		{
+			ItemGenerator::AbBase& aBase = iGen.e_abBases[abase_at];
+			if (abase_at != old_abase_at)
+			{
+				int i = 0;
+				for (auto texName : texNames)
+				{
+					if (texName == aBase.texName) {
+						anim_at = i;
+					}
+					else if (texName == aBase.iconName) {
+						icon_at = i;
+					}
+					i++;
+				}
+				old_abase_at = abase_at;
+			}
+			sf::Vector2u anim_size, icon_size;
+			sf::Sprite sprite;
+			if (ImGui::CollapsingHeader("Animation"))
+			{
+				ImGui::_ListBox("Animation", &anim_at, texNames);
+				texName = texNames[anim_at];
+				iGen.e_abBases[abase_at].texName = texName;
+				sf::Texture& anim_tex = game->texmgr.getRef(texName);
+				anim_size = anim_tex.getSize();
+				if (anim_size.y != 32)
+				{
+					ImGui::Text("Texture must be 32px high.");
+				}
+				else
+				{
+					sprite.setTexture(anim_tex);
+					sprite.setTextureRect({ 0,0, (int)anim_size.x,32 });
+					ImGui::Image(sprite);
+				}
+				char* w = _strdup(("Width:" + std::to_string((int)anim_size.x)).c_str());
+				char* h = _strdup(("Height:" + std::to_string((int)anim_size.y)).c_str());
+				ImGui::Text(w);
+				ImGui::SameLine();
+				ImGui::Text(h);
+			}
+			if (ImGui::CollapsingHeader("Icon"))
+			{
+				ImGui::_ListBox("Icon", &icon_at, texNames);
+				texName = iGen.e_abBases[abase_at].iconName = texNames[icon_at];
+
+				sf::Texture& icon_tex = game->texmgr.getRef(texName);
+				icon_size = icon_tex.getSize();
+				if (icon_size.y != 32 || icon_size.x != 32)
+				{
+					ImGui::Text("Texture must be 32x32 px.");
+				}
+				else
+				{
+					sprite.setTexture(icon_tex);
+					sprite.setTextureRect({ 0,0, (int)icon_size.x,32 });
+					ImGui::Image(sprite);
+				}
+				char* w = _strdup(("Width:" + std::to_string((int)icon_size.x)).c_str());
+				char* h = _strdup(("Height:" + std::to_string((int)icon_size.y)).c_str());
+				ImGui::Text(w);
+				ImGui::SameLine();
+				ImGui::Text(h);
+			}
+			ImGui::InputText("Description", aBase.description, IM_ARRAYSIZE(aBase.description));
+			ImGui::InputText("Name##257", aBase.name, IM_ARRAYSIZE(aBase.description));
+			//ImGui::InputInt("Cooldown", &aBase.cd);
+			ImGui::InputInt("Cast Time", &aBase.tc);
+			ImGui::InputFloat("Multiplier##258", &aBase.mult);
+			ImGui::_ListBox("Area Type", &aBase.area, helper.areaNames);
+			aBase.anim.startFrame = 0;
+			aBase.anim.endFrame = (int)(anim_size.x / 32);
+		}
+	}
 	else if (editing == A_BASE)
 	{
 		static int abase_at = 0;
@@ -190,79 +284,87 @@ void EditorState::update(const float dt)
 		{
 			abaseNames.push_back(iGen.abBases[i].name);
 		}
-		ImGui::_ListBox("Ability Base", &abase_at, abaseNames);
-		ItemGenerator::AbBase& aBase = iGen.abBases[abase_at];
-		if (abase_at != old_abase_at)
+		ImGui::_ListBox("Ability Base", &abase_at, abaseNames);		
+		if (ImGui::Button("New Base")) {
+			char* desc = "NULL";
+			char* name = "NULL";
+			iGen.abBases.push_back(ItemGenerator::AbBase("NULL", "NULL", desc, name, Animation(0, 0, 0), 0, 0, 0, 0.f));
+		}
+		if (iGen.abBases.size() > abase_at)
 		{
-			int i = 0;
-			for (auto texName : texNames)
+			ItemGenerator::AbBase& aBase = iGen.abBases[abase_at];
+			if (abase_at != old_abase_at)
 			{
-				if (texName == aBase.texName) {
-					anim_at = i;
+				int i = 0;
+				for (auto texName : texNames)
+				{
+					if (texName == aBase.texName) {
+						anim_at = i;
+					}
+					else if (texName == aBase.iconName) {
+						icon_at = i;
+					}
+					i++;
 				}
-				else if (texName == aBase.iconName) {
-					icon_at = i;
+				old_abase_at = abase_at;
+			}
+			sf::Vector2u anim_size, icon_size;
+			sf::Sprite sprite;
+			if (ImGui::CollapsingHeader("Animation"))
+			{
+				ImGui::_ListBox("Animation", &anim_at, texNames);
+				texName = iGen.abBases[abase_at].texName = texNames[anim_at];
+
+				sf::Texture& anim_tex = game->texmgr.getRef(texName);
+				anim_size = anim_tex.getSize();
+				if (anim_size.y != 32)
+				{
+					ImGui::Text("Texture must be 32px high.");
 				}
-				i++;
+				else
+				{
+					sprite.setTexture(anim_tex);
+					sprite.setTextureRect({ 0,0, (int)anim_size.x,32 });
+					ImGui::Image(sprite);
+				}
+				char* w = _strdup(("Width:" + std::to_string((int)anim_size.x)).c_str());
+				char* h = _strdup(("Height:" + std::to_string((int)anim_size.y)).c_str());
+				ImGui::Text(w);
+				ImGui::SameLine();
+				ImGui::Text(h);
 			}
-			old_abase_at = abase_at;
-		}
-		sf::Vector2u anim_size, icon_size;
-		sf::Sprite sprite;
-		if (ImGui::CollapsingHeader("Animation"))
-		{
-			ImGui::_ListBox("Animation", &anim_at, texNames);
-			texName = iGen.abBases[abase_at].texName = texNames[anim_at];
+			if (ImGui::CollapsingHeader("Icon"))
+			{
+				ImGui::_ListBox("Icon", &icon_at, texNames);
+				texName = iGen.abBases[abase_at].iconName = texNames[icon_at];
 
-			sf::Texture& anim_tex = game->texmgr.getRef(texName);
-			anim_size = anim_tex.getSize();
-			if (anim_size.y > 32)
-			{
-				ImGui::Text("Texture exceeds 32px height limit.");
+				sf::Texture& icon_tex = game->texmgr.getRef(texName);
+				icon_size = icon_tex.getSize();
+				if (icon_size.y != 32 || icon_size.x != 32)
+				{
+					ImGui::Text("Texture must be 32x32 px.");
+				}
+				else
+				{
+					sprite.setTexture(icon_tex);
+					sprite.setTextureRect({ 0,0, (int)icon_size.x,32 });
+					ImGui::Image(sprite);
+				}
+				char* w = _strdup(("Width:" + std::to_string((int)icon_size.x)).c_str());
+				char* h = _strdup(("Height:" + std::to_string((int)icon_size.y)).c_str());
+				ImGui::Text(w);
+				ImGui::SameLine();
+				ImGui::Text(h);
 			}
-			else
-			{
-				sprite.setTexture(anim_tex);
-				sprite.setTextureRect({ 0,0, (int)anim_size.x,32 });
-				ImGui::Image(sprite);
-			}
-			char* w = _strdup(("Width:" + std::to_string((int)anim_size.x)).c_str());
-			char* h = _strdup(("Height:" + std::to_string((int)anim_size.y)).c_str());
-			ImGui::Text(w);
-			ImGui::SameLine();
-			ImGui::Text(h);
+			ImGui::InputText("Description", aBase.description, IM_ARRAYSIZE(aBase.description));
+			ImGui::InputText("Name##257", aBase.name, IM_ARRAYSIZE(aBase.description));
+			ImGui::InputInt("Cooldown", &aBase.cd);
+			ImGui::InputInt("Cast Time", &aBase.tc);
+			ImGui::InputFloat("Multiplier##258", &aBase.mult);
+			ImGui::_ListBox("Area Type", &aBase.area, helper.areaNames);
+			aBase.anim.startFrame = 0;
+			aBase.anim.endFrame = (int)(anim_size.x / 32);
 		}
-		if (ImGui::CollapsingHeader("Icon"))
-		{
-			ImGui::_ListBox("Icon", &icon_at, texNames);
-			texName = iGen.abBases[abase_at].iconName = texNames[icon_at];
-
-			sf::Texture& icon_tex = game->texmgr.getRef(texName);
-			icon_size = icon_tex.getSize();
-			if (icon_size.y > 32 || icon_size.x > 32)
-			{
-				ImGui::Text("Texture Exceeds 32px size limit.");
-			}
-			else
-			{
-				sprite.setTexture(icon_tex);
-				sprite.setTextureRect({ 0,0, (int)icon_size.x,32 });
-				ImGui::Image(sprite);
-			}
-			char* w = _strdup(("Width:" + std::to_string((int)icon_size.x)).c_str());
-			char* h = _strdup(("Height:" + std::to_string((int)icon_size.y)).c_str());
-			ImGui::Text(w);
-			ImGui::SameLine();
-			ImGui::Text(h);
-		}
-		ImGui::InputText("Description", aBase.description, IM_ARRAYSIZE(aBase.description));
-		ImGui::InputText("Name##257", aBase.name, IM_ARRAYSIZE(aBase.description));
-		ImGui::InputInt("Cooldown", &aBase.cd);
-		ImGui::InputInt("Cast Time", &aBase.tc);
-		ImGui::InputFloat("Multiplier##258", &aBase.mult);
-		ImGui::_ListBox("Area Type", &aBase.area, helper.areaNames);
-		aBase.anim.startFrame = 0;
-		aBase.anim.endFrame = (int)(anim_size.x / 32);
 	}
 	old_file = file_int;
 	ImGui::End(); // end window

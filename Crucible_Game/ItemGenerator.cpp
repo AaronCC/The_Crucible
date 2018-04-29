@@ -79,16 +79,10 @@ void ItemGenerator::exportAffixes(std::string fileName)
 		}
 	}
 	out = "";
-	for (auto af : abAffixes)
+	for (auto base : ab_afBases)
 	{
-		std::pair<AbEffect::Effect, int> af_ilvl = af.second[0];
-		AbEffect::Effect eff = af_ilvl.first;
-		int ilvl = af_ilvl.second, hasStats = 0;
-		std::map<AF, AFV> afBuffs = eff.stats.getActiveBuffs();
-		if (afBuffs.size() > 0)
-		{
-			hasStats = 1;
-		}
+		int hasStats = helper.isDamage[base.first].first ? 0 : 1;
+		std::map<AF,AFV> afBuffs = base.second.stats.getActiveBuffs();
 		out = "3 " + std::to_string(hasStats);
 		if (hasStats == 1)
 		{
@@ -99,13 +93,14 @@ void ItemGenerator::exportAffixes(std::string fileName)
 					std::to_string(afBuff.second.v1) + "; ";
 			}
 			out += "5 0 0 10\n";
-
 		}
 		else
 		{
-			out += " " + std::to_string((int)eff.damage.type) + " " +
-				std::to_string(eff.damage.max - eff.damage.min) + " " +
-				std::to_string(eff.damage.min) + " 1\n";
+			out += " " + 
+				std::to_string(base.second.dtype) + " " +
+				std::to_string(base.second.range) + " " +
+				std::to_string(base.second.offset) + " " +
+				std::to_string(base.second.dur) + "\n";
 		}
 		newFile << out;
 	}

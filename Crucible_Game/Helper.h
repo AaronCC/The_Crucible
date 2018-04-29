@@ -149,6 +149,13 @@ public:
 		KNO,
 		ATK // 19
 	};
+	std::map<int, Affix> dTypeAffixTable = {
+		{ 0, PHYS_FLT_DMG },
+		{ 1, FIRE_FLT_DMG },
+		{ 2, COLD_FLT_DMG },
+		{ 3, LGHT_FLT_DMG },
+		{ 4, POIS_FLT_DMG }
+	};
 	std::vector<std::string> areaNames = { "Single Target", "Line", "Square", "Circle" };
 	std::map < Affix, std::pair<bool, int> > isDamage = {
 		{ HEALTH,{false,5} },
