@@ -11,6 +11,7 @@ private:
 	sf::Clock deltaClock;
 
 	int old_mode;
+	int old_abase_at = -1;
 	int old_file;
 	ItemGenerator iGen;
 	Helper helper;

@@ -31,6 +31,124 @@ Item::Rarity ItemGenerator::getRarity(float mf)
 	}
 	return rarity;
 }
+void ItemGenerator::exportAffixes(std::string fileName)
+{
+	std::string out;
+	std::ofstream newFile(dir_path + fileName, std::ofstream::trunc);
+
+	for (auto base : afBases)
+	{
+		std::string names = "6 ";
+		for (auto name : nameTable[base.first])
+		{
+			names += name + " ";
+		}
+		names += "\n";
+		AfBase afb = base.second;
+
+		int local = afb.local ? 1 : 0;
+		out = "0 " +
+			std::to_string(afb.range) + " " +
+			std::to_string(afb.offset) + " " +
+			std::to_string((int)base.first) + " " +
+			std::to_string((int)afb.local) + " " +
+			std::to_string(local) + "\n";
+		newFile << names;
+		newFile << out;
+	}
+	out = "";
+	for (int slot_type = 0; slot_type < Item::SlotType::SCR; slot_type++)
+	{
+		for (auto base : bases[(Item::SlotType)slot_type])
+		{
+			int ilvl = base.first;
+			BaseItem bi = base.second;
+			int dType = helper.isDamage[(AF)bi.init_af].second;
+			int isDamage = (int)helper.isDamage[(AF)bi.init_af].first;
+			out = "2 " +
+				std::to_string(slot_type) + " " +
+				std::to_string(bi.twoh) + " " +
+				bi.id + "; " +
+				std::to_string(bi.init_v1) + " " +
+				std::to_string(bi.init_v2) + " " +
+				std::to_string(dType) + " " +
+				std::to_string(bi.init_af) + " " +
+				std::to_string(isDamage) + " " +
+				std::to_string(ilvl) + "\n";
+			newFile << out;
+		}
+	}
+	out = "";
+	for (auto af : abAffixes)
+	{
+		std::pair<AbEffect::Effect, int> af_ilvl = af.second[0];
+		AbEffect::Effect eff = af_ilvl.first;
+		int ilvl = af_ilvl.second, hasStats = 0;
+		std::map<AF, AFV> afBuffs = eff.stats.getActiveBuffs();
+		if (afBuffs.size() > 0)
+		{
+			hasStats = 1;
+		}
+		out = "3 " + std::to_string(hasStats);
+		if (hasStats == 1)
+		{
+			out += " 1 ";
+			for (auto afBuff : afBuffs)
+			{
+				out += std::to_string((int)afBuff.first) + " " +
+					std::to_string(afBuff.second.v1) + "; ";
+			}
+			out += "5 0 0 10\n";
+
+		}
+		else
+		{
+			out += " " + std::to_string((int)eff.damage.type) + " " +
+				std::to_string(eff.damage.max - eff.damage.min) + " " +
+				std::to_string(eff.damage.min) + " 1\n";
+		}
+		newFile << out;
+	}
+	out = "";
+	for (auto ab : abBases)
+	{
+		out = "4 " +
+			ab.texName + " " +
+			ab.iconName + " " +
+			ab.description + "; " +
+			ab.name + "; " +
+			std::to_string(ab.anim.startFrame) + " " +
+			std::to_string(ab.anim.endFrame) + " " +
+			std::to_string(ab.cd) + " " +
+			std::to_string(ab.tc) + " " +
+			std::to_string(ab.area) + " " +
+			std::to_string(ab.mult) + "\n";
+		newFile << out;
+	}
+	out = "";
+	for (auto ab : e_abBases)
+	{
+		out = "5 " +
+			ab.texName + " " +
+			ab.iconName + " " +
+			ab.description + "; " +
+			ab.name + "; " +
+			std::to_string(ab.anim.startFrame) + " " +
+			std::to_string(ab.anim.endFrame) + " " +
+			std::to_string(ab.cd) + " " +
+			std::to_string(ab.tc) + " " +
+			std::to_string(ab.area) + " " +
+			std::to_string(ab.mult) + "\n";
+		newFile << out;
+	}
+	/*nameTable.clear();
+	afBases.clear();
+	abBases.clear();
+	e_abBases.clear();
+	bases.clear();
+	abAffixes.clear();*/
+	newFile.close();
+}
 Scroll* ItemGenerator::makeScroll(int aLvl, float mf)
 {
 	std::random_device rd;

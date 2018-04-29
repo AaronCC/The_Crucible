@@ -36,7 +36,7 @@ public:
 					filePaths.push_back(ent->d_name);
 			}
 			closedir(dir);
-		} 
+		}
 		else {
 			/* could not open directory */
 			perror("");
@@ -48,23 +48,28 @@ public:
 	}
 
 	Game * game;
+	Helper helper;
 	static const int numEfType = 4;
 	static const int MAX_ILVL = 100;
 	struct AbBase {
 		std::string texName;
 		std::string iconName;
-		std::string description;
-		std::string name;
+		char description[255] = "NULL";
+		char name[255] = "NULL";
 		Animation anim;
 		int cd, tc, area;
 		float mult;
-		AbBase(std::string tn, std::string in, std::string desc, std::string n, Animation anim, int cd, int tc, int area, float mult) :
-			texName(tn), iconName(in), description(desc), name(n), anim(anim), cd(cd), tc(tc), area(area), mult(mult) {}
+		AbBase(std::string tn, std::string in, char* desc, char* n, Animation anim, int cd, int tc, int area, float mult) :
+			texName(tn), iconName(in), anim(anim), cd(cd), tc(tc), area(area), mult(mult)
+		{
+			memcpy(this->name, n, sizeof(char) * 255);
+			memcpy(this->description, desc, sizeof(char) * 255);
+		}
 	};
 	struct AfBase {
 		//; type range offset aftype local dtype
-		int range;
-		int offset;
+		int range = 0;
+		int offset = 0;
 		int dtype;
 		bool local;
 		AfBase(int range, int offset, int dtype, bool local) :
@@ -82,6 +87,8 @@ public:
 	}
 	int getRand_0X(int x)
 	{
+		if (x < 0)
+			return 0;
 		std::random_device rd;
 		std::mt19937 gen(rd());
 		std::uniform_int_distribution<> dist(0, x);
@@ -97,7 +104,7 @@ public:
 	std::map<AF, std::vector<std::pair<AFV, int>>> suffixes;
 	std::map<AF, std::vector<std::pair<AFV, int>>> prefixes;
 
-	std::map<AF, std::vector<char*>> nameTable;
+	std::map<AF, std::vector<std::string>> nameTable;
 
 	void addSuffix(AF af, AFV afv, int ilvl) {
 		suffixes[af].push_back({ afv,ilvl });
@@ -112,7 +119,6 @@ public:
 	bool parseSuffix(std::vector<const char*> names, std::vector<std::string> data)
 	{
 		bool p = false;
-		Helper helper;
 		std::stringstream ss;
 		std::vector<std::pair<AF, std::pair<AFV, int>>> afs;
 		int range, off, af_I, local_I, dType_I, v1, v2, ilvl = 0;
@@ -155,7 +161,6 @@ public:
 	bool parsePrefix(std::vector<const char*> names, std::vector<std::string> data)
 	{
 		bool p = true;
-		Helper helper;
 		std::stringstream ss;
 		std::vector<std::pair<AF, std::pair<AFV, int>>> afs;
 		int range, off, af_I, local_I, dType_I, v1, v2, ilvl = 0;
@@ -197,7 +202,6 @@ public:
 	}
 	bool parseBase(std::vector<std::string> data)
 	{
-		Helper helper;
 		std::stringstream ss;
 		int slot = 0;
 		ss = std::stringstream(data[0]);
@@ -272,7 +276,9 @@ public:
 		ss >> area;
 		ss = std::stringstream(data[i + 6]);
 		ss >> mult;
-		e_abBases.push_back(AbBase(texname, iconname, desc, name,
+		char* c_desc = _strdup(desc.c_str());
+		char* c_name = _strdup(name.c_str());
+		e_abBases.push_back(AbBase(texname, iconname, c_desc, c_name,
 			{ aStart,aEnd,0.1f }, cd, ct, area, mult));
 		return false;
 	}
@@ -310,7 +316,9 @@ public:
 		ss >> area;
 		ss = std::stringstream(data[i + 6]);
 		ss >> mult;
-		abBases.push_back(AbBase(texname, iconname, desc, name,
+		char* c_desc = _strdup(desc.c_str());
+		char* c_name = _strdup(name.c_str());
+		abBases.push_back(AbBase(texname, iconname, c_desc, c_name,
 			{ aStart,aEnd,0.1f }, cd, ct, area, mult));
 		return false;
 	}
@@ -375,13 +383,7 @@ public:
 		return false;
 	}
 
-	void exportAffixes(std::string fileName) {
-		std::ofstream newFile(dir_path + fileName);
-
-
-
-		newFile.close();
-	}
+	void exportAffixes(std::string fileName);
 
 	void loadAffixes(std::string fileName) {
 
@@ -406,7 +408,6 @@ public:
 			NAMES,
 			NA
 		};
-		Helper helper;
 		Parsing parsing = Parsing::NA;
 		if (texFile.is_open())
 		{
@@ -486,7 +487,6 @@ public:
 	ItemGenerator() {}
 	ItemGenerator(Game* game)
 	{
-		Helper helper;
 		this->game = game;
 
 		afTypeExMap[AF::HEALTH] = { 2 };

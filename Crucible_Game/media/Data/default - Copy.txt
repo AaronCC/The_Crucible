@@ -1,0 +1,144 @@
+;dtypes { (0)phys, (1)fire, (2)cold, (3)lightning, (4)poison, (5)none }
+;types { (0)suffix||prefix, (2)base, (3)abaff, (4)abbase, (5) e_abBase, (6) names }
+;type range offset aftype local dtype
+;---------------------------------------
+;0 Health
+6 Hearty Wholesome
+0 0 5 0 0 1
+;1 fire damage
+6 Ash Cinders Heat Glow Blaze Flame Pyre Combustion Inferno Conflagration
+0 4 4 1 1 1
+;2 cold damage
+6 Cool Bleak Nipping Frost Freezing Chilling Stinging Frostbite Hypothermia Glacier
+0 2 6 2 1 2
+;3 lightning damage
+6 Sparking Light Voltage Magnetism Galvanism Current Electrocution Lightning Thunder Zeus
+0 10 1 3 1 3
+;4 poison damage
+6 Germs Bacteria Viruses Venom Sickness Plague Corruption Blight Miasma
+0 3 5 4 1 4
+;5 physical damage
+6 Striking Smashing Crushing Weight 
+0 3 5 5 1 0
+;6 % fire resistance
+6 Warmth Heat
+0 0 5 6 0 5
+;7 % lightning resistance
+6 Sparking Shocking
+0 0 5 7 0 5
+;8 % cold resistance
+6 Chill Frost
+0 0 5 8 0 5
+;9 % poison resistance
+6 Sickness Poison
+0 0 5 9 0 5
+;10 % global fire damage
+6 Warm Hot
+0 0 5 10 0 1
+;11 % global cold damage
+6 Cool Bitter
+0 0 5 11 0 2
+;12 % global lightning damage
+6 Sparking Shocking
+0 0 5 12 0 3
+;13 % global poison damage
+6 Sickening Poisonous
+0 0 5 13 0 4
+;14 % local physical damage
+6 Hardened Sharp
+0 0 10 14 1 5
+;15 % global physical damage
+6 Strengthened Swole
+0 0 10 15 0 5
+;16 flat armor rating
+6 Swiss Padded
+0 0 10 16 1 5
+;17 agility
+6 Slow Agile
+0 0 1 17 0 5
+;18 defense
+6 Stitched Welded
+0 0 1 18 0 5
+;19 knowledge
+6 Dumb Novice
+0 0 1 19 0 5
+;20 attack
+6 Weak Lean
+0 0 1 20 0 5
+;HED = 0,BDY = 1,MAH = 2,OFH = 3,RNG = 4,AMU = 5,CLK = 6,BLT = 7,SCR = 8
+;BASE type twoh? name; v1 v2 dType afType local? ilvl
+;Head Bases
+2 0 0 Leather Cowl; 5 -1 5 16 0 0
+2 0 0 Strapped Helm; 8 -1 5 16 0 2
+2 0 0 Dented Barbute; 15 -1 5 16 0 4
+2 0 0 Great Helm; 25 -1 5 16 0 6
+2 0 0 Men-yoroi; 5 -1 5 16 0 8
+2 0 0 Honored Kabuto; 20 -1 5 15 0 10
+;body bases
+2 1 0 Leather Body; 10 -1 5 16 0 0
+2 1 0 Studded Body; 15 -1 5 16 0 2
+2 1 0 Fitted Leather; 25 -1 5 16 0 4
+2 1 0 Old Plate; 40 -1 5 16 0 6
+2 1 0 Ring Mail; 60 -1 5 16 0 8
+2 1 0 Scale Mail; 100 -1 5 16 0 10
+;Weapon Bases
+2 2 0 Rusted Gladius; 1 5 0 5 1 0
+2 2 0 Dull Rapier; 2 7 0 5 1 2
+2 2 0 Charged Rod; 5 30 3 3 1 4
+2 2 0 Dripping Cestus; 15 30 4 4 1 6
+2 2 0 Bladed Torch; 25 40 1 1 1 8
+2 2 0 Honed Scimitar; 50 75 0 5 1 10
+2 2 1 Chipped Claymore; 2 10 0 5 1 0
+2 2 1 Dull Zweihander; 4 14 0 5 1 2
+2 2 1 Heavy Maul; 10 20 0 5 1 4
+2 2 1 Mallet; 20 35 0 5 1 6
+2 2 1 Piledriver; 45 60 0 5 1 8
+2 2 1 Collosal Voulge; 70 100 0 5 1 10
+;Offhand bases
+2 3 0 Leather Shield; 4 -1 5 16 0 0
+2 3 0 Brittle Ancile; 8 -1 5 16 0 2
+;Ring bases
+2 4 0 Ruby Ring; 10 -1 5 6 0 0
+2 4 0 Topaz Ring; 10 -1 5 7 0 0
+2 4 0 Sapphire Ring; 10 -1 5 8 0 0
+2 4 0 Emerald Ring; 10 -1 5 9 0 0
+2 4 0 Iron Ring; 2 4 0 5 1 0
+;Amulet bases
+2 5 0 Collar; 5 -1 5 17 0 0
+2 5 0 Chocker; 5 -1 5 18 0 0
+2 5 0 Locket; 5 -1 5 19 0 0
+2 5 0 Chain; 5 -1 5 20 0 0
+;Cloak bases
+2 6 0 Worn Scarf; 5 -1 5 16 0 0
+2 6 0 Torn Shawl; 8 -1 5 16 0 2
+2 6 0 Wool Cloak; 12 -1 5 16 0 4
+2 6 0 Stiff Pelt; 18 -1 5 16 0 6
+2 6 0 Sturdy Mantle; 30 -1 5 16 0 8
+2 6 0 Iron Pauldrons; 45 -1 5 16 0 10
+;Belt bases
+2 7 0 Leather Cord; 10 -1 5 12 0 0
+2 7 0 Heavy Belt; 10 -1 5 11 0 0
+2 7 0 Silk Ribbon; 10 -1 5 10 0 0
+2 7 0 Iron Girdle; 10 -1 5 15 0 0
+2 7 0 Stained Sash; 10 -1 5 13 0 0
+;Ability Affixes
+;type hasstats? buff? stats{aff afv}; dmgtype range off dur ilvl
+3 0 0 3 4 1
+3 0 1 4 3 1
+3 0 2 2 5 1
+3 0 3 10 1 1
+3 0 4 2 1 4
+3 1 1 16 5; 5 0 0 10
+3 1 1 17 5; 5 0 0 10
+3 1 1 18 5; 5 0 0 10
+3 1 1 19 5; 5 0 0 10
+;texname iconname description name animstart animend cd ct area|-1 multiplier.f
+4 slash slash_icon Targeted quick attack; Blue Slash; 0 3 6 1 0 1
+4 slash2 slash_icon2 Targeted heavy attack; Red Slash; 0 3 15 1 0 1.5
+4 poison poison_icon Weak area attack; Cloud; 0 3 9 1 3 1
+4 spiral spiral_icon Weak line attack; Spiral; 0 3 9 1 1 1
+;ENEMY AB BASES (CD IGNORED // CAST TIME = CD)
+5 slash slash_icon Targeted quick attack; Blue Slash; 0 3 1 3 1 1.5
+5 slash2 slash_icon2 Targeted heavy attack; Red Slash; 0 3 1 4 1 2
+5 poison poison_icon Weak area attack; Cloud; 0 3 1 2 1 1
+5 spiral spiral_icon Weak line attack; Spiral; 0 3 1 1 1 0.3

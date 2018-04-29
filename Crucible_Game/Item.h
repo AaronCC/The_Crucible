@@ -30,7 +30,7 @@ public:
 	struct BaseItem {
 		SlotType t;
 		bool twoh;
-		char* id;
+		char id[255] = "NULL";
 		int init_af;
 		int init_v1, init_v2;
 		std::map<AF, AFV> aff;
@@ -43,10 +43,11 @@ public:
 			}
 			aff[a] = av;
 		}
-		BaseItem(SlotType t, char* id, bool twoh) :t(t), id(id), twoh(twoh) {
+		BaseItem(SlotType t, char* id, bool twoh) :t(t), twoh(twoh) {
 			init_v1 = -1;
 			init_v2 = -1;
 			init_af = 0;
+			memcpy(this->id, id, sizeof(char) * 255);
 		}
 		BaseItem() :
 			t(SlotType::AMU),

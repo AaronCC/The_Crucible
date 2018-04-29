@@ -43,7 +43,6 @@ public:
 		float result = (m * (x / mod)) + b;
 		return result;
 	}
-
 	static const int numpreprefixes = 10;
 	std::string inamePrePrefixes[10] = {
 		"Pain",
@@ -150,29 +149,30 @@ public:
 		KNO,
 		ATK // 19
 	};
-	std::map<Affix, bool> isDamage = {
-		{ HEALTH,false },
-		{ FIRE_FLT_DMG,true },
-		{ COLD_FLT_DMG,true },
-		{ LGHT_FLT_DMG,true },
-		{ POIS_FLT_DMG,true },
-		{ PHYS_FLT_DMG,true },
-		{ FIRE_RES,false },
-		{ LGHT_RES,false },
-		{ COLD_RES,false },
-		{ POIS_RES,false },
-	//PREFIX
-		{ FIRE_PRC_DMG,false },
-		{ COLD_PRC_DMG,false },
-		{ LGHT_PRC_DMG,false },
-		{ POIS_PRC_DMG,false },
-		{ PHYS_PRC_L_DMG,false },
-		{ PHYS_PRC_G_DMG,false },
-		{ ARM_RAT,false },
-		{ AGI,false },
-		{ DEF,false },
-		{ KNO,false },
-		{ ATK,false }
+	std::vector<std::string> areaNames = { "Single Target", "Line", "Square", "Circle" };
+	std::map < Affix, std::pair<bool, int> > isDamage = {
+		{ HEALTH,{false,5} },
+		{ FIRE_FLT_DMG,{true,1} },
+		{ COLD_FLT_DMG,{true,2} },
+		{ LGHT_FLT_DMG,{ true,3 } },
+		{ POIS_FLT_DMG,{ true,4 } },
+		{ PHYS_FLT_DMG,{ true,0 } },
+		{ FIRE_RES,{ false,5 } },
+		{ LGHT_RES,{ false,5 } },
+		{ COLD_RES,{ false,5 } },
+		{ POIS_RES,{ false,5 } },
+		//PREFIX
+			{ FIRE_PRC_DMG,{ false,1 } },
+			{ COLD_PRC_DMG,{ false,2 } },
+			{ LGHT_PRC_DMG,{ false,3 } },
+			{ POIS_PRC_DMG,{ false,4 } },
+			{ PHYS_PRC_L_DMG,{ false,0 } },
+			{ PHYS_PRC_G_DMG,{ false,0 } },
+			{ ARM_RAT,{ false,5 } },
+			{ AGI,{ false,5 } },
+			{ DEF,{ false,5 } },
+			{ KNO,{ false,5 } },
+			{ ATK,{ false,5 } }
 	};
 	float getAgiMod(int agi);
 	float getKnoMod(int kno);
@@ -278,6 +278,15 @@ public:
 		int speed = 1;
 		Stats() {
 			reset();
+		}
+		std::map<Affix, AffVal> getActiveBuffs() {
+			std::map<Affix, AffVal> active;
+			for (auto buff : buffs)
+			{
+				if (buff.second.v1 != -1)
+					active[buff.first] = buff.second;
+			}
+			return active;
 		}
 		void reset()
 		{

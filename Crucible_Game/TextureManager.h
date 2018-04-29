@@ -15,6 +15,13 @@ public:
 
 	sf::Texture& getRef(const std::string& texture);
 
+	std::vector<std::string> getNames() const {
+		std::vector<std::string> names;
+		for (auto tex : textures)
+			names.push_back(tex.first);
+		return names;
+	}
+
 	TextureManager()
 	{
 	}

@@ -187,10 +187,10 @@
     <Text Include="media\Music.txt">
       <Filter>Resource Files</Filter>
     </Text>
-    <Text Include="media\Affixes.txt">
+    <Text Include="media\Enemies.txt">
       <Filter>Resource Files</Filter>
     </Text>
-    <Text Include="media\Enemies.txt">
+    <Text Include="media\Data\default.txt">
       <Filter>Resource Files</Filter>
     </Text>
   </ItemGroup>
