@@ -9,7 +9,7 @@ class EditorState : public GameState
 {
 private:
 	sf::Clock deltaClock;
-
+	bool back = false;
 	int old_mode;
 	int old_abase_at = -1;
 	int old_file;

@@ -32,6 +32,9 @@ void Tile::draw(sf::RenderWindow& window, float dt)
 	if (shrine != NO_SHRINE)
 		window.draw(this->shrineSprite);
 
+	if (hasDebris)
+		window.draw(this->debrisSprite);
+
 	return;
 }
 

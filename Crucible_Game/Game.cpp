@@ -16,8 +16,27 @@ Game::Game()
 	loadSounds();
 	loadFonts();
 	loadTiles();
+	defaultPath = readPath();
 }
 
+void Game::writePath(std::string path)
+{
+	std::ofstream pathFile("media/paths/defaultPath.txt", std::ofstream::trunc);
+	pathFile << path;
+	pathFile.close();
+}
+
+std::string Game::readPath()
+{
+	std::ifstream pathFile("media/paths/defaultPath.txt");
+
+	std::string line;
+	std::getline(pathFile, line);
+
+	pathFile.close();
+	if (line == "")line = "default";
+	return line;
+}
 
 Game::~Game()
 {
@@ -54,7 +73,6 @@ void Game::popState()
 {
 	delete this->states.top();
 	this->states.pop();
-
 	return;
 }
 

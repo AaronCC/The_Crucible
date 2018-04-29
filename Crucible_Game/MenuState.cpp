@@ -4,10 +4,11 @@
 MenuState::MenuState(Game* game)
 {
 	this->game = game;
-	testFont.loadFromFile("C:/Windows/Fonts/Arial.ttf");
-	testText.setFont(testFont);
-	testText.setPosition(200, 200);
-	testText.setString("Crucible Game");
+	pathText.setFont(this->game->fonts["main_font"]);
+	pathText.setPosition({ (float)this->game->windowSize.x / 2 - ((game->defaultPath.size()+4)*7), (float)this->game->windowSize.y / 2 - 128 });
+	pathText.setString("Mode: " + this->game->defaultPath);
+	pathText.setOutlineThickness(1);
+	pathText.setCharacterSize(24);
 	background.setTexture(this->game->texmgr.getRef("mainmenu"));
 	Animation btnAnim(0, 0, 1);
 	buttons = Gui(
@@ -35,11 +36,14 @@ void MenuState::draw(const float dt)
 	this->game->window.setView(this->view);
 	//this->game->window.draw(testText);
 	this->buttons.draw(this->game->window, dt);
+	this->game->window.draw(pathText);
 }
 
 void MenuState::update(const float dt)
 {
 	this->buttons.update(dt);
+	pathText.setPosition({ (float)this->game->windowSize.x / 2 - ((game->defaultPath.size() + 4) * 7), (float)this->game->windowSize.y / 2 - 128 });
+	pathText.setString("Mode: " + this->game->defaultPath);
 }
 
 void MenuState::handleInput()
@@ -51,7 +55,7 @@ void MenuState::handleInput()
 	while (this->game->window.pollEvent(event))
 	{
 		if (loading)
-			return;
+			break;
 		switch (event.type)
 		{
 		case sf::Event::Closed:
@@ -92,5 +96,5 @@ void MenuState::handleInput()
 		default: break;
 		}
 	}
-
+	loading = false;
 }

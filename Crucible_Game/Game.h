@@ -20,6 +20,7 @@ public:
 	const float aspectRatio = 800 / (float)600;
 	const sf::Vector2u windowSize{ 800, 600 };
 	std::stack<GameState*> states;
+	std::string defaultPath;
 
 	std::vector<sf::Text> gameMsgs;
 	void queueMsg(std::string msg);
@@ -44,6 +45,8 @@ public:
 	void gameLoop();
 
 	Game();
+	void writePath(std::string path);
+	std::string readPath();
 	~Game();
 
 private:

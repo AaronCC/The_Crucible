@@ -21,6 +21,7 @@ private:
 	Gui buttons;
 	sf::Font testFont;
 	sf::Text testText;
+	sf::Text pathText;
 	sf::Sprite background;
 };
 

@@ -91,6 +91,17 @@ public:
 	sf::Uint32 unitHeight;
 	sf::Uint32 unitWidth;
 
+	bool hasDebris = false;
+	sf::Sprite debrisSprite;
+	void setDebris(sf::Texture& tex)
+	{
+		hasDebris = true;
+		occupied = true;
+		passable = false;
+		debrisSprite.setTexture(tex);
+		debrisSprite.setOrigin(TILE_SIZE / 2, TILE_SIZE / 2);
+	}
+
 	enum Shrine {
 		HP_SHRINE,
 		STAT_SHRINE,
@@ -165,6 +176,7 @@ public:
 		this->fowSprite.setPosition(roundedPos);
 		this->fowDarkSprite.setPosition(roundedPos);
 		this->shrineSprite.setPosition(roundedPos);
+		this->debrisSprite.setPosition(roundedPos);
 	}
 	void setPosition(sf::Vector2i position, int x, int y) {
 		this->position = position;
@@ -173,6 +185,7 @@ public:
 		this->fowSprite.setPosition(roundedPos);
 		this->fowDarkSprite.setPosition(roundedPos);
 		this->shrineSprite.setPosition(roundedPos);
+		this->debrisSprite.setPosition(roundedPos);
 		this->node.x = x;
 		this->node.y = y;
 		this->node.parent = nullptr;

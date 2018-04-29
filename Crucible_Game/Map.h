@@ -29,6 +29,15 @@ public:
 	std::vector<sf::Text> hoverText;
 	std::vector<sf::Text> actionText;
 
+	struct Debris {
+		bool cluster;
+		bool wall;
+		std::string texName;
+		Debris() {}
+		Debris(bool c, bool w, std::string t) :cluster(c), wall(w), texName(t) {}
+	};
+	std::vector<Debris> debris;
+
 	struct EnemyBase {
 		bool melee;
 		int hp;
@@ -107,13 +116,13 @@ public:
 
 	void Map::loadDungeon();
 
-	void populateCave();
-
-	void populateDungeon();
+	void populateDungeon(bool debris);
 
 	bool spawnShrine(Dungeon::Entity e);
 
 	bool spawnBossGroupInRoom(Dungeon::Entity e);
+
+	bool spawnDebrisInRoom(Dungeon::Entity e);
 
 	bool spawnEnemyInRoom(Dungeon::Entity e);
 

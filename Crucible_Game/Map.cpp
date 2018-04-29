@@ -578,8 +578,8 @@ void Map::resolveEntityAI(float tickCount)
 }
 void Map::loadCave()
 {
-	width = 50;
-	height = 50;
+	width = 35;
+	height = 35;
 	tEnemies.clear();
 	tLoot.clear();
 	tEnemies.reserve(width*height);
@@ -590,6 +590,7 @@ void Map::loadCave()
 		tLoot.push_back({ nullptr });
 	}
 	int* map = new int[width*height];
+	Tile* downStairs = nullptr;
 	CaveGen cave(map, width, height, 3, 4, 4);
 	std::map<int, std::vector<sf::Vector2i>> caves = cave.flood();
 	int max = 0, maxCave = -1;
@@ -654,7 +655,7 @@ void Map::loadCave()
 			case Dungeon::Tile::DownStairs:
 			{
 				this->tiles[y*this->width + x].tileVariant = 6;
-				//this->spawnPos = { x,y };
+				downStairs = getTile( x,y );
 				break;
 			}
 			default:
@@ -799,9 +800,9 @@ void Map::loadDungeon()
 	}
 
 }
-void Map::populateDungeon()
+void Map::populateDungeon(bool _debris)
 {
-	int roll, bossChance = 20;
+	int roll, bossChance = 20, debrisChance = 40;
 	for (auto e : entities)
 	{
 		if (e.x == spawnPos.x && e.y == spawnPos.y)
@@ -810,6 +811,8 @@ void Map::populateDungeon()
 		{
 		case 'e':
 			roll = itemGenerator->getRand_100();
+			/*if (_debris && roll <= debrisChance)
+				spawnDebrisInRoom(e);*/
 			if (roll <= bossChance)
 				spawnBossGroupInRoom(e);
 			else
@@ -902,6 +905,61 @@ bool Map::spawnBossGroupInRoom(Dungeon::Entity e)
 	return true;
 }
 
+bool Map::spawnDebrisInRoom(Dungeon::Entity e)
+{
+	Tile* tile;
+	std::vector<sf::Vector2i> unOccupied{};
+	for (int r = e.y; r < e.y + e.h; r++)
+	{
+		for (int c = e.x; c < e.x + e.w; c++)
+		{
+			tile = getTile(c, r);
+			if (!tile->occupied && tile->passable)
+				unOccupied.push_back({ c,r });
+		}
+	}
+	if (unOccupied.size() == 0)
+		return false;
+	int roll = itemGenerator->getRand_0X(debris.size() - 1);
+	Debris d = debris[roll];
+	int maxCount = (e.w * e.h) / 4;
+	roll = itemGenerator->getRand_0X(maxCount) + 1;
+	for (int i = 0; i < roll; i++)
+	{
+		int at = itemGenerator->getRand_0X(unOccupied.size() - 1);
+		sf::Vector2i dSpawnStart = unOccupied[at];
+		sf::Vector2i next_dSpawnStart = dSpawnStart;
+
+		if (d.cluster)
+		{
+			int cCount = itemGenerator->getRand_0X(5) + 1;
+			for (int i = 0; i < cCount; i++)
+			{
+				getTile(dSpawnStart.x, dSpawnStart.y)->setDebris(game->texmgr.getRef(d.texName));
+				int x = itemGenerator->getRand_0X(3) - 2;
+				int y = itemGenerator->getRand_0X(3) - 2;
+				next_dSpawnStart = dSpawnStart + sf::Vector2i{ x, y };
+				tile = getTile(next_dSpawnStart.x, next_dSpawnStart.y);
+				if (!tile->occupied && tile->passable)
+				{
+					dSpawnStart == next_dSpawnStart;
+					for (int i = 0; i < unOccupied.size(); i++)
+					{
+						if (dSpawnStart == unOccupied[i] && i != at)
+						{
+							unOccupied.erase(unOccupied.begin() + i);
+							break;
+						}
+					}
+				}
+			}
+		}
+		unOccupied.erase(unOccupied.begin() + at);
+		if (unOccupied.size() == 0)
+			return false;
+	}
+}
+
 bool Map::spawnEnemyInRoom(Dungeon::Entity e)
 {
 	Tile* tile;
@@ -974,6 +1032,8 @@ Map::Map(Game* game, Camera* camera)
 	youAreHere.setOrigin({ 16, 16 });
 	miniMapView = sf::View(sf::FloatRect(-50, -50, this->game->windowSize.x * 4, this->game->windowSize.y * 4));
 	resizeMiniView(this->game->window.getSize().x, this->game->window.getSize().y);
+	debris.push_back(Debris{ true,false,"rocks" });
+	//debris.push_back(Debris{ false,false,"stalagmite" });
 	parseEbases();
 }
 Map::~Map()

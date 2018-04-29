@@ -13,7 +13,8 @@ ExploreState::ExploreState(Game* game)
 	Animation walkAnim(0, 0, 0.1);
 	camera = Camera(game, &player);
 	map = new Map(game, &camera);
-	map->loadDungeon();
+	//map->loadDungeon();
+	map->loadCave();
 	player = Player(game,
 		sf::Vector2u(32, 32),
 		this->game->texmgr.getRef("player"),
@@ -24,7 +25,7 @@ ExploreState::ExploreState(Game* game)
 	this->player.updateTilePos();
 	map->getTile(player.tilePos.x, player.tilePos.y)->occupied = true;
 	map->itemGenerator = &player.inventory.itemGenerator;
-	map->populateDungeon();
+	map->populateDungeon(true);
 	player.hud.updateDLevelText(map->level);
 	resolveFoW();
 	rTime = 0.01f;
@@ -337,6 +338,7 @@ void ExploreState::handleInput()
 			int aLvl = map->level;
 			delete map;
 			map = new Map(game, &camera);
+			cave = true;
 			if (cave)
 			{
 				map->loadCave();
@@ -353,7 +355,7 @@ void ExploreState::handleInput()
 			map->getTile(player.tilePos.x, player.tilePos.y)->occupied = true;
 			map->itemGenerator = &player.inventory.itemGenerator;
 			map->level = aLvl + 1;
-			map->populateDungeon();
+			map->populateDungeon(true);
 			player.hud.updateDLevelText(map->level);
 			fowCache.clear();
 			resolveFoW();

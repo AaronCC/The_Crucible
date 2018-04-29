@@ -27,6 +27,8 @@ namespace ImGui
 void EditorState::draw(const float dt)
 {
 	ImGui::SFML::Render(this->game->window);
+	if (back)
+		game->popState();
 }
 void EditorState::update(const float dt)
 {
@@ -56,7 +58,11 @@ void EditorState::update(const float dt)
 		ImGui::SameLine();
 		ImGui::InputText("##255", newFile, 20);
 		if (ImGui::Button("Set As Default")) {
-
+			game->defaultPath = iGen.filePaths[file_int];
+			game->writePath(iGen.filePaths[file_int]);
+		}
+		if (ImGui::Button("Back to menu")) {
+			back = true;
 		}
 	}
 	ImGui::EndGroup();
@@ -178,6 +184,23 @@ void EditorState::update(const float dt)
 			ImGui::PopID();
 		}
 	}
+	//else if (editing == A_AFFIX)
+	//{
+	//	static bool buff = false;
+	//	static int dmg_at = 0;
+	//	static int af_at = 0;
+	//	static int base_at = 0;
+	//	ItemGenerator::AbAfBase& base = iGen.ab_afBases;
+	//	ImGui::Checkbox("Buff", &buff);
+	//	if (buff)
+	//	{
+	//		ImGui::_ListBox("Buff type", &af_at, helper.buffnames);
+	//	}
+	//	else
+	//	{
+	//		ImGui::_ListBox("Damage type", &dmg_at, helper.damagenames);
+	//	}
+	//}
 	else if (editing == AE_BASE)
 	{
 		static int abase_at = 0;
@@ -223,7 +246,7 @@ void EditorState::update(const float dt)
 				iGen.e_abBases[abase_at].texName = texName;
 				sf::Texture& anim_tex = game->texmgr.getRef(texName);
 				anim_size = anim_tex.getSize();
-				if (anim_size.y != 32)
+				if (anim_size.y != 32 && anim_size.x > 32)
 				{
 					ImGui::Text("Texture must be 32px high.");
 				}
@@ -317,7 +340,7 @@ void EditorState::update(const float dt)
 
 				sf::Texture& anim_tex = game->texmgr.getRef(texName);
 				anim_size = anim_tex.getSize();
-				if (anim_size.y != 32)
+				if (anim_size.y != 32 && anim_size.x > 32)
 				{
 					ImGui::Text("Texture must be 32px high.");
 				}
@@ -366,6 +389,7 @@ void EditorState::update(const float dt)
 			aBase.anim.endFrame = (int)(anim_size.x / 32);
 		}
 	}
+	ImGui::Columns(1);
 	old_file = file_int;
 	ImGui::End(); // end window
 }

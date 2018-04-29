@@ -84,9 +84,10 @@ public:
 		int dtype;
 		int dur;
 		bool local;
+		bool buff;
 		Helper::Stats stats;
-		AbAfBase(Helper::Stats stats,int range, int offset, int dtype, bool local, int dur) :
-			range(range), offset(offset), dtype(dtype), local(local), stats(stats), dur(dur) {
+		AbAfBase(Helper::Stats stats,int range, int offset, int dtype, bool local, int dur, bool buff) :
+			range(range), offset(offset), dtype(dtype), local(local), stats(stats), dur(dur), buff(buff) {
 		}
 		AbAfBase() {}
 	};
@@ -382,7 +383,7 @@ public:
 		ss >> off;
 		ss = std::stringstream(data[i + 4]);
 		ss >> dur;
-		ab_afBases[(AF)af] = { stats, range,off,dmgtype,false,dur };
+		ab_afBases[(AF)af] = { stats, range,off,dmgtype,false,dur,hasStats };
 		while (ilvl <= MAX_ILVL)
 		{
 			v1 = off + (off*ilvl);

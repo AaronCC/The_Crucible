@@ -14,7 +14,7 @@ public:
 
 	static const int numbuffs = 21;
 
-	std::string buffnames[numbuffs] = {
+	std::vector<std::string> buffnames = {
 		"bonus health",
 		"fire damage",
 		"cold damage",
@@ -274,7 +274,7 @@ public:
 		"Agility",
 		"Knowledge"
 	};
-	std::string damagenames[5] = {
+	std::vector<std::string> damagenames = {
 		"Physical",
 		"Fire",
 		"Ice",

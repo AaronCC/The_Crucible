@@ -42,3 +42,5 @@ agi_button media/agi_button.png
 rat media/rat.png
 health_shrine media/health_shrine.png
 empty_shrine media/shrine_empty.png
+stalagmite media/stalagmite.png
+rocks media/rocks.png
